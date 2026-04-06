@@ -1,0 +1,260 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   MUSCU RPG — badges.css
+   Tier system, badge cards, muscle badges, body map, filter pills
+══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tier classes ────────────────────────────────────────────────────────── */
+.t0 { --tc: #4b5563; --tbg: rgba(75,85,99,0.08);   --tgl: #374151; }
+.t1 { --tc: #cd7f32; --tbg: rgba(205,127,50,0.1);  --tgl: #92400e; }
+.t2 { --tc: #94a3b8; --tbg: rgba(148,163,184,0.1); --tgl: #475569; }
+.t3 { --tc: #fbbf24; --tbg: rgba(251,191,36,0.1);  --tgl: #92400e; }
+.t4 { --tc: #22d3ee; --tbg: rgba(34,211,238,0.1);  --tgl: #155e75; }
+.t5 { --tc: #c084fc; --tbg: rgba(192,132,252,0.1); --tgl: #6b21a8; }
+
+/* ── Badge exercice card ─────────────────────────────────────────────────── */
+.bdg {
+  background: var(--card);
+  border: 1.5px solid var(--tc, #374151);
+  border-radius: 12px;
+  padding: 10px 6px 8px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, transform 0.15s;
+}
+
+.bdg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 40% 35%, var(--tbg, transparent), transparent 65%);
+  pointer-events: none;
+}
+
+.bdg:active { transform: scale(0.96); }
+
+/* Icon zone */
+.bdg-ico {
+  width: 44px;
+  height: 44px;
+  margin: 0 auto 5px;
+  display: block;
+  position: relative;
+}
+.bdg-ico svg {
+  width: 100%;
+  height: 100%;
+  color: var(--tc, #4b5563);
+  transition: color 0.3s;
+}
+
+/* Badge name */
+.bdg-nm {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: var(--text);
+  position: relative;
+  margin-bottom: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 2px;
+  line-height: 1.3;
+}
+
+/* Tier label */
+.bdg-tier {
+  font-size: 8px;
+  font-weight: 800;
+  color: var(--tc, #4b5563);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  position: relative;
+  margin-bottom: 5px;
+  line-height: 1;
+}
+
+/* Progress bar */
+.bdg-pb {
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+  margin: 0 3px 3px;
+}
+.bdg-pf {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--tc, #4b5563);
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Count */
+.bdg-cnt {
+  font-size: 7px;
+  color: var(--tc, #4b5563);
+  position: relative;
+  opacity: 0.85;
+  line-height: 1;
+}
+
+/* Earned glow animation */
+@keyframes tierGlow {
+  0%, 100% { box-shadow: 0 0 0px 0px var(--tc, transparent); }
+  50%       { box-shadow: 0 0 12px 2px var(--tc, transparent); }
+}
+.bdg.earned { animation: tierGlow 3s ease-in-out infinite; }
+
+/* ── Muscle group badge (horizontal scroll) ──────────────────────────────── */
+.muscle-badge-row {
+  display: flex;
+  gap: 7px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mbdg {
+  flex-shrink: 0;
+  width: 68px;
+  background: var(--card);
+  border: 1.5px solid var(--tc, #374151);
+  border-radius: 12px;
+  padding: 9px 4px 7px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.mbdg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 40% 35%, var(--tbg, transparent), transparent 70%);
+  pointer-events: none;
+}
+
+.mbdg-ico {
+  font-size: 18px;
+  line-height: 1;
+  margin-bottom: 4px;
+  display: block;
+}
+.mbdg-nm {
+  font-size: 7.5px;
+  font-weight: 700;
+  color: var(--text2);
+  line-height: 1.2;
+  margin-bottom: 2px;
+}
+.mbdg-t {
+  font-size: 8px;
+  font-weight: 800;
+  color: var(--tc, #4b5563);
+  margin-bottom: 4px;
+  display: block;
+}
+.mbdg-pb {
+  height: 3px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  margin: 0 2px;
+}
+.mbdg-pf {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--tc, #4b5563);
+}
+
+/* ── Badge filter pills ──────────────────────────────────────────────────── */
+#badge-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.bfpill {
+  padding: 5px 11px;
+  border-radius: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--navy3);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  cursor: pointer;
+  font-family: inherit;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.bfpill.on { background: var(--purple); color: #fff; border-color: var(--purple); }
+
+/* ── Badge grid ──────────────────────────────────────────────────────────── */
+#badge-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding-bottom: 16px;
+}
+
+/* ── Body map container ──────────────────────────────────────────────────── */
+.body-map-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.body-map-card {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 8px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.body-map-card .clabel { margin-bottom: 6px; }
+
+.body-map-wrap {
+  width: 100%;
+  display: block;
+}
+
+.body-map-wrap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* ── Muscle zone hover effect ────────────────────────────────────────────── */
+.mzone {
+  cursor: pointer;
+  transition: fill-opacity 0.25s;
+}
+
+/* ── Legend ──────────────────────────────────────────────────────────────── */
+.tier-legend {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 8px 0 4px;
+}
+.tier-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text2);
+  font-weight: 600;
+}
+.tier-legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}

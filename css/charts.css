@@ -1,0 +1,80 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   MUSCU RPG — charts.css
+   Stats charts, canvas containers, legends
+══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Chart containers ────────────────────────────────────────────────────── */
+.chart-wrap {
+  position: relative;
+  height: 160px;
+  margin-top: 8px;
+}
+
+.chart-wrap canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* ── Chart legend ────────────────────────────────────────────────────────── */
+.chart-legend {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  font-size: 11px;
+  color: var(--text2);
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ch-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ── Stats exercise selector ─────────────────────────────────────────────── */
+#stat-ex-sel {
+  margin-bottom: 12px;
+}
+
+/* ── Chart cards ─────────────────────────────────────────────────────────── */
+#chart-vol-card,
+#chart-pr-card {
+  display: none;
+}
+
+#chart-empty {
+  display: none;
+}
+
+#chart-empty > div {
+  text-align: center;
+  padding: 20px;
+  color: var(--text2);
+  font-size: 13px;
+}
+
+/* ── Chart axis labels ───────────────────────────────────────────────────── */
+/* Handled in JS via Canvas 2D API */
+
+/* ── Export / Import buttons row ─────────────────────────────────────────── */
+.export-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.export-row .btn {
+  flex: 1;
+  padding: 12px;
+  font-size: 14px;
+  margin-bottom: 0;
+}

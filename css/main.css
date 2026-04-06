@@ -1,1 +1,206 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   MUSCU RPG — main.css
+   Variables CSS, reset, layout principal, tab bar, typography
+══════════════════════════════════════════════════════════════════════════ */
 
+/* ── Variables ──────────────────────────────────────────────────────────── */
+:root {
+  --navy:     #0a0f1e;
+  --navy2:    #131929;
+  --navy3:    #1a2235;
+  --navy4:    #1e2a40;
+  --blue:     #3b82f6;
+  --blue-d:   #1d4ed8;
+  --green:    #10b981;
+  --red:      #ef4444;
+  --gold:     #f59e0b;
+  --gold-l:   #fbbf24;
+  --purple:   #8b5cf6;
+  --orange:   #f97316;
+  --teal:     #06b6d4;
+  --pink:     #ec4899;
+  --text:     #f1f5ff;
+  --text2:    #7a8aaa;
+  --card:     #131929;
+  --card2:    #1a2438;
+  --border:   rgba(255,255,255,0.07);
+  --safe-t:   env(safe-area-inset-top,    44px);
+  --safe-b:   env(safe-area-inset-bottom, 34px);
+  --safe-l:   env(safe-area-inset-left,   0px);
+  --safe-r:   env(safe-area-inset-right,  0px);
+
+  /* Tier colors */
+  --tier-0: #4b5563;
+  --tier-1: #cd7f32;
+  --tier-2: #94a3b8;
+  --tier-3: #fbbf24;
+  --tier-4: #22d3ee;
+  --tier-5: #c084fc;
+}
+
+/* ── Reset ──────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { display: none; }
+input[type=number] { -moz-appearance: textfield; }
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+/* ── App shell ──────────────────────────────────────────────────────────── */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+.safe-top {
+  height: var(--safe-t);
+  background: var(--navy);
+  flex-shrink: 0;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.hdr {
+  flex-shrink: 0;
+  padding: 10px 18px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--navy);
+}
+
+.hdr-title {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hdr-sub {
+  font-size: 11px;
+  color: var(--text2);
+  margin-top: 1px;
+}
+
+.hdr-xp {
+  background: rgba(139,92,246,0.18);
+  border: 1px solid rgba(139,92,246,0.28);
+  border-radius: 16px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #a78bfa;
+  white-space: nowrap;
+}
+
+/* ── Content scroll area ─────────────────────────────────────────────────── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 14px 12px;
+}
+
+/* ── Views ──────────────────────────────────────────────────────────────── */
+.view { display: none; }
+.view.on { display: block; }
+
+/* ── Tab bar ─────────────────────────────────────────────────────────────── */
+.tabs {
+  flex-shrink: 0;
+  display: flex;
+  background: rgba(10,15,30,0.97);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding-bottom: var(--safe-b);
+}
+
+.tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0 6px;
+  cursor: pointer;
+  position: relative;
+}
+
+.tab span:first-child {
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 0.15s;
+}
+
+.tab.on span:first-child {
+  transform: scale(1.1);
+}
+
+.tab span:last-child {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text2);
+  margin-top: 3px;
+  letter-spacing: 0.2px;
+}
+
+.tab.on span:last-child { color: var(--blue); }
+
+/* Active indicator */
+.tab.on::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 25%;
+  right: 25%;
+  height: 2px;
+  background: var(--blue);
+  border-radius: 0 0 2px 2px;
+}
+
+/* ── Section titles ──────────────────────────────────────────────────────── */
+.stitle {
+  font-size: 17px;
+  font-weight: 800;
+  padding: 14px 0 10px;
+  letter-spacing: -0.3px;
+}
+
+/* ── Toast ───────────────────────────────────────────────────────────────── */
+.toast {
+  position: fixed;
+  top: calc(var(--safe-t) + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-80px);
+  background: var(--green);
+  color: white;
+  padding: 11px 22px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 700;
+  z-index: 999;
+  transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.pr-toast { background: linear-gradient(135deg, var(--gold), var(--orange)); }
+.toast.err-toast { background: var(--red); }
