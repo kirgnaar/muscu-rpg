@@ -22,7 +22,6 @@ function initStats() {
 
   // Export / Import
   $('btn-export').addEventListener('click', exportData);
-  });
   $('btn-import').addEventListener('change', function(e) {
     importData(e.target.files[0]);
     this.value = '';
