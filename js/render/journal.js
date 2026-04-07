@@ -29,15 +29,20 @@ function initJournal() {
   $('btn-save').addEventListener('click', handleSave);
 
   // Listener delete sur le journal (event delegation)
-  $('journal').addEventListener('click', handleJournalClick);
+  var _lastTouchId = null;
   $('journal').addEventListener('touchend', function(ev) {
-    var btn = ev.target.closest('.del-btn');
-    if (!btn) return;
-    if (ev.cancelable) ev.preventDefault();
-    var id = parseInt(btn.closest('.sitem').dataset.id);
-    handleConfirmDelete(id, btn);
+  var btn = ev.target.closest('.del-btn');
+  if (!btn) return;
+  if (ev.cancelable) ev.preventDefault();
+  _lastTouchId = Date.now();
+  var id = parseInt(btn.closest('.sitem').dataset.id);
+  handleConfirmDelete(id, btn);
   }, { passive: false });
 
+$('journal').addEventListener('click', function(ev) {
+  if (_lastTouchId && Date.now() - _lastTouchId < 300) return;
+  handleJournalClick(ev);
+});
   // Filtres
   $('filter-bar').addEventListener('click', handleFilterPill);
   $('f-ex-sel').addEventListener('change', function() {
