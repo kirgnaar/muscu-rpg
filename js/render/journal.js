@@ -114,33 +114,13 @@ function handleSave() {
 }
 
 // ── Suppression ───────────────────────────────────────────────────────────
-function handleJournalClick(ev) {
+// Listener delete — click uniquement (iOS 13+ : pas de délai 300ms)
+$('journal').addEventListener('click', function(ev) {
   var btn = ev.target.closest('.del-btn');
   if (!btn) return;
   var id = parseInt(btn.closest('.sitem').dataset.id);
   handleConfirmDelete(id, btn);
-}
-
-function handleConfirmDelete(id, btn) {
-  var item = btn.closest('.sitem');
-  if (!item) return;
-  if (item.dataset.confirm === '1') {
-    deleteEntry(id);
-    APP.render();
-    toast('Série supprimée', '');
-    return;
-  }
-  item.dataset.confirm = '1';
-  btn.textContent = '✓ Supprimer ?';
-  btn.dataset.confirm = '1';
-  setTimeout(function() {
-    if (item && item.dataset.confirm === '1') {
-      item.dataset.confirm = '0';
-      btn.dataset.confirm = '0';
-      btn.textContent = '🗑';
-    }
-  }, 3000);
-}
+});
 
 // ── Filtres ───────────────────────────────────────────────────────────────
 function handleFilterPill(ev) {
