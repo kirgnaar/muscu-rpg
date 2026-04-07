@@ -182,94 +182,6 @@ var ICONS = {
     +'<path d="M42,46 L38,72 L32,88 L50,88 L56,72 L62,88 L68,72 L62,46 Z" fill="currentColor"/>',
 };
 
-function initBadges() {
-  $('badge-filter').addEventListener('click', function(ev) {
-    var pill = ev.target.closest('.bfpill');
-    if (!pill) return;
-    $$('.bfpill', $('badge-filter')).forEach(function(p) { p.classList.remove('on'); });
-    pill.classList.add('on');
-    BADGES.groupFilter = pill.dataset.grp;
-    renderBadgeGrid();
-  });
-}
-
-function renderBadges() {
-  renderBodyMaps();
-  renderMuscleBadges();
-  renderBadgeFilterPills();
-  renderBadgeGrid();
-}
-
-function renderBodyMaps() {
-  var wf = $('body-front-wrap');
-  var wb = $('body-back-wrap');
-  if (wf) wf.innerHTML = buildBodyFront();
-  if (wb) wb.innerHTML = buildBodyBack();
-}
-
-function renderMuscleBadges() {
-  var row = $('muscle-badges-row');
-  if (!row) return;
-  row.innerHTML = MUSCLES.map(function(m) {
-    var n    = seriesCountByGroup(m);
-    var ti   = getTier(n);
-    var meta = MUSCLE_META[m] || { emoji: '💪' };
-    var pct  = (getTierProgress(n) * 100).toFixed(0);
-    return '<div class="mbdg ' + ti.cls + '">'
-         + '<span class="mbdg-ico">' + meta.emoji + '</span>'
-         + '<div class="mbdg-nm">' + m + '</div>'
-         + '<span class="mbdg-t">' + ti.emoji + ' ' + ti.name + '</span>'
-         + '<div class="mbdg-pb"><div class="mbdg-pf" style="width:' + pct + '%"></div></div>'
-         + '</div>';
-  }).join('');
-}
-
-function renderBadgeFilterPills() {
-  var el = $('badge-filter');
-  if (!el) return;
-  var grps = [''].concat(MUSCLES);
-  el.innerHTML = grps.map(function(g) {
-    return '<button class="bfpill' + (g === BADGES.groupFilter ? ' on' : '') + '" data-grp="' + g + '">'
-         + (g || 'Tous') + '</button>';
-  }).join('');
-}
-
-function renderBadgeGrid() {
-  var grid = $('badge-grid');
-  if (!grid) return;
-
-  var counts = {};
-  APP.data.forEach(function(e) { counts[e.ex] = (counts[e.ex] || 0) + 1; });
-
-  var exList = EX.filter(function(e) {
-    return !BADGES.groupFilter || e[2] === BADGES.groupFilter;
-  });
-
-  var unlocked = exList.filter(function(e) { return counts[e[0]] > 0; });
-  var locked   = exList.filter(function(e) { return !counts[e[0]]; });
-  unlocked.sort(function(a, b) { return (counts[b[0]] || 0) - (counts[a[0]] || 0); });
-
-  grid.innerHTML = unlocked.concat(locked).map(function(ex) {
-    var name    = ex[0];
-    var n       = counts[name] || 0;
-    var ti      = getTier(n);
-    var pct     = (getTierProgress(n) * 100).toFixed(0);
-    var next    = getNextTierCount(n);
-    var earned  = n >= 10;
-    var svg     = ICONS[ICON_MAP[name] || 'generic'] || ICONS.generic;
-    var cntLbl  = n > 0 ? (next ? n + '/' + next + ' séries' : '✓ MAX') : '0 série';
-
-    return '<div class="bdg ' + ti.cls + (earned ? ' earned' : '') + '">'
-         + '<div class="bdg-ico" style="color:' + (n > 0 ? ti.col : '#374151') + '">'
-         + '<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">' + svg + '</svg>'
-         + '</div>'
-         + '<div class="bdg-nm">' + name + '</div>'
-         + '<div class="bdg-tier">' + (n > 0 ? ti.emoji + ' ' + ti.name : '○ Inactif') + '</div>'
-         + '<div class="bdg-pb"><div class="bdg-pf" style="width:' + (n > 0 ? pct : 0) + '%"></div></div>'
-         + '<div class="bdg-cnt">' + cntLbl + '</div>'
-         + '</div>';
-  }).join('');
-}
 // ── Init ──────────────────────────────────────────────────────────────────
 function initBadges() {
   $('badge-filter').addEventListener('click', function(ev) {
@@ -362,7 +274,7 @@ function renderBadgeGrid() {
 
     return '<div class="bdg ' + ti.cls + (earned ? ' earned' : '') + '">'
          + '<div class="bdg-ico" style="color:' + (n > 0 ? ti.col : '#374151') + '">'
-         + '<svg viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">' + svg + '</svg>'
+         + '<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">' + svg + '</svg>'
          + '</div>'
          + '<div class="bdg-nm">' + name + '</div>'
          + '<div class="bdg-tier">' + (n > 0 ? ti.emoji + ' ' + ti.name : '○ Inactif') + '</div>'

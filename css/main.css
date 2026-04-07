@@ -64,6 +64,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 #app {
   display: flex;
   flex-direction: column;
+  height: 100vh;
   height: 100dvh;
 }
 
@@ -114,7 +115,6 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  -webkit-overflow-scrolling: touch;
   padding: 0 14px 12px;
 }
 

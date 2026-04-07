@@ -114,13 +114,37 @@ function handleSave() {
 }
 
 // ── Suppression ───────────────────────────────────────────────────────────
-// Listener delete — click uniquement (iOS 13+ : pas de délai 300ms)
-$('journal').addEventListener('click', function(ev) {
+/**
+ * Double-tap pour confirmer : 1er appui → état rouge, 2e appui → suppression.
+ * Timeout de 3 s pour annuler automatiquement.
+ */
+function handleConfirmDelete(id, btn) {
+  var item = btn.closest('.sitem');
+  if (item.dataset.confirm === '1') {
+    deleteEntry(id);
+    APP.render();
+    toast('Série supprimée', '');
+  } else {
+    item.dataset.confirm = '1';
+    btn.dataset.confirm  = '1';
+    btn.textContent      = '✕';
+    setTimeout(function() {
+      if (item.parentNode) {
+        item.dataset.confirm = '';
+        btn.dataset.confirm  = '';
+        btn.textContent      = '\uD83D\uDDD1';
+      }
+    }, 3000);
+  }
+}
+
+/** Gestionnaire click générique sur la zone journal (desktop). */
+function handleJournalClick(ev) {
   var btn = ev.target.closest('.del-btn');
   if (!btn) return;
   var id = parseInt(btn.closest('.sitem').dataset.id);
   handleConfirmDelete(id, btn);
-});
+}
 
 // ── Filtres ───────────────────────────────────────────────────────────────
 function handleFilterPill(ev) {
