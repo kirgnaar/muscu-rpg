@@ -1,5 +1,5 @@
 // ── Service Worker — Muscu RPG ─────────────────────────────────────────────
-const CACHE_NAME = 'muscu-rpg-v2';
+const CACHE_NAME = 'muscu-rpg-v3';
 const ASSETS = [
   '/',
   '/index.html',
@@ -47,23 +47,25 @@ self.addEventListener('activate', function(e) {
   );
 });
 
-// ── Fetch : cache-first strategy ───────────────────────────────────────────
+// ── Fetch : network-first, cache en fallback offline ──────────────────────
 self.addEventListener('fetch', function(e) {
+  // Ne pas intercepter les requêtes non-GET
+  if (e.request.method !== 'GET') return;
+
   e.respondWith(
-    caches.match(e.request).then(function(cached) {
-      if (cached) return cached;
-      return fetch(e.request).then(function(response) {
-        if (!response || response.status !== 200 || response.type !== 'basic') {
-          return response;
-        }
+    fetch(e.request).then(function(response) {
+      // Mettre en cache les réponses valides
+      if (response && response.status === 200 && response.type === 'basic') {
         var clone = response.clone();
         caches.open(CACHE_NAME).then(function(cache) {
           cache.put(e.request, clone);
         });
-        return response;
-      }).catch(function() {
-        // Offline fallback
-        return caches.match('/index.html');
+      }
+      return response;
+    }).catch(function() {
+      // Hors-ligne : servir depuis le cache
+      return caches.match(e.request).then(function(cached) {
+        return cached || caches.match('/index.html');
       });
     })
   );

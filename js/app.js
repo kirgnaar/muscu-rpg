@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // 2. Register Service Worker
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(function(err) {
+    navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(function(err) {
       console.warn('[SW] Registration failed:', err);
     });
   }
