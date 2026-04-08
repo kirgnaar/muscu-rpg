@@ -17,6 +17,36 @@
 <link rel="stylesheet" href="css/components.css">
 <link rel="stylesheet" href="css/badges.css">
 <link rel="stylesheet" href="css/charts.css">
+<style>
+  /* ── 3D Container ───────────────────────────────────────────────────────── */
+  #body-3d-container {
+    width: 100%;
+    height: 450px;
+    background: radial-gradient(circle, #1e2a40 0%, #0a0f1e 100%);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+  }
+  #body-3d-container:active { cursor: grabbing; }
+  .loading-overlay {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(10, 15, 30, 0.9);
+    color: var(--accent);
+    z-index: 10;
+  }
+  .spinner {
+    width: 30px; height: 30px;
+    border: 3px solid rgba(34, 211, 238, 0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
 </head>
 <body>
 
@@ -85,6 +115,30 @@
         <button class="btn btn-p" id="btn-save">✓ Enregistrer</button>
 
       </div><!-- /addform -->
+
+      <!-- ── Chrono de repos ─────────────────────────────────────────── -->
+      <div class="card timer-card" id="timer-card" style="margin-bottom:12px">
+        <div class="clabel flex-between">
+          <span>⌛ Chrono de repos</span>
+          <div class="timer-opts">
+            <button class="timer-opt" data-d="60">1:00</button>
+            <button class="timer-opt active" data-d="90">1:30</button>
+            <button class="timer-opt" data-d="120">2:00</button>
+            <button class="timer-opt" data-d="180">3:00</button>
+          </div>
+        </div>
+        <div class="timer-main">
+          <div class="timer-display" id="timer-display">1:30</div>
+          <div class="timer-controls">
+            <button class="btn btn-s" id="timer-start-btn">▶ Démarrer</button>
+            <button class="btn btn-s" id="timer-stop-btn" style="display:none">⏹ Arrêter</button>
+            <button class="btn btn-s" id="timer-reset-btn">🔄 Reset</button>
+          </div>
+        </div>
+        <div class="timer-progress-bar">
+          <div class="timer-progress" id="timer-progress"></div>
+        </div>
+      </div>
 
       <div class="stitle flex-between">
         <span>Journal</span>
@@ -198,24 +252,12 @@
     <div class="view" id="v-badges">
       <div class="stitle">Badges & Progression</div>
 
-      <!-- Corps humain face + dos -->
-      <div class="body-map-row">
-        <div class="body-map-card">
-          <div class="clabel">Vue de face</div>
-          <div class="body-map-wrap" id="body-front-wrap">
-            <svg viewBox="0 0 220 560" style="width:100%;height:auto;display:block">
-              <rect width="220" height="560" fill="#1e2a40" rx="8"/>
-              <text x="110" y="280" text-anchor="middle" fill="#7a8aaa" font-size="14">Chargement…</text>
-            </svg>
-          </div>
-        </div>
-        <div class="body-map-card">
-          <div class="clabel">Vue de dos</div>
-          <div class="body-map-wrap" id="body-back-wrap">
-            <svg viewBox="0 0 220 560" style="width:100%;height:auto;display:block">
-              <rect width="220" height="560" fill="#1e2a40" rx="8"/>
-              <text x="110" y="280" text-anchor="middle" fill="#7a8aaa" font-size="14">Chargement…</text>
-            </svg>
+      <!-- Corps humain 3D interactif -->
+      <div class="card" style="padding:0; margin-bottom:15px; border:none; overflow:hidden;">
+        <div id="body-3d-container">
+          <div class="loading-overlay" id="3d-loader">
+            <div class="spinner"></div>
+            <p style="margin-top:10px; font-size:12px">Chargement du modèle 3D...</p>
           </div>
         </div>
       </div>
@@ -284,8 +326,15 @@
 <script src="js/tiers.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/data.js"></script>
+<script src="js/timer.js"></script>
 
-<!-- 3. Corps anatomiques SVG -->
+<!-- 3. Moteur 3D (Three.js via CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="js/body/body3d.js"></script>
+
+<!-- 4. Corps anatomiques SVG (Fallback) -->
 <script src="js/body/front.js"></script>
 <script src="js/body/back.js"></script>
 

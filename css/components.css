@@ -381,3 +381,61 @@ select {
 }
 .flex-gap-8 { display: flex; gap: 8px; }
 .flex-1 { flex: 1; }
+
+/* ── Timer Card ──────────────────────────────────────────────────────────── */
+.timer-card {
+  padding: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.timer-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0;
+}
+.timer-display {
+  font-size: 36px;
+  font-weight: 800;
+  font-family: monospace;
+  color: var(--text1);
+}
+.timer-controls {
+  display: flex;
+  gap: 8px;
+}
+.timer-opts {
+  display: flex;
+  gap: 4px;
+}
+.timer-opt {
+  padding: 4px 8px;
+  background: var(--bg2);
+  border: none;
+  border-radius: 4px;
+  color: var(--text2);
+  font-size: 11px;
+  cursor: pointer;
+}
+.timer-opt.active {
+  background: var(--accent);
+  color: #fff;
+}
+.timer-progress-bar {
+  height: 4px;
+  background: var(--bg2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+.timer-progress {
+  height: 100%;
+  background: var(--accent);
+  width: 100%;
+  transition: width 1s linear;
+}
+.timer-card.running .timer-display {
+  color: var(--accent);
+}

@@ -29,6 +29,13 @@ var APP = {
 
     // Render uniquement la vue active
     APP.renderView(name);
+
+    // Mises à jour spécifiques après changement de vue
+    if (name === 'badges' && typeof BODY3D !== 'undefined') {
+      setTimeout(function() {
+        BODY3D.updateColors();
+      }, 50);
+    }
   },
 
   // ── Render une vue ────────────────────────────────────────────────────
@@ -75,6 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
   initJournal();
   initStats();
   initBadges();
+  if (typeof TIMER !== 'undefined') TIMER.init();
+  if (typeof BODY3D !== 'undefined') BODY3D.init();
 
   // 4. Tab bar — event delegation (iOS-friendly)
   var tabsEl = document.querySelector('.tabs');

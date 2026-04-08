@@ -50,6 +50,9 @@ function addEntry(entry) {
     if (rm1 > prevBest) isPR = true;
   }
 
+  var prevVol = data.reduce(function(s, e) { return s + e.vol; }, 0);
+  var prevLvl = getLevel(prevVol);
+
   var newEntry = {
     id:    Date.now() + Math.floor(Math.random() * 1000),
     date:  entry.date,
@@ -66,6 +69,14 @@ function addEntry(entry) {
 
   APP.data.push(newEntry);
   APP.save();
+
+  var newVol = prevVol + vol;
+  var newLvl = getLevel(newVol);
+  if (newLvl > prevLvl) {
+    newEntry.isLevelUp = true;
+    newEntry.newLvl = newLvl;
+  }
+
   return newEntry;
 }
 

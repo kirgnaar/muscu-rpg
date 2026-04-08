@@ -106,11 +106,23 @@ function handleSave() {
 
   APP.render();
 
+  // Démarrer le chrono de repos
+  if (typeof TIMER !== 'undefined') {
+    TIMER.start();
+  }
+
   if (entry.isPR) {
     toast('🏆 NOUVEAU PR ! ' + entry.rm1 + ' kg', 'pr');
+  } else if (entry.isLevelUp) {
+    toast('✨ LEVEL UP ! Niveau ' + entry.newLvl, 'pr');
   } else {
     toast('✓ Enregistré · ' + fmtV(entry.vol), '');
   }
+
+  // Animation XP
+  var xp = $('hdr-xp');
+  xp.classList.add('xp-gain');
+  setTimeout(function() { xp.classList.remove('xp-gain'); }, 600);
 }
 
 // ── Suppression ───────────────────────────────────────────────────────────
