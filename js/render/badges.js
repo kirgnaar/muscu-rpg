@@ -206,8 +206,8 @@ function renderBadges() {
 function renderBodyMaps() {
   var wf = $('body-front-wrap');
   var wb = $('body-back-wrap');
-  if (wf) wf.innerHTML = buildBodyFront();
-  if (wb) wb.innerHTML = buildBodyBack();
+  try { if (wf) wf.innerHTML = buildBodyFront(); } catch(e) { console.warn('[body-front]', e); }
+  try { if (wb) wb.innerHTML = buildBodyBack();  } catch(e) { console.warn('[body-back]',  e); }
 }
 
 // ── Muscle badges ─────────────────────────────────────────────────────────

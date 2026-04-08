@@ -61,48 +61,4 @@ function _fallbackBack() {
   +'<ellipse cx="62" cy="443" rx="16" ry="10" fill="#3a1a08" stroke="#2a1008" stroke-width="0.7"/>'
   +'<ellipse cx="138" cy="443" rx="16" ry="10" fill="#3a1a08" stroke="#2a1008" stroke-width="0.7"/>'
   +'</svg>';
-}  svg = svg.replace(/OPAC_TRI_T/g, opt('Triceps'));
-  svg = svg.replace(/COND_TRI/g, cond('Triceps','bg-tri-g'));
-  svg = svg.replace(/STROKE_TRI/g, 'stroke="' + tc('Triceps') + '" stroke-width="0.4" stroke-opacity="' + opd('Triceps') + '"');
-
-  // DORSAL
-  svg = svg.replace(/FILL_DO/g, tc('Dorsal'));
-  svg = svg.replace(/OPAC_DO_HL/g, oph('Dorsal'));
-  svg = svg.replace(/OPAC_DO_F/g, opf('Dorsal'));
-  svg = svg.replace(/COND_DO/g, cond('Dorsal','bg-do-g'));
-  svg = svg.replace(/STROKE_DO/g, 'stroke="' + tc('Dorsal') + '" stroke-width="0.4" stroke-opacity="' + opd('Dorsal') + '"');
-
-  // LOMBAIRES
-  svg = svg.replace(/FILL_LO/g, tc('Lombaires'));
-  svg = svg.replace(/OPAC_LO_HL/g, oph('Lombaires'));
-  svg = svg.replace(/OPAC_LO_D/g, opd('Lombaires'));
-  svg = svg.replace(/OPAC_LO_F/g, opf('Lombaires'));
-  svg = svg.replace(/COND_LO/g, cond('Lombaires','bg-lo-g'));
-  svg = svg.replace(/STROKE_LO/g, 'stroke="' + tc('Lombaires') + '" stroke-width="0.4" stroke-opacity="' + opd('Lombaires') + '"');
-
-  // FESSIERS
-  svg = svg.replace(/FILL_FE/g, tc('Fessiers'));
-  svg = svg.replace(/OPAC_FE_M/g, ops('Fessiers'));
-  svg = svg.replace(/OPAC_FE_HL/g, oph('Fessiers'));
-  svg = svg.replace(/OPAC_FE_F/g, opf('Fessiers'));
-  svg = svg.replace(/COND_FE/g, cond('Fessiers','bg-fe-g'));
-  svg = svg.replace(/STROKE_FE/g, 'stroke="' + tc('Fessiers') + '" stroke-width="0.4" stroke-opacity="' + opd('Fessiers') + '"');
-
-  // ISCHIO-JAMBIERS
-  svg = svg.replace(/FILL_IS/g, tc('Ischio-jambiers'));
-  svg = svg.replace(/OPAC_IS_HL/g, oph('Ischio-jambiers'));
-  svg = svg.replace(/OPAC_IS_D/g, opd('Ischio-jambiers'));
-  svg = svg.replace(/OPAC_IS_F/g, opf('Ischio-jambiers'));
-  svg = svg.replace(/COND_IS/g, cond('Ischio-jambiers','bg-is-g'));
-  svg = svg.replace(/STROKE_IS/g, 'stroke="' + tc('Ischio-jambiers') + '" stroke-width="0.4" stroke-opacity="' + opd('Ischio-jambiers') + '"');
-
-  // MOLLETS
-  svg = svg.replace(/FILL_MO/g, tc('Mollets'));
-  svg = svg.replace(/OPAC_MO_HL/g, oph('Mollets'));
-  svg = svg.replace(/OPAC_MO_S/g, ops('Mollets'));
-  svg = svg.replace(/OPAC_MO_F/g, opf('Mollets'));
-  svg = svg.replace(/COND_MO/g, cond('Mollets','bg-mo-g'));
-  svg = svg.replace(/STROKE_MO/g, 'stroke="' + tc('Mollets') + '" stroke-width="0.4" stroke-opacity="' + opd('Mollets') + '"');
-
-  return svg;
 }
