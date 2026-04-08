@@ -7,10 +7,10 @@
 var TIERS = [
   { name: 'Inactif',   min: 0,   cls: 't0', col: '#4b5563', emoji: '🔒',  label: 'Non débloqué' },
   { name: 'Novice',    min: 10,  cls: 't1', col: '#cd7f32', emoji: '🥉', label: 'Novice'       },
-  { name: 'Guerrier',  min: 25,  cls: 't2', col: '#94a3b8', emoji: '🥈', label: 'Guerrier'     },
-  { name: 'Chevalier', min: 50,  cls: 't3', col: '#fbbf24', emoji: '🥇', label: 'Chevalier'    },
-  { name: 'Champion',  min: 100, cls: 't4', col: '#22d3ee', emoji: '💎', label: 'Champion'     },
-  { name: 'Légende',   min: 200, cls: 't5', col: '#c084fc', emoji: '🔮', label: 'Légende'      },
+  { name: 'Initié',    min: 25,  cls: 't2', col: '#94a3b8', emoji: '🥈', label: 'Initié'       },
+  { name: 'Athlète',   min: 50,  cls: 't3', col: '#fbbf24', emoji: '🥇', label: 'Athlète'      },
+  { name: 'Expert',    min: 100, cls: 't4', col: '#22d3ee', emoji: '💎', label: 'Expert'       },
+  { name: 'Élite',     min: 200, cls: 't5', col: '#c084fc', emoji: '🔮', label: 'Élite'        },
 ];
 
 // Tier suivant (null si max)
@@ -95,13 +95,13 @@ function levelProgress(vol) {
  * Nom du niveau avec emoji de rang
  */
 function levelName(lvl) {
-  if (lvl >= 100) return '🔴 ÉLITE — Niv. 100';
-  if (lvl >= 76)  return '🟠 Expert — Niv. '   + lvl;
-  if (lvl >= 51)  return '🟣 Avancé — Niv. '   + lvl;
-  if (lvl >= 26)  return '🔵 Inter. — Niv. '   + lvl;
-  if (lvl >= 11)  return '🟢 Débutant — Niv. ' + lvl;
-  if (lvl >= 1)   return '⚪ Novice — Niv. '   + lvl;
-  return '⚪ Niv. 0';
+  if (lvl >= 100) return 'ÉLITE — Niv. 100';
+  if (lvl >= 76)  return 'EXPERT — Niv. '   + lvl;
+  if (lvl >= 51)  return 'AVANCÉ — Niv. '   + lvl;
+  if (lvl >= 26)  return 'INTERMÉDIAIRE — Niv. '   + lvl;
+  if (lvl >= 11)  return 'DÉBUTANT — Niv. ' + lvl;
+  if (lvl >= 1)   return 'NOVICE — Niv. '   + lvl;
+  return 'NOVICE — Niv. 0';
 }
 
 /**

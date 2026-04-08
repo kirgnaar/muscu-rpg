@@ -1,110 +1,166 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — badges.css
-   Style visuel "Jeu Vidéo / RPG" pour les badges
+   Style visuel "Pro Fitness" inspiré par Hevy
    ══════════════════════════════════════════════════════════════════════════ */
 
 .muscle-badge-row {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   overflow-x: auto;
-  padding: 5px 0 15px;
+  padding: 10px 0 20px;
   scrollbar-width: none;
 }
 .muscle-badge-row::-webkit-scrollbar { display: none; }
 
 .mbdg {
-  min-width: 100px;
-  padding: 12px;
-  background: rgba(30, 41, 59, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  min-width: 120px;
+  padding: 14px;
+  background: var(--navy2);
+  border: 1px solid var(--border);
   border-radius: 12px;
-  text-align: center;
-  backdrop-filter: blur(4px);
-  transition: transform 0.2s;
+  text-align: left;
+  transition: background 0.2s;
 }
-.mbdg:active { transform: scale(0.95); }
 
-.mbdg-ico { font-size: 24px; display: block; margin-bottom: 4px; }
-.mbdg-nm { font-size: 11px; font-weight: 600; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.mbdg-t { font-size: 10px; font-weight: 700; display: block; margin-top: 2px; }
+.mbdg-ico { font-size: 18px; display: block; margin-bottom: 8px; color: var(--accent); }
+.mbdg-nm { font-size: 13px; font-weight: 700; color: var(--text1); margin-bottom: 2px; }
+.mbdg-t { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
 
-/* Tiers colors */
+/* Tiers indicators (subtle) */
 .t1 .mbdg-t, .t1.bdg .bdg-tier { color: #cd7f32; }
 .t2 .mbdg-t, .t2.bdg .bdg-tier { color: #94a3b8; }
-.t3 .mbdg-t, .t3.bdg .bdg-tier { color: #fbbf24; text-shadow: 0 0 8px rgba(251, 191, 36, 0.4); }
-.t4 .mbdg-t, .t4.bdg .bdg-tier { color: #22d3ee; text-shadow: 0 0 10px rgba(34, 211, 238, 0.5); }
-.t5 .mbdg-t, .t5.bdg .bdg-tier { color: #c084fc; text-shadow: 0 0 12px rgba(192, 132, 252, 0.6); }
+.t3 .mbdg-t, .t3.bdg .bdg-tier { color: #fbbf24; }
+.t4 .mbdg-t, .t4.bdg .bdg-tier { color: #22d3ee; }
+.t5 .mbdg-t, .t5.bdg .bdg-tier { color: #c084fc; }
 
-/* Badge Grid */
+/* Badge Grid - Hevy Style */
 #badge-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 12px;
-  padding-bottom: 30px;
+  padding-bottom: 40px;
 }
 
 .bdg {
-  background: var(--bg-card);
+  background: var(--navy2);
   border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 16px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  padding: 12px 16px;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 16px;
+  transition: transform 0.1s;
 }
 
-.bdg.earned {
-  border-color: rgba(255,255,255,0.1);
-  background: linear-gradient(145deg, var(--bg-card), rgba(30, 41, 59, 0.8));
+.bdg:active { transform: scale(0.98); }
+
+.bdg-ico-wrap {
+  width: 54px;
+  height: 54px;
+  background: var(--navy3);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .bdg-ico {
-  width: 50px;
-  height: 50px;
-  margin-bottom: 10px;
-  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+  width: 36px;
+  height: 36px;
+  color: var(--text2);
 }
 
-.bdg-nm { font-size: 13px; font-weight: 700; color: var(--text1); text-align: center; margin-bottom: 4px; line-height: 1.2; }
-.bdg-tier { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
-
-.bdg-pb { height: 4px; background: rgba(255,255,255,0.05); width: 100%; border-radius: 2px; margin-bottom: 6px; overflow: hidden; }
-.bdg-pf { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s; }
-
-.bdg-cnt { font-size: 10px; color: var(--text2); font-weight: 500; }
-
-/* Special Achievements Section */
-.ach-section {
-  margin: 20px 0;
+.bdg-main {
+  flex: 1;
+  min-width: 0;
 }
-.ach-card {
+
+.bdg-nm { 
+  font-size: 15px; 
+  font-weight: 700; 
+  color: var(--text1); 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.bdg-sub {
+  font-size: 12px;
+  color: var(--text2);
   display: flex;
   align-items: center;
-  gap: 15px;
-  background: linear-gradient(90deg, rgba(30, 41, 59, 0.6), transparent);
-  border-left: 3px solid var(--accent);
-  padding: 12px;
-  border-radius: 0 12px 12px 0;
-  margin-bottom: 10px;
+  gap: 6px;
 }
-.ach-ico { font-size: 28px; }
-.ach-info { flex: 1; }
-.ach-nm { font-size: 14px; font-weight: 800; color: #fff; }
-.ach-desc { font-size: 11px; color: var(--text2); }
 
-/* Glow Effects for high tiers */
-.t3.bdg { box-shadow: 0 0 15px rgba(251, 191, 36, 0.05); }
-.t4.bdg { box-shadow: 0 0 20px rgba(34, 211, 238, 0.1); border-color: rgba(34, 211, 238, 0.2); }
-.t5.bdg { box-shadow: 0 0 25px rgba(192, 132, 252, 0.15); border-color: rgba(192, 132, 252, 0.3); }
+.bdg-tier-pill {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 10px;
+}
 
-/* Locked Badge */
+.bdg-stats {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bdg-val {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text1);
+}
+
+.bdg-label {
+  font-size: 10px;
+  color: var(--text2);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Progress bar (linear at bottom of card) */
+.bdg-pb-wrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: transparent;
+}
+.bdg-pf {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 0 2px 2px 0;
+  opacity: 0.6;
+}
+
+/* Global Achievements */
+.ach-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.ach-card {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  padding: 16px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ach-ico { font-size: 24px; }
+.ach-nm { font-size: 14px; font-weight: 800; color: var(--text1); }
+.ach-desc { font-size: 11px; color: var(--text2); line-height: 1.3; }
+
+/* Locked State */
 .bdg:not(.earned) {
-  opacity: 0.5;
-  filter: grayscale(0.8);
+  opacity: 0.6;
 }
-.bdg:not(.earned) .bdg-ico {
-  opacity: 0.3;
+.bdg:not(.earned) .bdg-ico-wrap {
+  background: var(--navy);
 }
