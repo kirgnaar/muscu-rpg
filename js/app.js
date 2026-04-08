@@ -59,7 +59,15 @@ var APP = {
 // ── Render header ─────────────────────────────────────────────────────────
 function renderHeader() {
   var total = APP.data.reduce(function(s, e) { return s + e.vol; }, 0);
+  var lvl = getLevel(total);
+  var nextThr = levelThreshold(lvl + 1);
+  var currThr = levelThreshold(lvl);
+  var pct = ((total - currThr) / (nextThr - currThr) * 100).toFixed(0);
+
   $('hdr-xp').textContent = fmtV(total);
+  $('hdr-lvl-name').textContent = levelName(lvl);
+  $('hdr-lvl-bar').style.width = pct + '%';
+
   var d = new Date();
   var dayStr = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   $('hdr-date').textContent = dayStr.charAt(0).toUpperCase() + dayStr.slice(1);

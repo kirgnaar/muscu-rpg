@@ -1,260 +1,110 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — badges.css
-   Tier system, badge cards, muscle badges, body map, filter pills
-══════════════════════════════════════════════════════════════════════════ */
+   Style visuel "Jeu Vidéo / RPG" pour les badges
+   ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Tier classes ────────────────────────────────────────────────────────── */
-.t0 { --tc: #4b5563; --tbg: rgba(75,85,99,0.08);   --tgl: #374151; }
-.t1 { --tc: #cd7f32; --tbg: rgba(205,127,50,0.1);  --tgl: #92400e; }
-.t2 { --tc: #94a3b8; --tbg: rgba(148,163,184,0.1); --tgl: #475569; }
-.t3 { --tc: #fbbf24; --tbg: rgba(251,191,36,0.1);  --tgl: #92400e; }
-.t4 { --tc: #22d3ee; --tbg: rgba(34,211,238,0.1);  --tgl: #155e75; }
-.t5 { --tc: #c084fc; --tbg: rgba(192,132,252,0.1); --tgl: #6b21a8; }
-
-/* ── Badge exercice card ─────────────────────────────────────────────────── */
-.bdg {
-  background: var(--card);
-  border: 1.5px solid var(--tc, #374151);
-  border-radius: 12px;
-  padding: 10px 6px 8px;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.3s, transform 0.15s;
-}
-
-.bdg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 40% 35%, var(--tbg, transparent), transparent 65%);
-  pointer-events: none;
-}
-
-.bdg:active { transform: scale(0.96); }
-
-/* Icon zone */
-.bdg-ico {
-  width: 44px;
-  height: 44px;
-  margin: 0 auto 5px;
-  display: block;
-  position: relative;
-}
-.bdg-ico svg {
-  width: 100%;
-  height: 100%;
-  color: var(--tc, #4b5563);
-  transition: color 0.3s;
-}
-
-/* Badge name */
-.bdg-nm {
-  font-size: 8.5px;
-  font-weight: 700;
-  color: var(--text);
-  position: relative;
-  margin-bottom: 3px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  padding: 0 2px;
-  line-height: 1.3;
-}
-
-/* Tier label */
-.bdg-tier {
-  font-size: 8px;
-  font-weight: 800;
-  color: var(--tc, #4b5563);
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  position: relative;
-  margin-bottom: 5px;
-  line-height: 1;
-}
-
-/* Progress bar */
-.bdg-pb {
-  height: 4px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 2px;
-  overflow: hidden;
-  position: relative;
-  margin: 0 3px 3px;
-}
-.bdg-pf {
-  height: 100%;
-  border-radius: 2px;
-  background: var(--tc, #4b5563);
-  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-/* Count */
-.bdg-cnt {
-  font-size: 7px;
-  color: var(--tc, #4b5563);
-  position: relative;
-  opacity: 0.85;
-  line-height: 1;
-}
-
-/* Earned glow animation */
-@keyframes tierGlow {
-  0%, 100% { box-shadow: 0 0 0px 0px var(--tc, transparent); }
-  50%       { box-shadow: 0 0 12px 2px var(--tc, transparent); }
-}
-.bdg.earned { animation: tierGlow 3s ease-in-out infinite; }
-
-/* ── Muscle group badge (horizontal scroll) ──────────────────────────────── */
 .muscle-badge-row {
   display: flex;
-  gap: 7px;
+  gap: 10px;
   overflow-x: auto;
-  padding-bottom: 6px;
-  margin-bottom: 14px;
-  -webkit-overflow-scrolling: touch;
+  padding: 5px 0 15px;
+  scrollbar-width: none;
 }
+.muscle-badge-row::-webkit-scrollbar { display: none; }
 
 .mbdg {
-  flex-shrink: 0;
-  width: 68px;
-  background: var(--card);
-  border: 1.5px solid var(--tc, #374151);
+  min-width: 100px;
+  padding: 12px;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 12px;
-  padding: 9px 4px 7px;
   text-align: center;
-  position: relative;
-  overflow: hidden;
-  transition: border-color 0.3s;
+  backdrop-filter: blur(4px);
+  transition: transform 0.2s;
 }
+.mbdg:active { transform: scale(0.95); }
 
-.mbdg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 40% 35%, var(--tbg, transparent), transparent 70%);
-  pointer-events: none;
-}
+.mbdg-ico { font-size: 24px; display: block; margin-bottom: 4px; }
+.mbdg-nm { font-size: 11px; font-weight: 600; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mbdg-t { font-size: 10px; font-weight: 700; display: block; margin-top: 2px; }
 
-.mbdg-ico {
-  font-size: 18px;
-  line-height: 1;
-  margin-bottom: 4px;
-  display: block;
-}
-.mbdg-nm {
-  font-size: 7.5px;
-  font-weight: 700;
-  color: var(--text2);
-  line-height: 1.2;
-  margin-bottom: 2px;
-}
-.mbdg-t {
-  font-size: 8px;
-  font-weight: 800;
-  color: var(--tc, #4b5563);
-  margin-bottom: 4px;
-  display: block;
-}
-.mbdg-pb {
-  height: 3px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 2px;
-  overflow: hidden;
-  margin: 0 2px;
-}
-.mbdg-pf {
-  height: 100%;
-  border-radius: 2px;
-  background: var(--tc, #4b5563);
-}
+/* Tiers colors */
+.t1 .mbdg-t, .t1.bdg .bdg-tier { color: #cd7f32; }
+.t2 .mbdg-t, .t2.bdg .bdg-tier { color: #94a3b8; }
+.t3 .mbdg-t, .t3.bdg .bdg-tier { color: #fbbf24; text-shadow: 0 0 8px rgba(251, 191, 36, 0.4); }
+.t4 .mbdg-t, .t4.bdg .bdg-tier { color: #22d3ee; text-shadow: 0 0 10px rgba(34, 211, 238, 0.5); }
+.t5 .mbdg-t, .t5.bdg .bdg-tier { color: #c084fc; text-shadow: 0 0 12px rgba(192, 132, 252, 0.6); }
 
-/* ── Badge filter pills ──────────────────────────────────────────────────── */
-#badge-filter {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
-
-.bfpill {
-  padding: 5px 11px;
-  border-radius: 14px;
-  font-size: 11px;
-  font-weight: 600;
-  background: var(--navy3);
-  border: 1px solid var(--border);
-  color: var(--text2);
-  cursor: pointer;
-  font-family: inherit;
-  white-space: nowrap;
-  transition: all 0.15s;
-}
-.bfpill.on { background: var(--purple); color: #fff; border-color: var(--purple); }
-
-/* ── Badge grid ──────────────────────────────────────────────────────────── */
+/* Badge Grid */
 #badge-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  padding-bottom: 16px;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding-bottom: 30px;
 }
 
-/* ── Body map container ──────────────────────────────────────────────────── */
-.body-map-row {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
-}
-
-.body-map-card {
-  flex: 1;
-  background: var(--card);
+.bdg {
+  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 10px 8px;
-  text-align: center;
+  border-radius: 16px;
+  padding: 16px;
+  position: relative;
   overflow: hidden;
-}
-
-.body-map-card .clabel { margin-bottom: 6px; }
-
-.body-map-wrap {
-  width: 100%;
-  display: block;
-}
-
-.body-map-wrap svg {
-  width: 100%;
-  height: auto;
-  display: block;
-}
-
-/* ── Muscle zone hover effect ────────────────────────────────────────────── */
-.mzone {
-  cursor: pointer;
-  transition: fill-opacity 0.25s;
-}
-
-/* ── Legend ──────────────────────────────────────────────────────────────── */
-.tier-legend {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: center;
-  padding: 8px 0 4px;
+  flex-direction: column;
+  align-items: center;
 }
-.tier-legend-item {
+
+.bdg.earned {
+  border-color: rgba(255,255,255,0.1);
+  background: linear-gradient(145deg, var(--bg-card), rgba(30, 41, 59, 0.8));
+}
+
+.bdg-ico {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3));
+}
+
+.bdg-nm { font-size: 13px; font-weight: 700; color: var(--text1); text-align: center; margin-bottom: 4px; line-height: 1.2; }
+.bdg-tier { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+
+.bdg-pb { height: 4px; background: rgba(255,255,255,0.05); width: 100%; border-radius: 2px; margin-bottom: 6px; overflow: hidden; }
+.bdg-pf { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.5s; }
+
+.bdg-cnt { font-size: 10px; color: var(--text2); font-weight: 500; }
+
+/* Special Achievements Section */
+.ach-section {
+  margin: 20px 0;
+}
+.ach-card {
   display: flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  color: var(--text2);
-  font-weight: 600;
+  gap: 15px;
+  background: linear-gradient(90deg, rgba(30, 41, 59, 0.6), transparent);
+  border-left: 3px solid var(--accent);
+  padding: 12px;
+  border-radius: 0 12px 12px 0;
+  margin-bottom: 10px;
 }
-.tier-legend-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+.ach-ico { font-size: 28px; }
+.ach-info { flex: 1; }
+.ach-nm { font-size: 14px; font-weight: 800; color: #fff; }
+.ach-desc { font-size: 11px; color: var(--text2); }
+
+/* Glow Effects for high tiers */
+.t3.bdg { box-shadow: 0 0 15px rgba(251, 191, 36, 0.05); }
+.t4.bdg { box-shadow: 0 0 20px rgba(34, 211, 238, 0.1); border-color: rgba(34, 211, 238, 0.2); }
+.t5.bdg { box-shadow: 0 0 25px rgba(192, 132, 252, 0.15); border-color: rgba(192, 132, 252, 0.3); }
+
+/* Locked Badge */
+.bdg:not(.earned) {
+  opacity: 0.5;
+  filter: grayscale(0.8);
+}
+.bdg:not(.earned) .bdg-ico {
+  opacity: 0.3;
 }

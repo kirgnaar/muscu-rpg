@@ -5,12 +5,12 @@
 
 // ── Tiers (basés sur nombre de séries totales par exercice) ───────────────
 var TIERS = [
-  { name: 'Aucun',   min: 0,   cls: 't0', col: '#4b5563', emoji: '○',  label: 'Non débloqué' },
-  { name: 'Bronze',  min: 10,  cls: 't1', col: '#cd7f32', emoji: '🥉', label: 'Bronze'       },
-  { name: 'Argent',  min: 25,  cls: 't2', col: '#94a3b8', emoji: '🥈', label: 'Argent'       },
-  { name: 'Or',      min: 50,  cls: 't3', col: '#fbbf24', emoji: '🥇', label: 'Or'           },
-  { name: 'Diamant', min: 100, cls: 't4', col: '#22d3ee', emoji: '💎', label: 'Diamant'      },
-  { name: 'Platine', min: 200, cls: 't5', col: '#c084fc', emoji: '🔮', label: 'Platine'      },
+  { name: 'Inactif',   min: 0,   cls: 't0', col: '#4b5563', emoji: '🔒',  label: 'Non débloqué' },
+  { name: 'Novice',    min: 10,  cls: 't1', col: '#cd7f32', emoji: '🥉', label: 'Novice'       },
+  { name: 'Guerrier',  min: 25,  cls: 't2', col: '#94a3b8', emoji: '🥈', label: 'Guerrier'     },
+  { name: 'Chevalier', min: 50,  cls: 't3', col: '#fbbf24', emoji: '🥇', label: 'Chevalier'    },
+  { name: 'Champion',  min: 100, cls: 't4', col: '#22d3ee', emoji: '💎', label: 'Champion'     },
+  { name: 'Légende',   min: 200, cls: 't5', col: '#c084fc', emoji: '🔮', label: 'Légende'      },
 ];
 
 // Tier suivant (null si max)
