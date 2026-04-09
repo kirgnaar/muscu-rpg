@@ -47,6 +47,7 @@ var APP = {
       case 'seances': renderJournal();  break;
       case 'pr':      renderPR();       break;
       case 'rpg':     renderRPG();      break;
+      case 'simulation': renderSimulation(); break;
       case 'stats':   renderStats();    break;
       case 'badges':  renderBadges();   break;
     }
@@ -93,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function() {
   initJournal();
   initStats();
   initBadges();
+  initSimulation();
   if (typeof TIMER !== 'undefined') TIMER.init();
 
   // 4. Tab bar — event delegation (iOS-friendly)

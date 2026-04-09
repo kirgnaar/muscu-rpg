@@ -235,6 +235,52 @@
     </div>
 
     <!-- ════════════════════════════════════════════════════════════════════
+         SIMULATION
+    ════════════════════════════════════════════════════════════════════ -->
+    <div class="view" id="v-simulation">
+      <div class="stitle">Simulation de Séance</div>
+      
+      <div class="card" style="margin-bottom:15px">
+        <div class="clabel">Ajouter un exercice à la simu</div>
+        <div class="fgroup">
+          <select id="sim-ex-sel"></select>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1.2fr; gap:8px; margin-bottom:10px">
+          <div>
+            <label class="flabel">Séries</label>
+            <input type="number" id="sim-ser" placeholder="4">
+          </div>
+          <div>
+            <label class="flabel">Reps</label>
+            <input type="number" id="sim-rep" placeholder="10">
+          </div>
+          <div>
+            <label class="flabel">Poids (kg)</label>
+            <input type="number" id="sim-pds" placeholder="60" step="0.5">
+          </div>
+        </div>
+        <button class="btn btn-p" id="sim-add-btn">+ Ajouter à la séance</button>
+      </div>
+
+      <div class="stitle flex-between">
+        <span>Séance programmée</span>
+        <button class="btn btn-s" id="sim-clear-btn" style="background:#ef4444; color:#fff">Vider</button>
+      </div>
+      <div id="sim-list" style="margin-bottom:20px"></div>
+
+      <div id="sim-results" style="display:none">
+        <div class="stitle">Prévisions de Gain</div>
+        <div class="card card-grad-purple" style="margin-bottom:12px">
+          <div class="clabel" style="color:#a78bfa">Gain Global Estimé</div>
+          <div style="font-size:24px; font-weight:900" id="sim-xp-gain">+ 0 XP</div>
+          <div id="sim-lvl-preview" style="margin-top:8px"></div>
+        </div>
+        <div id="sim-muscle-results"></div>
+      </div>
+
+    </div><!-- /v-simulation -->
+
+    <!-- ════════════════════════════════════════════════════════════════════
          STATS
     ════════════════════════════════════════════════════════════════════ -->
     <div class="view" id="v-stats">
@@ -357,6 +403,7 @@
     <div class="tab on" data-v="seances"><span>📋</span><span>Séances</span></div>
     <div class="tab" data-v="pr"><span>🏆</span><span>PR Big 6</span></div>
     <div class="tab" data-v="rpg"><span>⚔️</span><span>RPG</span></div>
+    <div class="tab" data-v="simulation"><span>🧪</span><span>Simu</span></div>
     <div class="tab" data-v="stats"><span>📊</span><span>Stats</span></div>
     <div class="tab" data-v="badges"><span>🏅</span><span>Badges</span></div>
   </div>
@@ -395,6 +442,7 @@
 <script src="js/render/journal.js"></script>
 <script src="js/render/pr.js"></script>
 <script src="js/render/rpg.js"></script>
+<script src="js/render/simulation.js"></script>
 <script src="js/render/stats.js"></script>
 <script src="js/render/badges.js"></script>
 
