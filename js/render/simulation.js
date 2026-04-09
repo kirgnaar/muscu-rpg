@@ -44,6 +44,18 @@ function initSimulation() {
     SIM.currentBlock.exercises.splice(idx, 1);
     renderEditor();
   });
+
+  // Listener pour les modifications en direct dans l'éditeur
+  $('sim-ex-list').addEventListener('input', function(ev) {
+    var input = ev.target;
+    var idx = parseInt(input.dataset.idx);
+    var field = input.dataset.field;
+    if (!field || isNaN(idx)) return;
+
+    var val = parseFloat(input.value) || 0;
+    SIM.currentBlock.exercises[idx][field] = val;
+    calculateSimResults(SIM.currentBlock.exercises);
+  });
 }
 
 // ── Persistence ───────────────────────────────────────────────────────────
@@ -171,14 +183,24 @@ function renderEditor() {
   }
 
   list.innerHTML = exList.map((item, idx) => `
-    <div class="sitem">
-      <div class="sinfo">
-        <div class="sname">${item.ex}</div>
-        <div class="smeta">${item.ser}×${item.rep} · ${item.pds} kg</div>
+    <div class="sitem" style="flex-direction:column; align-items:stretch; gap:8px; padding:12px">
+      <div class="flex-between">
+        <div class="sname" style="font-size:14px">${item.ex}</div>
+        <button class="sim-ex-del" data-idx="${idx}" style="background:none; border:none; color:#ef4444; font-size:18px; padding:0">✕</button>
       </div>
-      <div style="display:flex; align-items:center; gap:10px">
-        <div class="svol">${fmtV(item.ser * item.rep * item.pds)}</div>
-        <button class="sim-ex-del" data-idx="${idx}" style="background:none; border:none; color:#ef4444; font-size:18px">✕</button>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px">
+        <div>
+          <label class="flabel" style="font-size:9px">Séries</label>
+          <input type="number" class="sim-inline-input" data-idx="${idx}" data-field="ser" value="${item.ser}">
+        </div>
+        <div>
+          <label class="flabel" style="font-size:9px">Reps</label>
+          <input type="number" class="sim-inline-input" data-idx="${idx}" data-field="rep" value="${item.rep}">
+        </div>
+        <div>
+          <label class="flabel" style="font-size:9px">Poids (kg)</label>
+          <input type="number" class="sim-inline-input" data-idx="${idx}" data-field="pds" step="0.5" value="${item.pds}">
+        </div>
       </div>
     </div>
   `).join('');

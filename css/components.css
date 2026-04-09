@@ -439,3 +439,21 @@ select {
 .timer-card.running .timer-display {
   color: var(--accent);
 }
+
+/* ── Simulation Inline Inputs ────────────────────────────────────────────── */
+.sim-inline-input {
+  width: 100%;
+  background: var(--navy3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  outline: none;
+}
+.sim-inline-input:focus {
+  border-color: var(--accent);
+  background: var(--navy4);
+}
