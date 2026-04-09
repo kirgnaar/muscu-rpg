@@ -1,95 +1,194 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — render/simulation.js
-   🧪 Onglet Simulation: Programmer une séance et voir les gains d'XP
+   🧪 Gestion des Blocs de Programmation et Simulation d'XP
    ══════════════════════════════════════════════════════════════════════════ */
 
 var SIM = {
-  list: [], // Liste des exercices simulés: [{ex, ser, rep, pds, vol, grp}]
+  blocks: [],      // [{id, name, exercises: [{ex, ser, rep, pds, grp}]}]
+  currentBlock: null, // Bloc en cours d'édition
+  dbKey: 'mrpg_blocks'
 };
 
+// ── Initialisation ────────────────────────────────────────────────────────
 function initSimulation() {
+  SIM.blocks = loadBlocks();
   populateExerciseSelect($('sim-ex-sel'), true);
   
-  $('sim-add-btn').addEventListener('click', handleSimAdd);
-  $('sim-clear-btn').addEventListener('click', handleSimClear);
+  // Listeners principaux
+  $('sim-new-block-btn').addEventListener('click', () => handleNewBlock());
+  $('sim-save-block-btn').addEventListener('click', () => saveCurrentBlock());
+  $('sim-add-ex-btn').addEventListener('click', () => handleAddExToBlock());
+  $('sim-confirm-btn').addEventListener('click', () => confirmSession());
+  $('sim-back-btn').addEventListener('click', () => closeEditor());
   
-  // Délégation pour supprimer un item de la simu
-  $('sim-list').addEventListener('click', function(ev) {
-    var btn = ev.target.closest('.sim-del-btn');
+  // Délégation sur la liste des blocs
+  $('sim-blocks-list').addEventListener('click', function(ev) {
+    var btnEdit = ev.target.closest('.sim-block-edit');
+    var btnDel = ev.target.closest('.sim-block-del');
+    
+    if (btnEdit) {
+      var id = parseInt(btnEdit.dataset.id);
+      openEditor(id);
+    }
+    if (btnDel) {
+      var id = parseInt(btnDel.dataset.id);
+      deleteBlock(id);
+    }
+  });
+
+  // Délégation sur la liste des exercices du bloc
+  $('sim-ex-list').addEventListener('click', function(ev) {
+    var btn = ev.target.closest('.sim-ex-del');
     if (!btn) return;
     var idx = parseInt(btn.dataset.idx);
-    SIM.list.splice(idx, 1);
-    renderSimulation();
+    SIM.currentBlock.exercises.splice(idx, 1);
+    renderEditor();
   });
 }
 
-function handleSimAdd() {
+// ── Persistence ───────────────────────────────────────────────────────────
+function loadBlocks() {
+  var raw = localStorage.getItem(SIM.dbKey);
+  return raw ? JSON.parse(raw) : [];
+}
+
+function saveBlocks() {
+  localStorage.setItem(SIM.dbKey, JSON.stringify(SIM.blocks));
+}
+
+// ── Logique des Blocs ─────────────────────────────────────────────────────
+function handleNewBlock() {
+  var newId = Date.now();
+  SIM.currentBlock = {
+    id: newId,
+    name: "Nouveau Programme",
+    exercises: []
+  };
+  openEditor();
+}
+
+function openEditor(id) {
+  if (id) {
+    var block = SIM.blocks.find(b => b.id === id);
+    if (block) SIM.currentBlock = JSON.parse(JSON.stringify(block)); // Clone
+  }
+  
+  $('sim-blocks-list').style.display = 'none';
+  $('v-simulation').querySelector('.stitle span').style.display = 'none';
+  $('sim-new-block-btn').style.display = 'none';
+  
+  $('sim-editor').style.display = 'block';
+  $('sim-block-name').value = SIM.currentBlock.name;
+  
+  renderEditor();
+}
+
+function closeEditor() {
+  SIM.currentBlock = null;
+  $('sim-editor').style.display = 'none';
+  $('sim-blocks-list').style.display = 'block';
+  $('v-simulation').querySelector('.stitle span').style.display = 'inline';
+  $('sim-new-block-btn').style.display = 'inline';
+  renderSimulation();
+}
+
+function saveCurrentBlock() {
+  if (!SIM.currentBlock) return;
+  SIM.currentBlock.name = $('sim-block-name').value || "Sans nom";
+  
+  var idx = SIM.blocks.findIndex(b => b.id === SIM.currentBlock.id);
+  if (idx !== -1) {
+    SIM.blocks[idx] = JSON.parse(JSON.stringify(SIM.currentBlock));
+  } else {
+    SIM.blocks.push(JSON.parse(JSON.stringify(SIM.currentBlock)));
+  }
+  
+  saveBlocks();
+  toast('Programme sauvegardé');
+  closeEditor();
+}
+
+function deleteBlock(id) {
+  if (!confirm("Supprimer ce programme ?")) return;
+  SIM.blocks = SIM.blocks.filter(b => b.id !== id);
+  saveBlocks();
+  renderSimulation();
+}
+
+function handleAddExToBlock() {
   var exName = $('sim-ex-sel').value;
   var ser = parseInt($('sim-ser').value);
   var rep = parseInt($('sim-rep').value);
   var pds = parseFloat($('sim-pds').value);
 
   if (!exName || !ser || !rep || isNaN(pds)) {
-    toast('Remplis tous les champs simu', 'err');
+    toast('Champs invalides', 'err');
     return;
   }
 
   var exData = EX.find(e => e[0] === exName);
-  var vol = ser * rep * pds;
-
-  SIM.list.push({
+  SIM.currentBlock.exercises.push({
     ex: exName,
     ser: ser,
     rep: rep,
     pds: pds,
-    vol: vol,
     grp: exData ? exData[2] : ''
   });
 
-  renderSimulation();
+  renderEditor();
 }
 
-function handleSimClear() {
-  SIM.list = [];
-  renderSimulation();
-}
-
+// ── Rendering ─────────────────────────────────────────────────────────────
 function renderSimulation() {
-  var listEl = $('sim-list');
-  var resultsEl = $('sim-results');
-  
-  if (SIM.list.length === 0) {
-    listEl.innerHTML = '<div class="empty"><p>Aucun exercice programmé.</p></div>';
-    resultsEl.style.display = 'none';
+  var list = $('sim-blocks-list');
+  if (SIM.blocks.length === 0) {
+    list.innerHTML = '<div class="empty"><p>Aucun programme enregistré.<br>Crée ton premier bloc !</p></div>';
     return;
   }
 
-  resultsEl.style.display = 'block';
-  
-  // Rendre la liste
-  var html = '';
-  SIM.list.forEach((item, idx) => {
-    html += `
-      <div class="sitem">
-        <div class="sinfo">
-          <div class="sname">${item.ex}</div>
-          <div class="smeta">${item.ser}×${item.rep} · ${item.pds} kg</div>
-        </div>
-        <div style="display:flex; align-items:center; gap:10px">
-          <div class="svol">${fmtV(item.vol)}</div>
-          <button class="sim-del-btn" data-idx="${idx}" style="background:none; border:none; color:#ef4444; font-size:18px; cursor:pointer">✕</button>
-        </div>
-      </div>`;
-  });
-  listEl.innerHTML = html;
-
-  calculateSimResults();
+  list.innerHTML = SIM.blocks.map(b => `
+    <div class="card" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center">
+      <div>
+        <div style="font-weight:800; color:#fff">${b.name}</div>
+        <div style="font-size:11px; color:var(--text2)">${b.exercises.length} exercices</div>
+      </div>
+      <div style="display:flex; gap:8px">
+        <button class="btn btn-s sim-block-edit" data-id="${b.id}">Éditer</button>
+        <button class="btn btn-s sim-block-del" data-id="${b.id}" style="background:rgba(239,68,68,0.1); color:#ef4444">✕</button>
+      </div>
+    </div>
+  `).join('');
 }
 
-function calculateSimResults() {
-  // 1. Gain Global
+function renderEditor() {
+  var list = $('sim-ex-list');
+  var exList = SIM.currentBlock.exercises;
+  
+  if (exList.length === 0) {
+    list.innerHTML = '<div class="empty" style="padding:20px"><p>Liste vide.</p></div>';
+    calculateSimResults([]);
+    return;
+  }
+
+  list.innerHTML = exList.map((item, idx) => `
+    <div class="sitem">
+      <div class="sinfo">
+        <div class="sname">${item.ex}</div>
+        <div class="smeta">${item.ser}×${item.rep} · ${item.pds} kg</div>
+      </div>
+      <div style="display:flex; align-items:center; gap:10px">
+        <div class="svol">${fmtV(item.ser * item.rep * item.pds)}</div>
+        <button class="sim-ex-del" data-idx="${idx}" style="background:none; border:none; color:#ef4444; font-size:18px">✕</button>
+      </div>
+    </div>
+  `).join('');
+
+  calculateSimResults(exList);
+}
+
+function calculateSimResults(simList) {
   var currentVol = APP.data.reduce((s, e) => s + e.vol, 0);
-  var simVolGain = SIM.list.reduce((s, e) => s + e.vol, 0);
+  var simVolGain = simList.reduce((s, e) => s + (e.ser * e.rep * e.pds), 0);
   var newVolTotal = currentVol + simVolGain;
 
   var currentLvl = getLevel(currentVol);
@@ -107,40 +206,55 @@ function calculateSimResults() {
   }
   $('sim-lvl-preview').innerHTML = lvlHtml;
 
-  // 2. Gains par Muscles (Tiers)
-  // On calcule l'augmentation des séries par groupe
+  // Impact Musculaire
   var muscleGains = {};
-  SIM.list.forEach(item => {
-    if (item.grp) {
-      muscleGains[item.grp] = (muscleGains[item.grp] || 0) + item.ser;
-    }
-  });
+  simList.forEach(item => { if (item.grp) muscleGains[item.grp] = (muscleGains[item.grp] || 0) + item.ser; });
 
   var muscleHtml = '<div class="clabel" style="margin-bottom:8px">Impact Musculaire</div>';
   Object.keys(muscleGains).forEach(grp => {
     var currentSets = seriesCountByGroup(grp);
     var newSets = currentSets + muscleGains[grp];
-    
-    var currentTier = getTier(currentSets);
-    var nextTier = getTier(newSets);
-    
-    var color = nextTier.col;
-    var tierLabel = nextTier.name;
-    
+    var curT = getTier(currentSets);
+    var nxtT = getTier(newSets);
     muscleHtml += `
-      <div class="card" style="margin-bottom:8px; border-left: 3px solid ${color}">
-        <div style="display:flex; justify-content:space-between; align-items:center">
+      <div class="card" style="margin-bottom:8px; border-left: 3px solid ${nxtT.col}">
+        <div class="flex-between">
           <div>
             <div style="font-size:13px; font-weight:800">${grp}</div>
             <div style="font-size:11px; color:var(--text2)">${currentSets} → ${newSets} séries</div>
           </div>
           <div style="text-align:right">
-            <div style="font-size:12px; font-weight:800; color:${color}">${tierLabel}</div>
-            ${nextTier.min > currentTier.min ? '<div style="font-size:9px; color:var(--accent)">UPGRADE !</div>' : ''}
+            <div style="font-size:12px; font-weight:800; color:${nxtT.col}">${nxtT.name}</div>
+            ${nxtT.min > curT.min ? '<div style="font-size:9px; color:var(--accent)">UPGRADE !</div>' : ''}
           </div>
         </div>
       </div>`;
   });
-  
   $('sim-muscle-results').innerHTML = muscleHtml;
+}
+
+// ── Validation de Séance ──────────────────────────────────────────────────
+function confirmSession() {
+  if (!SIM.currentBlock || SIM.currentBlock.exercises.length === 0) return;
+  if (!confirm("Confirmer que cette séance a été effectuée ? Les données seront ajoutées au journal.")) return;
+
+  var date = todayISO();
+  var type = "Force"; // Par défaut
+
+  SIM.currentBlock.exercises.forEach(item => {
+    addEntry({
+      date: date,
+      type: type,
+      ex: item.ex,
+      grp: item.grp,
+      ser: item.ser,
+      rep: item.rep,
+      pds: item.pds
+    });
+  });
+
+  APP.render();
+  toast('Séance enregistrée dans le journal !');
+  closeEditor();
+  APP.switchView('seances');
 }
