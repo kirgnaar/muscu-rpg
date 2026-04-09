@@ -1,0 +1,227 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   MUSCU RPG — badges-premium.css
+   Style "ULTRA HAUTE GAMME" (Glassmorphism, Neon Glow, Animated Borders)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --rarity-0: #4b5563; /* Commun */
+  --rarity-1: #cd7f32; /* Rare */
+  --rarity-2: #94a3b8; /* Épique */
+  --rarity-3: #fbbf24; /* Légendaire */
+  --rarity-4: #22d3ee; /* Mythique */
+  --rarity-5: #c084fc; /* Divin */
+  
+  --glass: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --neon-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+}
+
+/* ── Badge Card (RPG Artifact Style) ────────────────────────────────────── */
+.bdg-card {
+  position: relative;
+  background: var(--glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+  cursor: pointer;
+  perspective: 1000px;
+}
+
+.bdg-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* Animated Border for High Rarity (Legendary+) */
+.t4.bdg-card::before, .t5.bdg-card::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: conic-gradient(transparent, var(--accent), transparent 30%);
+  animation: rotate 4s linear infinite;
+  z-index: -1;
+  opacity: 0.4;
+}
+
+@keyframes rotate {
+  100% { transform: rotate(360deg); }
+}
+
+.bdg-card::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: var(--navy);
+  border-radius: 19px;
+  z-index: -1;
+}
+
+/* ── Visual Section (Pro Illustration) ──────────────────────────────────── */
+.bdg-visual {
+  width: 70px;
+  height: 70px;
+  background: radial-gradient(circle, var(--navy3) 0%, var(--navy) 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--glass-border);
+  position: relative;
+}
+
+.bdg-visual svg {
+  width: 80%;
+  height: 80%;
+  filter: drop-shadow(0 0 8px var(--accent));
+}
+
+/* Glow Effect */
+.t3 .bdg-visual { box-shadow: 0 0 15px rgba(251, 191, 36, 0.2); }
+.t4 .bdg-visual { box-shadow: 0 0 20px rgba(34, 211, 238, 0.3); }
+.t5 .bdg-visual { box-shadow: 0 0 25px rgba(192, 132, 252, 0.4); }
+
+/* ── Info Section ────────────────────────────────────────────────────────── */
+.bdg-title {
+  font-size: 16px;
+  font-weight: 900;
+  color: #fff;
+  letter-spacing: -0.5px;
+  margin-bottom: 2px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.bdg-meta {
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bdg-rarity-pill {
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.05);
+  font-size: 9px;
+  border: 1px solid var(--glass-border);
+}
+
+/* ── Progress & Stats ────────────────────────────────────────────────────── */
+.bdg-progress-bg {
+  width: 100%;
+  height: 5px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 4px;
+  border: 1px solid rgba(255,255,255,0.02);
+}
+
+.bdg-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), #fff);
+  box-shadow: 0 0 10px var(--accent);
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bdg-stat-v {
+  font-size: 18px;
+  font-weight: 950;
+  color: #fff;
+  font-family: 'SF Pro Display', sans-serif;
+  letter-spacing: -0.5px;
+}
+
+.bdg-stat-l {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Dashboard (Premium Grid) ────────────────────────────────────────────── */
+.ach-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.ach-card {
+  background: var(--glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  padding: 18px 12px;
+  border-radius: 20px;
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.ach-card:hover {
+  transform: scale(1.05);
+  background: rgba(255,255,255,0.05);
+}
+
+.ach-val {
+  font-size: 20px;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 4px;
+  background: linear-gradient(to bottom, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.ach-lbl {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ── Muscle Badges (Floating Pills) ──────────────────────────────────────── */
+.mbdg {
+  min-width: 140px;
+  padding: 16px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.mbdg::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 4px; height: 100%;
+  background: var(--accent);
+  opacity: 0.5;
+}
+
+/* ── Locked State (Elegant Mystery) ───────────────────────────────────────── */
+.bdg-card:not(.earned) {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+.bdg-card:not(.earned) .bdg-visual {
+  background: #000;
+}

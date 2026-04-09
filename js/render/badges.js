@@ -1,46 +1,53 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — render/badges.js
-   VISUAL PRO REBORN — High-fidelity exercise illustrations & Hevy-style UI
+   ULTRA PREMIUM VERSION — High-End RPG Achievement Engine
    ══════════════════════════════════════════════════════════════════════════ */
 
 var BADGES = { groupFilter: '' };
 
-// ── VISUAL GENERATOR (Pro Blueprint Style) ────────────────────────────────
-function getVisualSVG(type, color) {
-  const c = color || 'var(--text2)';
-  const acc = 'var(--accent)';
+// ── Visual Assets ─────────────────────────────────────────────────────────
+function getPremiumVisual(type, color, isEarned) {
+  const c = isEarned ? (color || 'var(--accent)') : '#4b5563';
+  const glow = isEarned ? `filter="url(#glow)"` : '';
   
-  const poses = {
-    bench: `<rect x="10" y="75" width="80" height="4" rx="2" fill="${c}" opacity=".2"/>`
-          +`<path d="M25,70 L25,85 M75,70 L75,85" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`
-          +`<circle cx="50" cy="45" r="8" fill="${acc}" opacity=".8"/>`
-          +`<path d="M35,60 L65,60 M30,55 L70,55" stroke="${acc}" stroke-width="4" stroke-linecap="round"/>`
-          +`<path d="M20,40 L80,40" stroke="${c}" stroke-width="2" stroke-dasharray="4 2"/>`,
+  const icons = {
+    bench: `<rect x="10" y="70" width="80" height="6" rx="3" fill="${c}" opacity=".2"/>
+           <path d="M20,65 L20,85 M80,65 L80,85" stroke="${c}" stroke-width="4" stroke-linecap="round"/>
+           <circle cx="50" cy="40" r="10" fill="${c}" ${glow}/>
+           <path d="M30,55 L70,55" stroke="${c}" stroke-width="6" stroke-linecap="round"/>`,
     
-    squat: `<circle cx="50" cy="20" r="7" fill="${acc}" opacity=".8"/>`
-          +`<path d="M50,27 L50,45 L35,65 L30,85 M50,45 L65,65 L70,85" stroke="${c}" stroke-width="5" stroke-linecap="round" fill="none"/>`
-          +`<path d="M25,30 L75,30" stroke="${acc}" stroke-width="6" stroke-linecap="round"/>`,
+    squat: `<circle cx="50" cy="25" r="9" fill="${c}" ${glow}/>
+           <path d="M50,34 L50,55 L35,85 M50,55 L65,85" stroke="${c}" stroke-width="7" stroke-linecap="round" fill="none"/>
+           <path d="M20,35 L80,35" stroke="${c}" stroke-width="8" stroke-linecap="round"/>`,
     
-    deadlift: `<path d="M10,85 L90,85" stroke="${c}" stroke-width="3" stroke-linecap="round"/>`
-             +`<circle cx="40" cy="40" r="7" fill="${acc}" opacity=".8"/>`
-             +`<path d="M40,47 L40,70 L30,85 M40,70 L50,85" stroke="${c}" stroke-width="5" stroke-linecap="round" fill="none"/>`
-             +`<rect x="15" y="78" width="70" height="8" rx="4" fill="${acc}"/>`,
+    deadlift: `<path d="M10,90 L90,90" stroke="${c}" stroke-width="4" stroke-linecap="round" opacity=".4"/>
+              <circle cx="45" cy="40" r="9" fill="${c}" ${glow}/>
+              <path d="M45,49 L45,75 L30,90 M45,75 L60,90" stroke="${c}" stroke-width="7" stroke-linecap="round" fill="none"/>
+              <rect x="20" y="80" width="60" height="10" rx="5" fill="${c}"/>`,
     
-    pullup: `<path d="M10,15 L90,15" stroke="${c}" stroke-width="4" stroke-linecap="round" opacity=".3"/>`
-           +`<circle cx="50" cy="40" r="7" fill="${acc}" opacity=".8"/>`
-           +`<path d="M30,15 L40,35 L60,35 L70,15" stroke="${c}" stroke-width="5" stroke-linecap="round" fill="none"/>`,
+    pullup: `<path d="M10,20 L90,20" stroke="${c}" stroke-width="6" stroke-linecap="round" opacity=".3"/>
+            <circle cx="50" cy="45" r="9" fill="${c}" ${glow}/>
+            <path d="M35,20 L45,40 L55,40 L65,20" stroke="${c}" stroke-width="7" stroke-linecap="round" fill="none"/>`,
     
-    curl: `<circle cx="50" cy="25" r="7" fill="${acc}" opacity=".8"/>`
-         +`<path d="M50,32 L50,55 L40,85 L60,85" stroke="${c}" stroke-width="5" stroke-linecap="round" fill="none"/>`
-         +`<path d="M50,40 L65,30" stroke="${acc}" stroke-width="5" stroke-linecap="round"/>`
-         +`<circle cx="68" cy="25" r="5" fill="${acc}"/>`,
+    curl: `<circle cx="50" cy="30" r="9" fill="${c}" ${glow}/>
+          <path d="M50,39 L50,65 L40,90 L60,90" stroke="${c}" stroke-width="7" stroke-linecap="round" fill="none"/>
+          <path d="M50,45 L70,35" stroke="${c}" stroke-width="7" stroke-linecap="round"/>
+          <circle cx="75" cy="30" r="6" fill="${c}"/>`,
     
-    generic: `<circle cx="50" cy="30" r="8" fill="${acc}" opacity=".6"/>`
-            +`<path d="M50,38 L50,65 L40,85 L60,85" stroke="${c}" stroke-width="4" stroke-linecap="round" fill="none"/>`
-            +`<path d="M30,45 L70,45" stroke="${c}" stroke-width="4" stroke-linecap="round"/>`
+    generic: `<circle cx="50" cy="30" r="10" fill="${c}" ${glow}/>
+             <path d="M50,40 L50,70 L35,90 L65,90" stroke="${c}" stroke-width="6" stroke-linecap="round" fill="none"/>
+             <path d="M30,50 L70,50" stroke="${c}" stroke-width="6" stroke-linecap="round"/>`
   };
 
-  return `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">${poses[type] || poses.generic}</svg>`;
+  return `<svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="3" result="blur" />
+        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+      </filter>
+    </defs>
+    ${icons[type] || icons.generic}
+  </svg>`;
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────
@@ -73,20 +80,20 @@ function renderMuscleBadges() {
     var pct  = (getTierProgress(n) * 100).toFixed(0);
     return `<div class="mbdg ${ti.cls}">
       <div class="mbdg-nm">${m}</div>
-      <div class="mbdg-t">${ti.name}</div>
-      <div class="mbdg-pb"><div class="mbdg-pf" style="width:${pct}%; background:${ti.col}"></div></div>
+      <div class="mbdg-t" style="color:${ti.col}">${ti.name}</div>
+      <div class="mbdg-pb"><div class="mbdg-pf" style="width:${pct}%; background:linear-gradient(90deg, ${ti.col}, #fff)"></div></div>
     </div>`;
   }).join('');
 }
 
-// ── Global Achievements (Hevy Style Dashboard) ────────────────────────────
+// ── Global Stats Dashboard ────────────────────────────────────────────────
 function renderGlobalAchievements() {
   var totalVol = APP.data.reduce(function(s, e) { return s + e.vol; }, 0);
   var totalSes = allDates().length;
-  var prCount = APP.data.filter(e => e.isPR).length;
+  var prCount  = APP.data.filter(e => e.isPR).length;
 
   var html = `
-    <div class="clabel" style="margin:20px 0 10px">Statistiques Globales</div>
+    <div class="clabel" style="margin:25px 0 12px; color:var(--accent)">Tableau d'Honneur</div>
     <div class="ach-grid">
       <div class="ach-card">
         <div class="ach-val">${fmtV(totalVol)}</div>
@@ -98,7 +105,7 @@ function renderGlobalAchievements() {
       </div>
       <div class="ach-card">
         <div class="ach-val">${prCount}</div>
-        <div class="ach-lbl">Records (PR)</div>
+        <div class="ach-lbl">Records</div>
       </div>
     </div>`;
            
@@ -123,7 +130,7 @@ function renderBadgeFilterPills() {
   }).join('');
 }
 
-// ── Badge grid (Visual Pro Grid) ──────────────────────────────────────────
+// ── Badge grid ────────────────────────────────────────────────────────────
 function renderBadgeGrid() {
   var grid = $('badge-grid');
   if (!grid) return;
@@ -160,17 +167,30 @@ function renderBadgeGrid() {
     if (name.includes('Soulevé')) type = 'deadlift';
 
     return `
-      <div class="bdg-card ${ti.cls} ${earned ? 'earned' : ''}">
-        <div class="bdg-visual">${getVisualSVG(type, earned ? '#7a8aaa' : '#2d3748')}</div>
-        <div class="bdg-content">
+      <div class="bdg-card ${ti.cls} ${earned ? 'earned' : ''}" data-rarity="${ti.name}">
+        <div class="bdg-visual">${getPremiumVisual(type, ti.col, earned)}</div>
+        <div class="bdg-info" style="flex:1">
           <div class="bdg-title">${name}</div>
-          <div class="bdg-meta">${group} · ${ti.name}</div>
-          <div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:${pct}%; background:${ti.col}"></div></div>
+          <div class="bdg-meta">
+            ${group} <span class="bdg-rarity-pill" style="color:${ti.col}">${ti.name}</span>
+          </div>
+          <div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:${pct}%; background:${ti.col}; box-shadow:0 0 10px ${ti.col}"></div></div>
         </div>
-        <div class="bdg-aside">
+        <div class="bdg-aside" style="text-align:right">
           <div class="bdg-stat-v">${earned ? max1RM + 'kg' : '--'}</div>
           <div class="bdg-stat-l">1RM MAX</div>
         </div>
       </div>`;
   }).join('');
+
+  // GSAP Entrance Animation
+  if (window.gsap) {
+    gsap.from(".bdg-card", {
+      opacity: 0,
+      y: 20,
+      stagger: 0.05,
+      duration: 0.5,
+      ease: "power2.out"
+    });
+  }
 }
