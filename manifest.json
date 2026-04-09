@@ -1,7 +1,7 @@
 {
-  "name": "Muscu RPG — CdB Sucy Judo",
+  "name": "Muscu RPG",
   "short_name": "Muscu RPG",
-  "description": "Suivi musculation RPG — CdB Sucy Judo",
+  "description": "Tracker de musculation gamifié — Incarnez votre progression.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",

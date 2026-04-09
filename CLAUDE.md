@@ -6,7 +6,7 @@ Guidance for AI assistants working in this repository.
 
 ## Project Overview
 
-**Muscu RPG** is a gamified weightlifting tracker built as a Progressive Web App (PWA). It targets members of the "CdB Sucy Judo" sports club. The UI is entirely in **French**.
+**Muscu RPG** is a gamified weightlifting tracker built as a Progressive Web App (PWA). It is designed for any amateur or athlete who wants a tracker that feels like an RPG character they embody. The UI is entirely in **French**.
 
 - No backend, no build step, no package manager, no framework
 - Pure vanilla JavaScript (ES5-compatible), HTML, and CSS

@@ -122,7 +122,7 @@ function exportData() {
   var payload = {
     version:  2,
     exported: new Date().toISOString(),
-    app:      'Muscu RPG — CdB Sucy Judo',
+    app:      'Muscu RPG — Tracker Gamifié',
     entries:  data
   };
   var json     = JSON.stringify(payload, null, 2);
