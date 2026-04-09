@@ -367,7 +367,8 @@ function renderBadgeGrid() {
   });
 
   var exList = EX.filter(function(e) {
-    return !BADGES.groupFilter || e[2] === BADGES.groupFilter;
+    if (!BADGES.groupFilter) return true;
+    return getMuscleInfluence(e[0], BADGES.groupFilter) > 0;
   });
 
   var unlocked = exList.filter(function(e) { return counts[e[0]] > 0; });
@@ -376,19 +377,22 @@ function renderBadgeGrid() {
 
   grid.innerHTML = unlocked.concat(locked).map(function(ex) {
     var name    = ex[0];
-    var group   = ex[2];
+    var group   = getPrimaryGroup(name);
     var n       = counts[name] || 0;
     var ti      = getTier(n);
     var pct     = (getTierProgress(n) * 100).toFixed(0);
     var earned  = n > 0;
     var max1RM  = max1RMs[name] || 0;
-    
-    var type = ICON_MAP[name] || 'generic';
+
+    var type = 'generic';
     if (group === 'Pectoraux') type = 'bench';
     if (group === 'Quadriceps') type = 'squat';
     if (group === 'Dorsal') type = 'pullup';
     if (group === 'Biceps') type = 'curl';
     if (name.includes('Soulevé')) type = 'deadlift';
+
+    // L'icône spécifique de la map prend le dessus
+    if (ICON_MAP[name]) type = ICON_MAP[name];
 
     return `
       <div class="bdg-card ${ti.cls} ${earned ? 'earned' : ''}" data-rarity="${ti.label}">

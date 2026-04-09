@@ -10,11 +10,11 @@ var BODY3D = {
   isInitialized: false,
 
   mapping: {
-    'pecs': 'Pectoraux', 'back': 'Dos', 'shoulders_l': 'Épaules', 'shoulders_r': 'Épaules',
+    'pecs': 'Pectoraux', 'back': 'Dorsal', 'shoulders_l': 'Épaules', 'shoulders_r': 'Épaules',
     'biceps_l': 'Biceps', 'biceps_r': 'Biceps', 'triceps_l': 'Triceps', 'triceps_r': 'Triceps',
     'abs': 'Abdominaux', 'quads_l': 'Quadriceps', 'quads_r': 'Quadriceps', 'glutes': 'Fessiers',
     'calves_l': 'Mollets', 'calves_r': 'Mollets', 'hams_l': 'Ischio-jambiers', 'hams_r': 'Ischio-jambiers',
-    'traps': 'Trapèzes', 'forearms_l': 'Avant-bras', 'forearms_r': 'Avant-bras', 'lumbars': 'Lombaires'
+    'traps': 'Trapèzes', 'forearms_l': 'Biceps', 'forearms_r': 'Biceps', 'lumbars': 'Lombaires'
   },
 
   init: function() {
