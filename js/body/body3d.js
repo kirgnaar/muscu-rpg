@@ -1,14 +1,15 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — body/body3d.js
-   THE ARCHITECT v2.1 — Pure Mathematical 3D Anatomy (No Assets, High Compatibility)
+   HOLOGRAM ENGINE v3.0 — The Indestructible Procedural Core
    ══════════════════════════════════════════════════════════════════════════ */
 
 var BODY3D = {
   scene: null, camera: null, renderer: null, controls: null,
-  model: new THREE.Group(),
+  group: new THREE.Group(),
   muscles: {},
-  isInitialized: false,
+  isReady: false,
 
+  // Mapping direct vers les segments géométriques
   mapping: {
     'pecs': 'Pectoraux', 'back': 'Dos', 'shoulders_l': 'Épaules', 'shoulders_r': 'Épaules',
     'biceps_l': 'Biceps', 'biceps_r': 'Biceps', 'triceps_l': 'Triceps', 'triceps_r': 'Triceps',
@@ -18,124 +19,128 @@ var BODY3D = {
   },
 
   init: function() {
-    if (this.isInitialized) return;
+    if (this.isReady) return;
     var container = document.getElementById('body-3d-container');
     if (!container) return;
 
     try {
+      // 1. Scene Setup
       this.scene = new THREE.Scene();
-      this.camera = new THREE.PerspectiveCamera(32, container.clientWidth / container.clientHeight, 0.1, 1000);
-      this.camera.position.set(0, 1.6, 5);
+      this.camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 1000);
+      this.camera.position.set(0, 1.5, 5);
 
       this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       this.renderer.setSize(container.clientWidth, container.clientHeight);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      this.renderer.outputEncoding = THREE.sRGBEncoding;
       container.appendChild(this.renderer.domElement);
 
-      // Studio Lighting
-      this.scene.add(new THREE.AmbientLight(0xffffff, 0.25));
-      var l1 = new THREE.DirectionalLight(0x3b82f6, 1.5);
-      l1.position.set(5, 5, 5);
-      this.scene.add(l1);
-      var l2 = new THREE.PointLight(0x22d3ee, 1.2, 15);
-      l2.position.set(-3, 2, 3);
-      this.scene.add(l2);
-
-      if (window.OrbitControls) {
-        this.controls = new window.OrbitControls(this.camera, this.renderer.domElement);
+      // 2. Lighting (Neon Rig)
+      this.scene.add(new THREE.AmbientLight(0xffffff, 0.1));
+      var light1 = new THREE.DirectionalLight(0x00f2ff, 1);
+      light1.position.set(5, 5, 5);
+      this.scene.add(light1);
+      
+      // 3. Orbit Controls
+      if (THREE.OrbitControls) {
+        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
         this.controls.target.set(0, 1.1, 0);
       }
 
-      this.buildHumanoid();
-      this.scene.add(this.model);
-      
+      // 4. Construct Holographic Body
+      this.buildHologram();
+      this.scene.add(this.group);
+
+      // 5. Success
       document.getElementById('3d-loader').style.display = 'none';
-      this.isInitialized = true;
-      
+      this.isReady = true;
       this.updateColors();
       this.animate();
-      
+
       window.addEventListener('resize', () => this.onResize());
+      console.log("Hologram Engine: ONLINE");
+
     } catch (e) {
-      console.error("BODY3D Error:", e);
+      console.error("Hologram Init Error:", e);
+      document.getElementById('3d-loader').innerHTML = `<p style="color:#ff3e3e; font-size:10px">SYSTEM_FAILURE: ${e.message}</p>`;
     }
   },
 
-  // Création d'une capsule personnalisée (Compatible toutes versions)
-  createCapsuleGeo: function(radius, height) {
-    const points = [];
-    for (let i = 0; i <= 18; i++) {
-      const angle = (i / 18) * Math.PI;
-      const x = radius * Math.sin(angle);
-      const y = radius * Math.cos(angle) + (i <= 9 ? height / 2 : -height / 2);
-      points.push(new THREE.Vector2(x, y));
-    }
-    return new THREE.LatheGeometry(points, 20);
-  },
-
-  buildHumanoid: function() {
-    const glassMat = () => new THREE.MeshPhysicalMaterial({
-      color: 0x1a2235, metalness: 0.95, roughness: 0.05,
-      transparent: true, opacity: 0.4, transmission: 0.8, thickness: 1.5,
-      emissive: new THREE.Color(0x000000), emissiveIntensity: 0
-    });
-
-    const addPart = (geo, y, x, z, rx, ry, rz, name) => {
-      const mesh = new THREE.Mesh(geo, glassMat());
-      mesh.position.set(x, y, z);
-      mesh.rotation.set(rx || 0, ry || 0, rz || 0);
-      mesh.name = name;
-      this.muscles[name] = mesh;
-      this.model.add(mesh);
+  buildHologram: function() {
+    // Matériau Holographique Universel (Fil de fer + Lueur)
+    const createHoloMat = (color) => {
+      return new THREE.MeshLambertMaterial({
+        color: color || 0x00f2ff,
+        transparent: true,
+        opacity: 0.4,
+        wireframe: false,
+        emissive: color || 0x00f2ff,
+        emissiveIntensity: 0.2
+      });
     };
 
-    // --- BUSTE ---
-    addPart(this.createCapsuleGeo(0.2, 0.45), 1.3, 0, 0, 0, 0, 0, 'abs');
-    addPart(new THREE.BoxGeometry(0.42, 0.22, 0.12), 1.55, 0, 0.06, 0.1, 0, 0, 'pecs');
-    addPart(new THREE.BoxGeometry(0.42, 0.48, 0.08), 1.35, 0, -0.08, -0.1, 0, 0, 'back');
-    addPart(this.createCapsuleGeo(0.08, 0.12), 1.1, 0, -0.1, 0, 0, 0, 'lumbars');
-    addPart(this.createCapsuleGeo(0.1, 0.08), 1.7, 0, -0.04, 0, 0, 0, 'traps');
+    const addPart = (geo, y, x, z, name) => {
+      const mesh = new THREE.Mesh(geo, createHoloMat());
+      mesh.position.set(x, y, z);
+      mesh.name = name;
+      this.muscles[name] = mesh;
+      this.group.add(mesh);
+      
+      // Bordures lumineuses (Outline)
+      const edges = new THREE.EdgesGeometry(geo);
+      const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x00f2ff, transparent: true, opacity: 0.3 }));
+      mesh.add(line);
+    };
 
-    // --- BRAS ---
-    addPart(new THREE.SphereGeometry(0.11, 16, 16), 1.6, -0.26, 0, 0, 0, 0, 'shoulders_l');
-    addPart(new THREE.SphereGeometry(0.11, 16, 16), 1.6, 0.26, 0, 0, 0, 0, 'shoulders_r');
-    addPart(this.createCapsuleGeo(0.07, 0.22), 1.4, -0.32, 0, 0, 0, 0.2, 'biceps_l');
-    addPart(this.createCapsuleGeo(0.07, 0.22), 1.4, 0.32, 0, 0, 0, -0.2, 'biceps_r');
-    addPart(this.createCapsuleGeo(0.06, 0.22), 1.1, -0.38, 0, 0, 0, 0.1, 'forearms_l');
-    addPart(this.createCapsuleGeo(0.06, 0.22), 1.1, 0.38, 0, 0, 0, -0.1, 'forearms_r');
+    // --- CONSTRUCTION ANATOMIQUE ---
+    const sphere = (r) => new THREE.SphereGeometry(r, 16, 16);
+    const box = (w, h, d) => new THREE.BoxGeometry(w, h, d);
 
-    // --- JAMBES ---
-    addPart(new THREE.SphereGeometry(0.16, 16, 12), 0.9, 0, -0.08, 0, 0, 0, 'glutes');
-    addPart(this.createCapsuleGeo(0.13, 0.45), 0.5, -0.16, 0, 0, 0, 0.05, 'quads_l');
-    addPart(this.createCapsuleGeo(0.13, 0.45), 0.5, 0.16, 0, 0, 0, -0.05, 'quads_r');
-    addPart(this.createCapsuleGeo(0.09, 0.35), -0.1, -0.18, 0, 0, 0, 0.02, 'calves_l');
-    addPart(this.createCapsuleGeo(0.09, 0.35), -0.1, 0.18, 0, 0, 0, -0.02, 'calves_r');
+    // Torse & Core
+    addPart(box(0.4, 0.6, 0.2), 1.3, 0, 0, 'abs');
+    addPart(box(0.45, 0.25, 0.15), 1.55, 0, 0.05, 'pecs');
+    addPart(box(0.45, 0.5, 0.1), 1.35, 0, -0.1, 'back');
+    
+    // Bras
+    addPart(sphere(0.12), 1.6, -0.28, 0, 'shoulders_l');
+    addPart(sphere(0.12), 1.6, 0.28, 0, 'shoulders_r');
+    addPart(box(0.1, 0.3, 0.1), 1.4, -0.35, 0, 'biceps_l');
+    addPart(box(0.1, 0.3, 0.1), 1.4, 0.35, 0, 'triceps_r');
+    
+    // Jambes
+    addPart(box(0.18, 0.7, 0.18), 0.5, -0.18, 0, 'quads_l');
+    addPart(box(0.18, 0.7, 0.18), 0.5, 0.18, 0, 'quads_r');
+    addPart(box(0.12, 0.4, 0.12), -0.1, -0.2, 0, 'calves_l');
+    addPart(box(0.12, 0.4, 0.12), -0.1, 0.2, 0, 'calves_r');
 
     // Tête
-    const head = new THREE.Mesh(new THREE.IcosahedronGeometry(0.16, 2), glassMat());
-    head.position.y = 1.92;
-    head.material.opacity = 0.2;
-    this.model.add(head);
+    const head = new THREE.Mesh(new THREE.IcosahedronGeometry(0.18, 1), createHoloMat(0x7a8aaa));
+    head.position.y = 1.95;
+    this.group.add(head);
   },
 
   updateColors: function() {
-    if (!this.isInitialized || !window.gsap) return;
+    if (!this.isReady || !window.gsap) return;
+    
     Object.keys(this.mapping).forEach(key => {
       const group = this.mapping[key];
       const mesh = this.muscles[key];
       if (mesh && mesh.material) {
-        const targetColor = new THREE.Color(tierCol(group));
+        const color = new THREE.Color(tierCol(group));
         const count = seriesCountByGroup(group);
-        gsap.to(mesh.material.color, { r: targetColor.r, g: targetColor.g, b: targetColor.b, duration: 1 });
+        
+        gsap.to(mesh.material.color, { r: color.r, g: color.g, b: color.b, duration: 1 });
+        
         if (count > 0) {
-          gsap.to(mesh.material, { emissiveIntensity: 0.4 + Math.min(1.2, count / 60), opacity: 0.85, duration: 1.5 });
-          mesh.material.emissive.copy(targetColor);
+          gsap.to(mesh.material, {
+            opacity: 0.8,
+            emissiveIntensity: 0.5 + Math.min(1.5, count / 50),
+            duration: 1.5
+          });
+          mesh.material.emissive.copy(color);
         } else {
-          gsap.to(mesh.material, { emissiveIntensity: 0, opacity: 0.4, duration: 1 });
+          gsap.to(mesh.material, { opacity: 0.2, emissiveIntensity: 0.1, duration: 1 });
         }
       }
     });
@@ -152,6 +157,11 @@ var BODY3D = {
   animate: function() {
     requestAnimationFrame(() => this.animate());
     if (this.controls) this.controls.update();
+    
+    // Floating Animation
+    this.group.position.y = Math.sin(Date.now() * 0.002) * 0.05;
+    this.group.rotation.y += 0.005;
+
     this.renderer.render(this.scene, this.camera);
   }
 };
