@@ -19,33 +19,71 @@
 <link rel="stylesheet" href="css/charts.css">
 <link rel="stylesheet" href="css/badges-premium.css">
 <style>
-  /* ── 3D Premium Container ─────────────────────────────────────────────────── */
+  /* ── 3D Premium Interface (Medical Scan Overlay) ─────────────────────────── */
   #body-3d-container {
     width: 100%;
-    height: 500px;
-    background: radial-gradient(circle at 50% 50%, #1e2a40 0%, #0a0f1e 100%);
+    height: 520px;
+    background: radial-gradient(circle at 50% 50%, #1e2a40 0%, #050810 100%);
     border-radius: 24px;
     position: relative;
     overflow: hidden;
     cursor: grab;
-    box-shadow: inset 0 0 100px rgba(0,0,0,0.8), 0 10px 40px rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.9), 0 10px 40px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.08);
   }
+  
+  #body-3d-container::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(0deg, rgba(34, 211, 238, 0.03) 0px, transparent 1px, transparent 4px);
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .scan-line {
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.2), transparent);
+    top: -10%;
+    animation: scan 4s linear infinite;
+    z-index: 6;
+    pointer-events: none;
+  }
+
+  @keyframes scan {
+    0% { top: -10%; }
+    100% { top: 110%; }
+  }
+
+  .ui-marker {
+    position: absolute;
+    color: var(--accent);
+    font-family: monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    opacity: 0.6;
+    z-index: 7;
+    pointer-events: none;
+  }
+
   #body-3d-container:active { cursor: grabbing; }
+  
   .loading-overlay {
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: rgba(10, 15, 30, 1);
+    background: #0a0f1e;
     color: var(--accent);
-    z-index: 10;
+    z-index: 20;
   }
   .spinner {
     width: 40px; height: 40px;
-    border: 4px solid rgba(34, 211, 238, 0.1);
+    border: 2px solid rgba(34, 211, 238, 0.1);
     border-top-color: var(--accent);
     border-radius: 50%;
-    animation: spin 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+    animation: spin 1s cubic-bezier(0.5, 0, 0.5, 1) infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>
@@ -260,12 +298,15 @@
     <div class="view" id="v-badges">
       <div class="stitle">Badges & Progression</div>
 
-      <!-- Corps humain 3D interactif -->
+      <!-- Corps humain 3D interactif (Engine PRO v2) -->
       <div class="card" style="padding:0; margin-bottom:15px; border:none; overflow:hidden;">
         <div id="body-3d-container">
+          <div class="scan-line"></div>
+          <div class="ui-marker" style="top:20px; left:20px">ANATOMY_SCAN_v2.0</div>
+          <div class="ui-marker" style="bottom:20px; right:20px">STATUS: ONLINE</div>
           <div class="loading-overlay" id="3d-loader">
             <div class="spinner"></div>
-            <p style="margin-top:10px; font-size:12px">Chargement du modèle 3D...</p>
+            <p style="margin-top:10px; font-size:11px; letter-spacing:2px">INITIALIZING ENGINE...</p>
           </div>
         </div>
       </div>
