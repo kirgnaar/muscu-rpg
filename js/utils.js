@@ -3,25 +3,40 @@
    Fonctions utilitaires partagées: format, formules, toast, date
 ══════════════════════════════════════════════════════════════════════════ */
 
-// ── Formule Epley (1RM estimé) ────────────────────────────────────────────
+// ── Formules de Force (1RM estimé) ─────────────────────────────────────────
 /**
- * 1RM estimé via la formule d'Epley, arrondi au 0.5kg
+ * 1RM estimé via le compromis Epley & Brzycki, arrondi au 0.5kg
  * @param {number} poids - poids de la série (kg)
  * @param {number} reps  - nombre de répétitions
  * @returns {number}
  */
 function epley(poids, reps) {
   if (!poids || !reps || poids <= 0 || reps <= 0) return 0;
-  return Math.round(poids * (1 + reps / 30) * 2) / 2;
+  if (reps === 1) return poids;
+  
+  // Formule Epley
+  var epleyVal = poids * (1 + reps / 30);
+  // Formule Brzycki (limitée à 36 reps max pour éviter division par zéro)
+  var brzyckiVal = poids * (36 / (37 - Math.min(reps, 36)));
+  
+  // Moyenne des deux pour plus de fiabilité
+  var res = (epleyVal + brzyckiVal) / 2;
+  return Math.round(res * 2) / 2;
 }
 
 /**
  * Charge recommandée pour N reps depuis un 1RM
- * Formule inverse d'Epley, arrondie au 0.5kg
+ * Utilise l'inverse de la moyenne Epley/Brzycki
  */
 function repWeight(rm1, reps) {
   if (!rm1 || !reps) return 0;
-  return Math.round(rm1 / (1 + reps / 30) * 2) / 2;
+  if (reps === 1) return rm1;
+  
+  var epleyInv = rm1 / (1 + reps / 30);
+  var brzyckiInv = rm1 * (37 - Math.min(reps, 36)) / 36;
+  
+  var res = (epleyInv + brzyckiInv) / 2;
+  return Math.round(res * 2) / 2;
 }
 
 // ── Formatage ─────────────────────────────────────────────────────────────
