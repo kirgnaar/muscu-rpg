@@ -167,14 +167,15 @@ function renderBadgeGrid() {
     if (name.includes('Soulevé')) type = 'deadlift';
 
     return `
-      <div class="bdg-card ${ti.cls} ${earned ? 'earned' : ''}" data-rarity="${ti.name}">
+      <div class="bdg-card ${ti.cls} ${earned ? 'earned' : ''}" data-rarity="${ti.label}">
         <div class="bdg-visual">${getPremiumVisual(type, ti.col, earned)}</div>
         <div class="bdg-info" style="flex:1">
           <div class="bdg-title">${name}</div>
           <div class="bdg-meta">
-            ${group} <span class="bdg-rarity-pill" style="color:${ti.col}">${ti.name}</span>
+            ${group} <span class="bdg-rarity-pill" style="color:${ti.col}">${ti.label}</span>
           </div>
           <div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:${pct}%; background:${ti.col}; box-shadow:0 0 10px ${ti.col}"></div></div>
+          ${earned ? `<div class="bdg-rate">Débloqué par seulement ${ti.rate} des athlètes</div>` : ''}
         </div>
         <div class="bdg-aside" style="text-align:right">
           <div class="bdg-stat-v">${earned ? max1RM + 'kg' : '--'}</div>

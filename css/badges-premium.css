@@ -134,9 +134,70 @@
 
 .bdg-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent), #fff);
-  box-shadow: 0 0 10px var(--accent);
-  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bdg-rate {
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 6px;
+  opacity: 0.6;
+}
+
+.bdg-aside {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Tier Overlays & Animated Borders */
+.t4.bdg-card { border-color: rgba(168, 85, 247, 0.3); } /* ÉPIQUE */
+.t5.bdg-card { border-color: rgba(251, 191, 36, 0.4); box-shadow: 0 0 20px rgba(251, 191, 36, 0.1); } /* LÉGENDAIRE */
+
+/* MYTHIQUE (1000 Séries) - Animated Neon Border */
+.t6.bdg-card::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: conic-gradient(transparent, #22d3ee, transparent 30%);
+  animation: rotate 3s linear infinite;
+  z-index: -1;
+}
+
+/* RELIQUE (2500 Séries) - Godly Pulse & Particles */
+.t7.bdg-card {
+  border-color: #fff;
+  box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+  animation: pulse-divine 2s infinite alternate;
+}
+.t7.bdg-card::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: conic-gradient(transparent, #fff, transparent 20%, #ef4444, transparent 40%);
+  animation: rotate 2s linear infinite;
+  z-index: -1;
+}
+
+@keyframes pulse-divine {
+  from { transform: scale(1.02); filter: brightness(1); }
+  to { transform: scale(1.04); filter: brightness(1.3); }
+}
+
+@keyframes rotate {
+  100% { transform: rotate(360deg); }
+}
+
+.bdg-card::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: var(--navy2);
+  border-radius: 15px;
+  z-index: -1;
 }
 
 .bdg-stat-v {

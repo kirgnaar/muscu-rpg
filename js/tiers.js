@@ -5,16 +5,17 @@
 
 // ── Tiers (basés sur nombre de séries totales par exercice) ───────────────
 var TIERS = [
-  { name: 'Inactif',   min: 0,   cls: 't0', col: '#4b5563', emoji: '🔒',  label: 'Non débloqué' },
-  { name: 'Novice',    min: 10,  cls: 't1', col: '#cd7f32', emoji: '🥉', label: 'Novice'       },
-  { name: 'Initié',    min: 25,  cls: 't2', col: '#94a3b8', emoji: '🥈', label: 'Initié'       },
-  { name: 'Athlète',   min: 50,  cls: 't3', col: '#fbbf24', emoji: '🥇', label: 'Athlète'      },
-  { name: 'Expert',    min: 100, cls: 't4', col: '#22d3ee', emoji: '💎', label: 'Expert'       },
-  { name: 'Élite',     min: 200, cls: 't5', col: '#c084fc', emoji: '🔮', label: 'Élite'        },
+  { name: 'Inactif',   min: 0,    cls: 't0', col: '#4b5563', rate: '100%',  label: 'Bloqué' },
+  { name: 'Novice',    min: 10,   cls: 't1', col: '#94a3b8', rate: '95.0%', label: 'COMMUN' },
+  { name: 'Initié',    min: 25,   cls: 't2', col: '#10b981', rate: '60.0%', label: 'PEU COMMUN' },
+  { name: 'Athlète',   min: 50,   cls: 't3', col: '#3b82f6', rate: '25.0%', label: 'RARE' },
+  { name: 'Expert',    min: 100,  cls: 't4', col: '#a855f7', rate: '8.0%',  label: 'ÉPIQUE' },
+  { name: 'Maître',    min: 250,  cls: 't5', col: '#fbbf24', rate: '2.0%',  label: 'LÉGENDAIRE' },
+  { name: 'Légende',   min: 1000, cls: 't6', col: '#22d3ee', rate: '0.1%',  label: 'MYTHIQUE' },
+  { name: 'Divin',     min: 2500, cls: 't7', col: '#ffffff', rate: '0.01%', label: 'RELIQUE' },
 ];
 
-// Tier suivant (null si max)
-var TIER_NEXT_MIN = [10, 25, 50, 100, 200, null];
+var TIER_NEXT_MIN = [10, 25, 50, 100, 250, 1000, 2500, null];
 
 /**
  * Retourne l'objet tier pour un nombre de séries donné
