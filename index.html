@@ -338,6 +338,13 @@
 <script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
 <script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
 <script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+  // Patch pour s'assurer que les plugins sont bien attachés au namespace THREE global
+  if (window.THREE) {
+    if (window.GLTFLoader) THREE.GLTFLoader = window.GLTFLoader;
+    if (window.OrbitControls) THREE.OrbitControls = window.OrbitControls;
+  }
+</script>
 <script src="js/body/body3d.js"></script>
 
 <!-- 4. Corps anatomiques SVG (Fallback) -->

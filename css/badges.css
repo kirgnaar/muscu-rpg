@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — badges.css
-   Style visuel "Pro Fitness" inspiré par Hevy
+   VISUAL PRO REBORN — High-fidelity exercise cards & Dashboard UI
    ══════════════════════════════════════════════════════════════════════════ */
 
 .muscle-badge-row {
@@ -13,154 +13,137 @@
 .muscle-badge-row::-webkit-scrollbar { display: none; }
 
 .mbdg {
-  min-width: 120px;
+  min-width: 130px;
   padding: 14px;
   background: var(--navy2);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 14px;
   text-align: left;
-  transition: background 0.2s;
 }
 
-.mbdg-ico { font-size: 18px; display: block; margin-bottom: 8px; color: var(--accent); }
-.mbdg-nm { font-size: 13px; font-weight: 700; color: var(--text1); margin-bottom: 2px; }
-.mbdg-t { font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; }
+.mbdg-nm { font-size: 13px; font-weight: 800; color: var(--text1); margin-bottom: 2px; }
+.mbdg-t { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.5px; }
+.mbdg-pb { height: 2px; background: rgba(255,255,255,0.05); margin-top: 8px; border-radius: 1px; overflow: hidden; }
+.mbdg-pf { height: 100%; transition: width 0.6s; }
 
-/* Tiers indicators (subtle) */
-.t1 .mbdg-t, .t1.bdg .bdg-tier { color: #cd7f32; }
-.t2 .mbdg-t, .t2.bdg .bdg-tier { color: #94a3b8; }
-.t3 .mbdg-t, .t3.bdg .bdg-tier { color: #fbbf24; }
-.t4 .mbdg-t, .t4.bdg .bdg-tier { color: #22d3ee; }
-.t5 .mbdg-t, .t5.bdg .bdg-tier { color: #c084fc; }
-
-/* Badge Grid - Hevy Style */
-#badge-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding-bottom: 40px;
-}
-
-.bdg {
-  background: var(--navy2);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  transition: transform 0.1s;
-}
-
-.bdg:active { transform: scale(0.98); }
-
-.bdg-ico-wrap {
-  width: 54px;
-  height: 54px;
-  background: var(--navy3);
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.bdg-ico {
-  width: 36px;
-  height: 36px;
-  color: var(--text2);
-}
-
-.bdg-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.bdg-nm { 
-  font-size: 15px; 
-  font-weight: 700; 
-  color: var(--text1); 
-  white-space: nowrap; 
-  overflow: hidden; 
-  text-overflow: ellipsis;
-  margin-bottom: 2px;
-}
-
-.bdg-sub {
-  font-size: 12px;
-  color: var(--text2);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.bdg-tier-pill {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  background: rgba(255,255,255,0.05);
-  border-radius: 10px;
-}
-
-.bdg-stats {
-  text-align: right;
-  flex-shrink: 0;
-}
-
-.bdg-val {
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--text1);
-}
-
-.bdg-label {
-  font-size: 10px;
-  color: var(--text2);
-  text-transform: uppercase;
-  font-weight: 600;
-}
-
-/* Progress bar (linear at bottom of card) */
-.bdg-pb-wrap {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: transparent;
-}
-.bdg-pf {
-  height: 100%;
-  background: var(--accent);
-  border-radius: 0 2px 2px 0;
-  opacity: 0.6;
-}
-
-/* Global Achievements */
-.ach-section {
+/* Dashboard Grid */
+.ach-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 20px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 25px;
 }
 .ach-card {
   background: var(--navy2);
   border: 1px solid var(--border);
-  padding: 16px;
-  border-radius: 12px;
+  padding: 15px 10px;
+  border-radius: 14px;
+  text-align: center;
+}
+.ach-val { font-size: 16px; font-weight: 900; color: #fff; margin-bottom: 2px; }
+.ach-lbl { font-size: 10px; font-weight: 700; color: var(--text2); text-transform: uppercase; }
+
+/* Badge Card (Hevy-Style List) */
+#badge-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  padding-bottom: 40px;
 }
-.ach-ico { font-size: 24px; }
-.ach-nm { font-size: 14px; font-weight: 800; color: var(--text1); }
-.ach-desc { font-size: 11px; color: var(--text2); line-height: 1.3; }
+
+.bdg-card {
+  display: flex;
+  align-items: center;
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 12px 16px;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.1s, border-color 0.3s;
+}
+
+.bdg-card:active { transform: scale(0.98); }
+
+.bdg-visual {
+  width: 60px;
+  height: 60px;
+  background: var(--navy3);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 8px;
+}
+
+.bdg-visual svg { width: 100%; height: 100%; }
+
+.bdg-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.bdg-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text1);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bdg-meta {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.bdg-progress-bg {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.bdg-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.bdg-aside {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.bdg-stat-v {
+  font-size: 15px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.bdg-stat-l {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--text2);
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+
+/* Tier Overlays */
+.t3.bdg-card { border-color: rgba(251, 191, 36, 0.2); }
+.t4.bdg-card { border-color: rgba(34, 211, 238, 0.2); }
+.t5.bdg-card { border-color: rgba(192, 132, 252, 0.2); }
 
 /* Locked State */
-.bdg:not(.earned) {
-  opacity: 0.6;
-}
-.bdg:not(.earned) .bdg-ico-wrap {
-  background: var(--navy);
+.bdg-card:not(.earned) {
+  opacity: 0.4;
+  filter: grayscale(0.8);
 }

@@ -75,6 +75,9 @@ function addEntry(entry) {
   if (newLvl > prevLvl) {
     newEntry.isLevelUp = true;
     newEntry.newLvl = newLvl;
+    if (window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate([200, 100, 200, 100, 400]);
+    }
   }
 
   return newEntry;

@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — body/body3d.js
-   Moteur 3D interactif (Three.js) — VERSION RENFORCÉE AVEC FALLBACK
+   Moteur 3D interactif (Three.js) — VERSION PRO (Z-Anatomy Data)
    ══════════════════════════════════════════════════════════════════════════ */
 
 var BODY3D = {
@@ -8,7 +8,6 @@ var BODY3D = {
   muscles: {},
   isInitialized: false,
 
-  // Mapping simple (on colorera tout ce qu'on trouve si possible)
   mapping: {
     'Pectoralis_Major': 'Pectoraux', 'Latissimus_Dorsi': 'Dos', 'Deltoid': 'Épaules',
     'Biceps_Brachii': 'Biceps', 'Triceps_Brachii': 'Triceps', 'Abdominal_Rectus': 'Abdominaux',
@@ -22,32 +21,27 @@ var BODY3D = {
     if (!container) return;
 
     try {
-      // 1. Initialisation de base
       this.scene = new THREE.Scene();
       this.camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-      this.camera.position.set(0, 1.2, 3.5);
+      this.camera.position.set(0, 1.2, 4);
 
-      this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, logarithmicDepthBuffer: true });
       this.renderer.setSize(container.clientWidth, container.clientHeight);
       this.renderer.setPixelRatio(window.devicePixelRatio);
       container.appendChild(this.renderer.domElement);
 
-      // Lumières
       this.scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-      var dl = new THREE.DirectionalLight(0xffffff, 0.8);
+      var dl = new THREE.DirectionalLight(0xffffff, 1.0);
       dl.position.set(5, 10, 7.5);
       this.scene.add(dl);
 
-      // 2. Contrôles
       if (THREE.OrbitControls) {
         this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.target.set(0, 1, 0);
       }
 
-      // 3. Tentative chargement modèle GLB
       this.loadModel();
-      
       this.isInitialized = true;
       this.animate();
       window.addEventListener('resize', () => this.onResize());
@@ -62,18 +56,25 @@ var BODY3D = {
     var self = this;
     var loader = (THREE.GLTFLoader) ? new THREE.GLTFLoader() : null;
     
-    // URL via CDN plus stable (modèle anatomique low poly)
-    var modelUrl = 'https://cdn.jsdelivr.net/gh/pmndrs/drei-assets@master/meat.glb';
+    // Nouveau modèle GLB ultra-fiable (Source: hpfrei / Z-Anatomy optimized)
+    var modelUrl = 'https://cdn.jsdelivr.net/gh/hpfrei/body-anatomy-3d-viewer@main/public/models/body.glb';
 
     if (loader) {
       loader.load(modelUrl, 
         function(gltf) {
           self.model = gltf.scene;
-          self.model.scale.set(1.5, 1.5, 1.5);
+          // Centrage et mise à l'échelle
+          self.model.scale.set(1.2, 1.2, 1.2);
+          self.model.position.y = -1.2; // Ajuster selon le modèle
           self.scene.add(self.model);
+
           self.model.traverse(node => {
             if (node.isMesh) {
-              node.material = node.material.clone();
+              node.material = new THREE.MeshStandardMaterial({
+                color: 0x2d3748,
+                metalness: 0.2,
+                roughness: 0.8
+              });
               self.muscles[node.name] = node;
             }
           });
@@ -82,7 +83,7 @@ var BODY3D = {
         },
         undefined,
         function(err) {
-          console.warn("GLB non chargé, utilisation du mannequin de secours.");
+          console.warn("Modèle externe inaccessible, passage au mannequin de secours.");
           self.createFallbackMannequin();
         }
       );
@@ -91,26 +92,24 @@ var BODY3D = {
     }
   },
 
-  // Création d'un mannequin simple (boîtes/sphères) si le modèle GLB échoue
   createFallbackMannequin: function() {
     this.model = new THREE.Group();
-    
-    const createPart = (w, h, d, y, name) => {
+    const createPart = (w, h, d, y, x, name) => {
       const geo = new THREE.BoxGeometry(w, h, d);
       const mat = new THREE.MeshStandardMaterial({ color: 0x4b5563 });
       const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.y = y;
+      mesh.position.set(x, y, 0);
       mesh.name = name;
       this.muscles[name] = mesh;
       this.model.add(mesh);
     };
 
-    // Parties simplifiées mappées sur nos groupes
-    createPart(0.4, 0.6, 0.2, 1.3, 'Dos');       // Buste
-    createPart(0.15, 0.4, 0.1, 1.3, 'Biceps');   // Bras gauche
-    createPart(0.15, 0.4, 0.1, 1.3, 'Triceps');  // Bras droit (simplifié)
-    createPart(0.2, 0.7, 0.15, 0.6, 'Quadriceps'); // Jambe gauche
-    createPart(0.2, 0.7, 0.15, 0.6, 'Mollets');    // Jambe droite (simplifié)
+    createPart(0.4, 0.6, 0.2, 1.3, 0, 'Latissimus_Dorsi'); // Torse
+    createPart(0.3, 0.2, 0.1, 1.5, 0, 'Pectoralis_Major'); // Pecs
+    createPart(0.12, 0.4, 0.1, 1.3, -0.3, 'Biceps_Brachii'); // Bras L
+    createPart(0.12, 0.4, 0.1, 1.3, 0.3, 'Triceps_Brachii'); // Bras R
+    createPart(0.18, 0.8, 0.18, 0.5, -0.15, 'Quadriceps_Femoral'); // Jambe L
+    createPart(0.18, 0.8, 0.18, 0.5, 0.15, 'Hamstrings'); // Jambe R
 
     this.scene.add(this.model);
     document.getElementById('3d-loader').style.display = 'none';
@@ -119,15 +118,18 @@ var BODY3D = {
 
   updateColors: function() {
     if (!this.model) return;
+    var self = this;
     Object.keys(this.mapping).forEach(meshName => {
-      const group = this.mapping[meshName];
-      const mesh = this.muscles[meshName];
+      const group = self.mapping[meshName];
+      const mesh = self.muscles[meshName];
       if (mesh && mesh.material) {
-        const color = tierCol(group);
-        mesh.material.color.set(color);
-        if (mesh.material.emissive) {
-          mesh.material.emissive.set(color);
-          mesh.material.emissiveIntensity = 0.2;
+        const colorHex = tierCol(group);
+        mesh.material.color.set(colorHex);
+        
+        const count = seriesCountByGroup(group);
+        if (count > 0) {
+          mesh.material.emissive.set(colorHex);
+          mesh.material.emissiveIntensity = 0.2 + Math.min(0.6, count / 200);
         }
       }
     });
