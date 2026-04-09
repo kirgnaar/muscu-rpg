@@ -72,7 +72,6 @@ function initBadges() {
 function renderBadges() {
   renderMuscleBadges();
   renderGlobalAchievements();
-  renderSpecialAchievements();
   renderBadgeGrid();
 }
 
@@ -88,7 +87,15 @@ function renderMuscleBadges() {
     <div class="mbdg-pb"><div class="mbdg-pf" style="width:100%; background:var(--accent)"></div></div>
   </div>`;
 
-  // 2. Cartes de muscles
+  // 2. Bouton "Badges Spéciaux"
+  var specialProgress = calculateSpecialAchievementsProgress();
+  var specHtml = `<div class="mbdg ${BADGES.groupFilter === 'special' ? 'on' : ''}" data-grp="special">
+    <div class="mbdg-nm">Succès</div>
+    <div class="mbdg-t">Spéciaux</div>
+    <div class="mbdg-pb"><div class="mbdg-pf" style="width:${specialProgress}%; background:var(--gold)"></div></div>
+  </div>`;
+
+  // 3. Cartes de muscles
   var musclesHtml = MUSCLES.map(function(m) {
     var n    = seriesCountByGroup(m);
     var ti   = getTier(n);
@@ -102,7 +109,29 @@ function renderMuscleBadges() {
     </div>`;
   }).join('');
 
-  row.innerHTML = allHtml + musclesHtml;
+  row.innerHTML = allHtml + specHtml + musclesHtml;
+}
+
+// Calcul de la progression globale des succès spéciaux
+function calculateSpecialAchievementsProgress() {
+  var totalVol = APP.data.reduce(function(s, e) { return s + e.vol; }, 0);
+  var totalSes = allDates().length;
+  var uniqueEx = new Set(APP.data.map(e => e.ex)).size;
+  var big6Total = BIG6.reduce((sum, ex) => sum + bestRM1(ex), 0);
+  var dailyVols = {};
+  APP.data.forEach(e => dailyVols[e.date] = (dailyVols[e.date] || 0) + e.vol);
+  var maxSessionVol = Math.max(0, ...Object.values(dailyVols));
+
+  const specs = [
+    { val: totalVol, max: 5000000 },
+    { val: totalSes, max: 500 },
+    { val: big6Total, max: 1250 },
+    { val: uniqueEx, max: 100 },
+    { val: maxSessionVol, max: 20000 }
+  ];
+
+  var totalPct = specs.reduce((sum, s) => sum + Math.min(100, (s.val / s.max * 100)), 0);
+  return (totalPct / specs.length).toFixed(0);
 }
 
 // ── Global Stats Dashboard ────────────────────────────────────────────────
@@ -248,6 +277,22 @@ function renderSpecialAchievements() {
 function renderBadgeGrid() {
   var grid = $('badge-grid');
   if (!grid) return;
+
+  // Si on est sur le filtre spécial, on affiche uniquement les hauts faits
+  if (BADGES.groupFilter === 'special') {
+    var oldBox = document.getElementById('special-ach-box');
+    if (oldBox) oldBox.remove();
+    renderSpecialAchievements();
+    grid.style.display = 'none';
+    var specBox = document.getElementById('special-ach-box');
+    if (specBox) specBox.style.display = 'block';
+    return;
+  }
+
+  // Sinon, on affiche la grille d'exercices et on cache les succès
+  grid.style.display = 'grid';
+  var specBox = document.getElementById('special-ach-box');
+  if (specBox) specBox.style.display = 'none';
 
   var counts = {};
   var max1RMs = {};
