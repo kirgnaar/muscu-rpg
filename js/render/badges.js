@@ -121,13 +121,20 @@ function calculateSpecialAchievementsProgress() {
   var dailyVols = {};
   APP.data.forEach(e => dailyVols[e.date] = (dailyVols[e.date] || 0) + e.vol);
   var maxSessionVol = Math.max(0, ...Object.values(dailyVols));
+  
+  var totalPRs = APP.data.filter(e => e.isPR).length;
+  var totalReps = APP.data.reduce((s, e) => s + (e.ser * e.rep), 0);
+  var maxWeight = APP.data.filter(e => BIG6.includes(e.ex)).reduce((m, e) => Math.max(m, e.pds), 0);
 
   const specs = [
     { val: totalVol, max: 5000000 },
     { val: totalSes, max: 500 },
     { val: big6Total, max: 1250 },
     { val: uniqueEx, max: 100 },
-    { val: maxSessionVol, max: 20000 }
+    { val: maxSessionVol, max: 20000 },
+    { val: totalPRs, max: 250 },
+    { val: totalReps, max: 100000 },
+    { val: maxWeight, max: 300 }
   ];
 
   var totalPct = specs.reduce((sum, s) => sum + Math.min(100, (s.val / s.max * 100)), 0);
@@ -174,13 +181,38 @@ function renderSpecialAchievements() {
   var totalSes = allDates().length;
   var uniqueEx = new Set(APP.data.map(e => e.ex)).size;
   
-  // Big 6 Total 1RM
+  // Stats complexes
   var big6Total = BIG6.reduce((sum, ex) => sum + bestRM1(ex), 0);
-  
-  // Max Session Volume
   var dailyVols = {};
   APP.data.forEach(e => dailyVols[e.date] = (dailyVols[e.date] || 0) + e.vol);
   var maxSessionVol = Math.max(0, ...Object.values(dailyVols));
+  
+  var totalPRs = APP.data.filter(e => e.isPR).length;
+  var totalReps = APP.data.reduce((s, e) => s + (e.ser * e.rep), 0);
+  
+  var exCounts = {};
+  APP.data.forEach(e => exCounts[e.ex] = (exCounts[e.ex] || 0) + e.ser);
+  
+  var big6Done = BIG6.filter(ex => APP.data.some(e => e.ex === ex)).length;
+  var maxWeight = APP.data.filter(e => BIG6.includes(e.ex)).reduce((m, e) => Math.max(m, e.pds), 0);
+
+  // Maître des Chaînes logic
+  var chains = { ant: 0, post: 0, core: 0 };
+  var chainsExpert = { ant: 0, post: 0, core: 0 };
+  EX.forEach(ex => {
+    var s = exCounts[ex[0]] || 0;
+    var c = ex[1];
+    var type = '';
+    if (c.includes('Antérieur')) type = 'ant';
+    if (c.includes('Postérieur')) type = 'post';
+    if (c === 'Core') type = 'core';
+    if (type) {
+      if (s >= 50) chains[type]++;
+      if (s >= 100) chainsExpert[type]++;
+    }
+  });
+  var chainMin = Math.min(chains.ant, chains.post, chains.core);
+  var chainExpertMin = Math.min(chainsExpert.ant, chainsExpert.post, chainsExpert.core);
 
   const specs = [
     { 
@@ -204,13 +236,47 @@ function renderSpecialAchievements() {
       ]
     },
     { 
-      id: 'club1000', name: 'Le Club des 1000 (Big 6)', icon: 'trophy', val: big6Total,
+      id: 'briseur', name: 'Le Briseur de Limites', icon: 'trophy', val: totalPRs,
       paliere: [
-        { n: 250, l: 'Initié', r: 'COMMUN', c: '#94a3b8' },
-        { n: 500, l: 'Guerrier', r: 'RARE', c: '#3b82f6' },
-        { n: 750, l: 'Hercule', r: 'ÉPIQUE', c: '#a855f7' },
-        { n: 1000, l: 'Club des 1000', r: 'LÉGENDAIRE', c: '#fbbf24' },
-        { n: 1250, l: 'Dieu de la Force', r: 'MYTHIQUE', c: '#22d3ee' }
+        { n: 10, l: 'Déterminé', r: 'RARE', c: '#3b82f6' },
+        { n: 50, l: 'Inarrêtable', r: 'ÉPIQUE', c: '#a855f7' },
+        { n: 100, l: 'Briseur de Plafond', r: 'LÉGENDAIRE', c: '#fbbf24' },
+        { n: 250, l: 'L\'Anomalie', r: 'MYTHIQUE', c: '#22d3ee' }
+      ]
+    },
+    { 
+      id: 'acharne', name: 'L\'Acharné', icon: 'trophy', val: totalReps,
+      paliere: [
+        { n: 1000, l: 'Cadence I', r: 'COMMUN', c: '#94a3b8' },
+        { n: 10000, l: 'Cadence II', r: 'RARE', c: '#3b82f6' },
+        { n: 50000, l: 'Mécanique', r: 'ÉPIQUE', c: '#a855f7' },
+        { n: 100000, l: 'L\'Horloge de Fer', r: 'LÉGENDAIRE', c: '#fbbf24' }
+      ]
+    },
+    { 
+      id: 'chaines', name: 'Le Maître des Chaînes', icon: 'trophy', val: chainMin,
+      valAlt: chainExpertMin,
+      paliere: [
+        { n: 1, l: 'Équilibré', r: 'RARE', c: '#3b82f6' },
+        { n: 3, l: 'Symétrique', r: 'ÉPIQUE', c: '#a855f7' },
+        { n: 6, l: 'Harmonie Divine', r: 'MYTHIQUE', c: '#22d3ee', useAlt: true }
+      ]
+    },
+    { 
+      id: 'chelem', name: 'Le Grand Chelem', icon: 'trophy', val: big6Done,
+      paliere: [
+        { n: 2, l: 'Apprenti', r: 'RARE', c: '#3b82f6' },
+        { n: 4, l: 'Guerrier Complet', r: 'ÉPIQUE', c: '#a855f7' },
+        { n: 6, l: 'Le Grand Chelem', r: 'LÉGENDAIRE', c: '#fbbf24' }
+      ]
+    },
+    { 
+      id: 'monolithe', name: 'Le Monolithe', icon: 'trophy', val: maxWeight,
+      paliere: [
+        { n: 100, l: 'Acier', r: 'RARE', c: '#3b82f6' },
+        { n: 150, l: 'Béton', r: 'ÉPIQUE', c: '#a855f7' },
+        { n: 200, l: 'Monolithe', r: 'LÉGENDAIRE', c: '#fbbf24' },
+        { n: 300, l: 'La Montagne', r: 'MYTHIQUE', c: '#22d3ee' }
       ]
     },
     { 
@@ -222,15 +288,6 @@ function renderSpecialAchievements() {
         { n: 75, l: 'Encyclopédie', r: 'LÉGENDAIRE', c: '#fbbf24' },
         { n: 100, l: 'Maître de la Salle', r: 'MYTHIQUE', c: '#22d3ee' }
       ]
-    },
-    { 
-      id: 'explosif', name: 'L\'Explosif (Volume/Jour)', icon: 'trophy', val: maxSessionVol,
-      paliere: [
-        { n: 5000, l: 'Surchargé', r: 'COMMUN', c: '#94a3b8' },
-        { n: 10000, l: 'Infatigable', r: 'RARE', c: '#3b82f6' },
-        { n: 15000, l: 'Machine', r: 'ÉPIQUE', c: '#a855f7' },
-        { n: 20000, l: 'Monolithe', r: 'LÉGENDAIRE', c: '#fbbf24' }
-      ]
     }
   ];
 
@@ -239,12 +296,21 @@ function renderSpecialAchievements() {
   specs.forEach(s => {
     var current = s.paliere[0];
     for (var i = s.paliere.length - 1; i >= 0; i--) {
-      if (s.val >= s.paliere[i].n) { current = s.paliere[i]; break; }
+      var checkVal = s.paliere[i].useAlt ? s.valAlt : s.val;
+      if (checkVal >= s.paliere[i].n) { current = s.paliere[i]; break; }
     }
-    var earned = s.val >= s.paliere[0].n;
-    var next = s.paliere.find(p => s.val < p.n);
-    var pct = next ? (s.val / next.n * 100).toFixed(0) : 100;
+    var earned = (current.useAlt ? s.valAlt : s.val) >= s.paliere[0].n;
+    var next = s.paliere.find(p => (p.useAlt ? s.valAlt : s.val) < p.n);
+    var pct = next ? ((current.useAlt ? s.valAlt : s.val) / next.n * 100).toFixed(0) : 100;
     
+    var unit = 'kg';
+    if (s.id === 'pilier') unit = 'séances';
+    if (s.id === 'cameleon') unit = 'exercices';
+    if (s.id === 'briseur') unit = 'PR';
+    if (s.id === 'acharne') unit = 'reps';
+    if (s.id === 'chelem') unit = '/ 6 ex';
+    if (s.id === 'chaines') unit = 'ex/chaîne';
+
     html += `
       <div class="bdg-card special-ach ${earned ? 'earned' : ''}" style="border-left: 4px solid ${current.c}">
         <div class="bdg-visual">${getPremiumVisual(s.icon, current.c, earned)}</div>
@@ -254,14 +320,13 @@ function renderSpecialAchievements() {
             ${s.name} <span class="bdg-rarity-pill" style="color:${current.c}">${current.r}</span>
           </div>
           <div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:${pct}%; background:${current.c}"></div></div>
-          <div class="bdg-rate" style="color:#fff; opacity:1">Progression : ${s.val.toLocaleString()} ${s.id === 'cameleon' ? 'exercices' : (s.id === 'pilier' ? 'séances' : 'kg')}</div>
+          <div class="bdg-rate" style="color:#fff; opacity:1">Progression : ${s.val.toLocaleString()} ${unit}</div>
         </div>
       </div>`;
   });
   
   html += '</div>';
 
-  // Point d'injection corrigé pour être compatible avec la fusion UI
   var grid = $('badge-grid');
   if (grid) {
     var old = document.getElementById('special-ach-box');
