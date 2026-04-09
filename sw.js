@@ -1,5 +1,5 @@
 // ── Service Worker — Muscu RPG ─────────────────────────────────────────────
-const CACHE_NAME = 'muscu-rpg-v11';
+const CACHE_NAME = 'muscu-rpg-v12';
 const ASSETS = [
   '/',
   '/index.html',

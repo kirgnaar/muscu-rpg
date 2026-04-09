@@ -74,6 +74,7 @@ function handleNewBlock() {
   SIM.currentBlock = {
     id: newId,
     name: "Nouveau Programme",
+    type: "Hypertrophie",
     exercises: []
   };
   openEditor();
@@ -85,12 +86,16 @@ function openEditor(id) {
     if (block) SIM.currentBlock = JSON.parse(JSON.stringify(block)); // Clone
   }
   
+  // Valeur par défaut si type absent (compatibilité ancienne version)
+  if (!SIM.currentBlock.type) SIM.currentBlock.type = "Hypertrophie";
+
   $('sim-blocks-list').style.display = 'none';
   $('v-simulation').querySelector('.stitle span').style.display = 'none';
   $('sim-new-block-btn').style.display = 'none';
   
   $('sim-editor').style.display = 'block';
   $('sim-block-name').value = SIM.currentBlock.name;
+  $('sim-block-type').value = SIM.currentBlock.type;
   
   renderEditor();
 }
@@ -107,6 +112,7 @@ function closeEditor() {
 function saveCurrentBlock() {
   if (!SIM.currentBlock) return;
   SIM.currentBlock.name = $('sim-block-name').value || "Sans nom";
+  SIM.currentBlock.type = $('sim-block-type').value;
   
   var idx = SIM.blocks.findIndex(b => b.id === SIM.currentBlock.id);
   if (idx !== -1) {
@@ -158,18 +164,47 @@ function renderSimulation() {
     return;
   }
 
-  list.innerHTML = SIM.blocks.map(b => `
-    <div class="card" style="margin-bottom:10px; display:flex; justify-content:space-between; align-items:center">
-      <div>
-        <div style="font-weight:800; color:#fff">${b.name}</div>
-        <div style="font-size:11px; color:var(--text2)">${b.exercises.length} exercices</div>
+  list.innerHTML = SIM.blocks.map(b => {
+    var dist = calculateMuscleDistribution(b.exercises);
+    var distHtml = dist.length > 0 ? `
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px">
+        ${dist.map(d => `<span style="font-size:9px; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px; color:var(--text2)">${d.grp} ${d.pct}%</span>`).join('')}
+      </div>` : '';
+
+    return `
+      <div class="card" style="margin-bottom:10px">
+        <div class="flex-between">
+          <div>
+            <div style="font-weight:800; color:#fff">${b.name}</div>
+            <div style="font-size:11px; color:var(--accent); font-weight:700">${b.type || 'Hypertrophie'}</div>
+            <div style="font-size:10px; color:var(--text2); margin-top:2px">${b.exercises.length} exercices</div>
+          </div>
+          <div style="display:flex; gap:8px">
+            <button class="btn btn-s sim-block-edit" data-id="${b.id}">Éditer</button>
+            <button class="btn btn-s sim-block-del" data-id="${b.id}" style="background:rgba(239,68,68,0.1); color:#ef4444">✕</button>
+          </div>
+        </div>
+        ${distHtml}
       </div>
-      <div style="display:flex; gap:8px">
-        <button class="btn btn-s sim-block-edit" data-id="${b.id}">Éditer</button>
-        <button class="btn btn-s sim-block-del" data-id="${b.id}" style="background:rgba(239,68,68,0.1); color:#ef4444">✕</button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
+}
+
+function calculateMuscleDistribution(exercises) {
+  if (!exercises.length) return [];
+  var counts = {};
+  var total = 0;
+  exercises.forEach(ex => {
+    if (ex.grp) {
+      counts[ex.grp] = (counts[ex.grp] || 0) + ex.ser;
+      total += ex.ser;
+    }
+  });
+  if (total === 0) return [];
+  return Object.keys(counts).map(grp => ({
+    grp: grp,
+    pct: Math.round((counts[grp] / total) * 100)
+  })).sort((a, b) => b.pct - a.pct);
 }
 
 function renderEditor() {
@@ -261,7 +296,7 @@ function confirmSession() {
   if (!confirm("Confirmer que cette séance a été effectuée ? Les données seront ajoutées au journal.")) return;
 
   var date = todayISO();
-  var type = "Force"; // Par défaut
+  var type = SIM.currentBlock.type || "Hypertrophie";
 
   SIM.currentBlock.exercises.forEach(item => {
     addEntry({
