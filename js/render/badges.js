@@ -363,7 +363,9 @@ function renderBadgeGrid() {
   var max1RMs = {};
   APP.data.forEach(function(e) {
     counts[e.ex] = (counts[e.ex] || 0) + 1;
-    max1RMs[e.ex] = Math.max(max1RMs[e.ex] || 0, e.rm1);
+    // On recalcule le 1RM avec la nouvelle formule hybride pour l'affichage des badges
+    var currentRM1 = epley(e.pds, e.rep);
+    max1RMs[e.ex] = Math.max(max1RMs[e.ex] || 0, currentRM1);
   });
 
   var exList = EX.filter(function(e) {
