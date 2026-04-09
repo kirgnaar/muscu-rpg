@@ -58,7 +58,7 @@ function addEntry(entry) {
     date:  entry.date,
     type:  entry.type,
     ex:    entry.ex,
-    grp:   entry.grp,
+    grp:   entry.grp || getPrimaryGroup(entry.ex),
     ser:   entry.ser,
     rep:   entry.rep,
     pds:   entry.pds,
@@ -139,11 +139,12 @@ function bestRM1ForDate(exName, date) {
 }
 
 /**
- * Volume total pour un groupe musculaire
+ * Volume total pour un groupe musculaire (prend en compte les influences primaires et secondaires)
  */
 function volByGroup(grp) {
   return APP.data.reduce(function(s, e) {
-    return e.grp === grp ? s + e.vol : s;
+    var influence = getMuscleInfluence(e.ex, grp);
+    return s + (e.vol * influence);
   }, 0);
 }
 

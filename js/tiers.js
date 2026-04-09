@@ -118,17 +118,27 @@ function levelColor(lvl) {
 
 /**
  * Nombre de séries pour un groupe musculaire
- * (moyenne des exercices pratiqués dans ce groupe)
+ * Prend en compte l'influence de chaque exercice sur le groupe.
  */
 function seriesCountByGroup(grp) {
-  var done = EX.filter(function(e) {
-    return e[2] === grp && APP.data.filter(function(d){ return d.ex === e[0]; }).length > 0;
+  // On récupère tous les exercices pratiqués qui influent sur ce groupe
+  var totalInfluencedSets = 0;
+  var exerciseCount = 0;
+
+  EX.forEach(function(e) {
+    var influence = getMuscleInfluence(e[0], grp);
+    if (influence > 0) {
+      var sets = APP.data.filter(d => d.ex === e[0]).length;
+      if (sets > 0) {
+        totalInfluencedSets += sets * influence;
+        exerciseCount++;
+      }
+    }
   });
-  if (!done.length) return 0;
-  var total = done.reduce(function(s, e) {
-    return s + APP.data.filter(function(d){ return d.ex === e[0]; }).length;
-  }, 0);
-  return Math.floor(total / done.length);
+
+  if (exerciseCount === 0) return 0;
+  // On retourne la moyenne pondérée pour le groupe
+  return Math.floor(totalInfluencedSets / exerciseCount);
 }
 
 /**

@@ -192,19 +192,25 @@ function renderSimulation() {
 
 function calculateMuscleDistribution(exercises) {
   if (!exercises.length) return [];
-  var counts = {};
-  var total = 0;
+  var weightedCounts = {};
+  var totalWeighted = 0;
+  
   exercises.forEach(ex => {
-    if (ex.grp) {
-      counts[ex.grp] = (counts[ex.grp] || 0) + ex.ser;
-      total += ex.ser;
-    }
+    MUSCLES.forEach(m => {
+      var influence = getMuscleInfluence(ex.ex, m);
+      if (influence > 0) {
+        var w = ex.ser * influence;
+        weightedCounts[m] = (weightedCounts[m] || 0) + w;
+        totalWeighted += w;
+      }
+    });
   });
-  if (total === 0) return [];
-  return Object.keys(counts).map(grp => ({
+  
+  if (totalWeighted === 0) return [];
+  return Object.keys(weightedCounts).map(grp => ({
     grp: grp,
-    pct: Math.round((counts[grp] / total) * 100)
-  })).sort((a, b) => b.pct - a.pct);
+    pct: Math.round((weightedCounts[grp] / totalWeighted) * 100)
+  })).sort((a, b) => b.pct - a.pct).filter(d => d.pct > 0);
 }
 
 function renderEditor() {
@@ -263,14 +269,21 @@ function calculateSimResults(simList) {
   }
   $('sim-lvl-preview').innerHTML = lvlHtml;
 
-  // Impact Musculaire
+  // Impact Musculaire avec multi-muscle influence
   var muscleGains = {};
-  simList.forEach(item => { if (item.grp) muscleGains[item.grp] = (muscleGains[item.grp] || 0) + item.ser; });
+  simList.forEach(item => {
+    MUSCLES.forEach(m => {
+      var influence = getMuscleInfluence(item.ex, m);
+      if (influence > 0) {
+        muscleGains[m] = (muscleGains[m] || 0) + (item.ser * influence);
+      }
+    });
+  });
 
   var muscleHtml = '<div class="clabel" style="margin-bottom:8px">Impact Musculaire</div>';
   Object.keys(muscleGains).forEach(grp => {
     var currentSets = seriesCountByGroup(grp);
-    var newSets = currentSets + muscleGains[grp];
+    var newSets = currentSets + Math.floor(muscleGains[grp]); // Gain pondéré
     var curT = getTier(currentSets);
     var nxtT = getTier(newSets);
     muscleHtml += `
@@ -278,7 +291,7 @@ function calculateSimResults(simList) {
         <div class="flex-between">
           <div>
             <div style="font-size:13px; font-weight:800">${grp}</div>
-            <div style="font-size:11px; color:var(--text2)">${currentSets} → ${newSets} séries</div>
+            <div style="font-size:11px; color:var(--text2)">${currentSets} → ${newSets} séries équiv.</div>
           </div>
           <div style="text-align:right">
             <div style="font-size:12px; font-weight:800; color:${nxtT.col}">${nxtT.name}</div>

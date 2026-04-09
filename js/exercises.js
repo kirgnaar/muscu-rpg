@@ -6,28 +6,28 @@
 
 var EX = [
   // ── HAUT ANTÉRIEUR — PECTORAUX ──────────────────────────────────────────
-  ["Développé couché barre",           "Haut Antérieur", "Pectoraux",        "Poly"],
-  ["Développé couché haltères",        "Haut Antérieur", "Pectoraux",        "Poly"],
-  ["Développé incliné barre",          "Haut Antérieur", "Pectoraux",        "Poly"],
-  ["Développé incliné haltères",       "Haut Antérieur", "Pectoraux",        "Poly"],
-  ["Développé décliné barre",          "Haut Antérieur", "Pectoraux",        "Poly"],
-  ["Développé machine",                "Haut Antérieur", "Pectoraux",        "Poly"],
-  ["Dips",                             "Haut Antérieur", "Pectoraux",        "Poly"],
-  ["Pompes",                           "Haut Antérieur", "Pectoraux",        "Poly"],
+  ["Développé couché barre",           "Haut Antérieur", {p:"Pectoraux", s:["Triceps","Épaules"]}, "Poly"],
+  ["Développé couché haltères",        "Haut Antérieur", {p:"Pectoraux", s:["Triceps","Épaules"]}, "Poly"],
+  ["Développé incliné barre",          "Haut Antérieur", {p:"Pectoraux", s:["Triceps","Épaules"]}, "Poly"],
+  ["Développé incliné haltères",       "Haut Antérieur", {p:"Pectoraux", s:["Triceps","Épaules"]}, "Poly"],
+  ["Développé décliné barre",          "Haut Antérieur", {p:"Pectoraux", s:["Triceps","Épaules"]}, "Poly"],
+  ["Développé machine",                "Haut Antérieur", {p:"Pectoraux", s:["Triceps"]},           "Poly"],
+  ["Dips",                             "Haut Antérieur", {p:"Triceps", s:["Pectoraux","Épaules"]}, "Poly"],
+  ["Pompes",                           "Haut Antérieur", {p:"Pectoraux", s:["Triceps"]},           "Poly"],
   ["Écarté haltères",                  "Haut Antérieur", "Pectoraux",        "Mono"],
   ["Écarté machine / Pec deck",        "Haut Antérieur", "Pectoraux",        "Mono"],
   ["Crossover câble",                  "Haut Antérieur", "Pectoraux",        "Mono"],
-  ["Pull over haltère",                "Haut Antérieur", "Pectoraux",        "Poly"],
+  ["Pull over haltère",                "Haut Antérieur", {p:"Pectoraux", s:["Dorsal"]},            "Poly"],
   // ── HAUT ANTÉRIEUR — ÉPAULES ────────────────────────────────────────────
-  ["Développé militaire barre",        "Haut Antérieur", "Épaules",          "Poly"],
-  ["Développé militaire haltères",     "Haut Antérieur", "Épaules",          "Poly"],
-  ["Presse épaule machine",            "Haut Antérieur", "Épaules",          "Poly"],
-  ["Arnold press",                     "Haut Antérieur", "Épaules",          "Poly"],
+  ["Développé militaire barre",        "Haut Antérieur", {p:"Épaules", s:["Triceps"]},             "Poly"],
+  ["Développé militaire haltères",     "Haut Antérieur", {p:"Épaules", s:["Triceps"]},             "Poly"],
+  ["Presse épaule machine",            "Haut Antérieur", {p:"Épaules", s:["Triceps"]},             "Poly"],
+  ["Arnold press",                     "Haut Antérieur", {p:"Épaules", s:["Triceps"]},             "Poly"],
   ["Élévation latérale haltères",      "Haut Antérieur", "Épaules",          "Mono"],
   ["Élévation latérale câble",         "Haut Antérieur", "Épaules",          "Mono"],
   ["Élévation frontale haltères",      "Haut Antérieur", "Épaules",          "Mono"],
   ["Oiseau haltères",                  "Haut Postérieur","Épaules",          "Mono"],
-  ["Face pull câble",                  "Haut Postérieur","Épaules",          "Poly"],
+  ["Face pull câble",                  "Haut Postérieur",{p:"Épaules", s:["Trapèzes"]},            "Poly"],
   ["Rotation externe câble",           "Haut Antérieur", "Épaules",          "Mono"],
   // ── HAUT ANTÉRIEUR — TRICEPS ─────────────────────────────────────────────
   ["Extensions triceps poulie haute",  "Haut Antérieur", "Triceps",          "Mono"],
@@ -35,22 +35,22 @@ var EX = [
   ["Skull crusher barre",              "Haut Antérieur", "Triceps",          "Mono"],
   ["Kickback triceps haltère",         "Haut Antérieur", "Triceps",          "Mono"],
   ["Triceps machine",                  "Haut Antérieur", "Triceps",          "Mono"],
-  ["Développé couché prise serrée",    "Haut Antérieur", "Triceps",          "Poly"],
-  ["Pompes prise serrée",              "Haut Antérieur", "Triceps",          "Poly"],
+  ["Développé couché prise serrée",    "Haut Antérieur", {p:"Triceps", s:["Pectoraux"]},           "Poly"],
+  ["Pompes prise serrée",              "Haut Antérieur", {p:"Triceps", s:["Pectoraux"]},           "Poly"],
   // ── HAUT POSTÉRIEUR — DORSAL ─────────────────────────────────────────────
-  ["Tractions pronation",              "Haut Postérieur","Dorsal",           "Poly"],
-  ["Tractions supination",             "Haut Postérieur","Dorsal",           "Poly"],
-  ["Tractions neutres",                "Haut Postérieur","Dorsal",           "Poly"],
-  ["Tirage haut kimono",               "Haut Postérieur","Dorsal",           "Poly"],
-  ["Tirage poitrine poulie haute",     "Haut Postérieur","Dorsal",           "Poly"],
-  ["Rowing barre",                     "Haut Postérieur","Dorsal",           "Poly"],
-  ["Rowing haltère 1 bras",            "Haut Postérieur","Dorsal",           "Poly"],
-  ["Rowing machine",                   "Haut Postérieur","Dorsal",           "Poly"],
-  ["Tirage allongé poulie basse",      "Haut Postérieur","Dorsal",           "Poly"],
-  ["Rowing vertical / Upright row",    "Haut Postérieur","Dorsal",           "Poly"],
+  ["Tractions pronation",              "Haut Postérieur",{p:"Dorsal", s:["Biceps","Trapèzes"]},    "Poly"],
+  ["Tractions supination",             "Haut Postérieur",{p:"Biceps", s:["Dorsal"]},               "Poly"],
+  ["Tractions neutres",                "Haut Postérieur",{p:"Dorsal", s:["Biceps"]},               "Poly"],
+  ["Tirage haut kimono",               "Haut Postérieur",{p:"Dorsal", s:["Biceps"]},               "Poly"],
+  ["Tirage poitrine poulie haute",     "Haut Postérieur",{p:"Dorsal", s:["Biceps"]},               "Poly"],
+  ["Rowing barre",                     "Haut Postérieur",{p:"Dorsal", s:["Biceps","Lombaires"]},   "Poly"],
+  ["Rowing haltère 1 bras",            "Haut Postérieur",{p:"Dorsal", s:["Biceps"]},               "Poly"],
+  ["Rowing machine",                   "Haut Postérieur",{p:"Dorsal", s:["Biceps"]},               "Poly"],
+  ["Tirage allongé poulie basse",      "Haut Postérieur",{p:"Dorsal", s:["Biceps"]},               "Poly"],
+  ["Rowing vertical / Upright row",    "Haut Postérieur",{p:"Épaules", s:["Trapèzes"]},            "Poly"],
   ["Tirage bras tendu câble",          "Haut Postérieur","Dorsal",           "Mono"],
-  ["Pull over poulie",                 "Haut Postérieur","Dorsal",           "Poly"],
-  ["Barre explosive",                  "Haut Postérieur","Dorsal",           "Poly"],
+  ["Pull over poulie",                 "Haut Postérieur",{p:"Dorsal", s:["Triceps"]},              "Poly"],
+  ["Barre explosive",                  "Haut Postérieur",{p:"Full body", s:["Dorsal","Épaules"]},  "Poly"],
   // ── HAUT POSTÉRIEUR — BICEPS ──────────────────────────────────────────────
   ["Curl barre droite",                "Haut Postérieur","Biceps",           "Mono"],
   ["Curl barre EZ",                    "Haut Postérieur","Biceps",           "Mono"],
@@ -72,43 +72,43 @@ var EX = [
   ["Rotation russe",                   "Core",           "Abdominaux",       "Mono"],
   ["Gainage face (planche)",           "Core",           "Abdominaux",       "Mono"],
   ["Gainage latéral",                  "Core",           "Abdominaux",       "Mono"],
-  ["Ab wheel (roue abdominale)",       "Core",           "Abdominaux",       "Poly"],
+  ["Ab wheel (roue abdominale)",       "Core",           {p:"Abdominaux", s:["Lombaires"]},          "Poly"],
   ["Cable crunch poulie haute",        "Core",           "Abdominaux",       "Mono"],
   ["Traction haute kimono isométrique","Core",           "Abdominaux",       "Mono"],
   // ── CORE — LOMBAIRES ──────────────────────────────────────────────────────
   ["Extensions lombaires banc romain", "Core",           "Lombaires",        "Mono"],
   ["Superman",                         "Core",           "Lombaires",        "Mono"],
-  ["Good morning barre",               "Core",           "Lombaires",        "Poly"],
-  ["Soulevé de terre roumain",         "Bas Postérieur", "Lombaires",        "Poly"],
+  ["Good morning barre",               "Core",           {p:"Lombaires", s:["Ischio-jambiers"]},     "Poly"],
+  ["Soulevé de terre roumain",         "Bas Postérieur", {p:"Ischio-jambiers", s:["Lombaires","Fessiers"]}, "Poly"],
   // ── BAS ANTÉRIEUR — QUADRICEPS ───────────────────────────────────────────
-  ["Squat barre",                      "Bas Antérieur",  "Quadriceps",       "Poly"],
-  ["Squat gobelet haltère",            "Bas Antérieur",  "Quadriceps",       "Poly"],
-  ["Squat avant (front squat)",        "Bas Antérieur",  "Quadriceps",       "Poly"],
-  ["Leg press 45°",                    "Bas Antérieur",  "Quadriceps",       "Poly"],
-  ["Hack squat machine",               "Bas Antérieur",  "Quadriceps",       "Poly"],
-  ["Fentes avant haltères",            "Bas Antérieur",  "Quadriceps",       "Poly"],
-  ["Fentes marchées",                  "Bas Antérieur",  "Quadriceps",       "Poly"],
-  ["Fentes latérales",                 "Bas Antérieur",  "Quadriceps",       "Poly"],
-  ["Step up haltères",                 "Bas Antérieur",  "Quadriceps",       "Poly"],
+  ["Squat barre",                      "Bas Antérieur",  {p:"Quadriceps", s:["Fessiers","Lombaires"]}, "Poly"],
+  ["Squat gobelet haltère",            "Bas Antérieur",  {p:"Quadriceps", s:["Fessiers"]},           "Poly"],
+  ["Squat avant (front squat)",        "Bas Antérieur",  {p:"Quadriceps", s:["Lombaires"]},          "Poly"],
+  ["Leg press 45°",                    "Bas Antérieur",  {p:"Quadriceps", s:["Fessiers"]},           "Poly"],
+  ["Hack squat machine",               "Bas Antérieur",  {p:"Quadriceps", s:["Fessiers"]},           "Poly"],
+  ["Fentes avant haltères",            "Bas Antérieur",  {p:"Quadriceps", s:["Fessiers"]},           "Poly"],
+  ["Fentes marchées",                  "Bas Antérieur",  {p:"Quadriceps", s:["Fessiers"]},           "Poly"],
+  ["Fentes latérales",                 "Bas Antérieur",  {p:"Quadriceps", s:["Fessiers"]},           "Poly"],
+  ["Step up haltères",                 "Bas Antérieur",  {p:"Quadriceps", s:["Fessiers"]},           "Poly"],
   ["Leg extension machine",            "Bas Antérieur",  "Quadriceps",       "Mono"],
   ["Sissy squat",                      "Bas Antérieur",  "Quadriceps",       "Mono"],
   // ── BAS ANTÉRIEUR — FESSIERS ─────────────────────────────────────────────
-  ["Hip thrust barre",                 "Bas Antérieur",  "Fessiers",         "Poly"],
-  ["Hip thrust machine",               "Bas Antérieur",  "Fessiers",         "Poly"],
-  ["Sumo squat haltère",               "Bas Antérieur",  "Fessiers",         "Poly"],
-  ["Fentes arrière haltères",          "Bas Antérieur",  "Fessiers",         "Poly"],
+  ["Hip thrust barre",                 "Bas Antérieur",  {p:"Fessiers", s:["Ischio-jambiers"]},      "Poly"],
+  ["Hip thrust machine",               "Bas Antérieur",  {p:"Fessiers", s:["Ischio-jambiers"]},      "Poly"],
+  ["Sumo squat haltère",               "Bas Antérieur",  {p:"Fessiers", s:["Quadriceps"]},           "Poly"],
+  ["Fentes arrière haltères",          "Bas Antérieur",  {p:"Fessiers", s:["Quadriceps"]},           "Poly"],
   ["Abduction hanche câble",           "Bas Antérieur",  "Fessiers",         "Mono"],
   ["Abduction machine",                "Bas Antérieur",  "Fessiers",         "Mono"],
   ["Kickback fessier câble",           "Bas Antérieur",  "Fessiers",         "Mono"],
   ["Glute bridge au sol",              "Bas Antérieur",  "Fessiers",         "Mono"],
   // ── BAS POSTÉRIEUR — ISCHIO-JAMBIERS ─────────────────────────────────────
-  ["Soulevé de terre conventionnel",   "Bas Postérieur", "Ischio-jambiers",  "Poly"],
-  ["Soulevé de terre sumo",            "Bas Postérieur", "Ischio-jambiers",  "Poly"],
+  ["Soulevé de terre conventionnel",   "Bas Postérieur", {p:"Ischio-jambiers", s:["Lombaires","Trapèzes","Fessiers"]}, "Poly"],
+  ["Soulevé de terre sumo",            "Bas Postérieur", {p:"Ischio-jambiers", s:["Quadriceps","Trapèzes"]}, "Poly"],
   ["Leg curl couché machine",          "Bas Postérieur", "Ischio-jambiers",  "Mono"],
   ["Leg curl assis machine",           "Bas Postérieur", "Ischio-jambiers",  "Mono"],
   ["Leg curl debout câble",            "Bas Postérieur", "Ischio-jambiers",  "Mono"],
   ["Nordic curl",                      "Bas Postérieur", "Ischio-jambiers",  "Mono"],
-  ["Fentes arrière accent ischio",     "Bas Postérieur", "Ischio-jambiers",  "Poly"],
+  ["Fentes arrière accent ischio",     "Bas Postérieur", {p:"Ischio-jambiers", s:["Fessiers"]},      "Poly"],
   // ── BAS POSTÉRIEUR — MOLLETS ─────────────────────────────────────────────
   ["Mollets debout machine",           "Bas Postérieur", "Mollets",          "Mono"],
   ["Mollets assis machine",            "Bas Postérieur", "Mollets",          "Mono"],
@@ -116,10 +116,10 @@ var EX = [
   ["Mollets haltères 1 jambe",         "Bas Postérieur", "Mollets",          "Mono"],
   ["Mollets à la barre",               "Bas Postérieur", "Mollets",          "Mono"],
   // ── FULL BODY ─────────────────────────────────────────────────────────────
-  ["Barre explosive (power clean)",    "Full body",      "Full body",        "Poly"],
-  ["Soulevé de terre complet",         "Full body",      "Full body",        "Poly"],
-  ["Squat sauté",                      "Full body",      "Full body",        "Poly"],
-  ["Burpee avec développé",            "Full body",      "Full body",        "Poly"],
+  ["Barre explosive (power clean)",    "Full body",      {p:"Full body", s:["Trapèzes","Quadriceps"]}, "Poly"],
+  ["Soulevé de terre complet",         "Full body",      {p:"Full body", s:["Lombaires","Ischio-jambiers"]}, "Poly"],
+  ["Squat sauté",                      "Full body",      {p:"Full body", s:["Quadriceps"]},           "Poly"],
+  ["Burpee avec développé",            "Full body",      {p:"Full body", s:["Pectoraux","Épaules"]},  "Poly"],
 ];
 
 // Big 6 pour PR tracking
@@ -290,7 +290,7 @@ var ICON_MAP = {
   "Burpee avec développé": "pushup",
 };
 
-// Populate a <select> element with optgroups by chain
+  // Population du <select> avec optgroups par chaîne
 function populateExerciseSelect(selectEl, includeEmpty) {
   if (includeEmpty) {
     var opt = document.createElement('option');
@@ -314,4 +314,27 @@ function populateExerciseSelect(selectEl, includeEmpty) {
     });
     selectEl.appendChild(og);
   });
+}
+
+/**
+ * Helper: obtenir le groupe principal d'un exercice
+ */
+function getPrimaryGroup(exName) {
+  var ex = EX.find(e => e[0] === exName);
+  if (!ex) return "Full body";
+  var grp = ex[2];
+  return (typeof grp === 'string') ? grp : grp.p;
+}
+
+/**
+ * Helper: obtenir l'influence d'un exercice sur un groupe donné (0 à 1)
+ */
+function getMuscleInfluence(exName, targetGrp) {
+  var ex = EX.find(e => e[0] === exName);
+  if (!ex) return 0;
+  var grp = ex[2];
+  if (typeof grp === 'string') return grp === targetGrp ? 1 : 0;
+  if (grp.p === targetGrp) return 1;
+  if (grp.s && grp.s.includes(targetGrp)) return 0.5; // Influence secondaire = 50%
+  return 0;
 }
