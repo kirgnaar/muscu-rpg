@@ -232,14 +232,15 @@ function renderSpecialAchievements() {
   
   html += '</div>';
 
-  var target = document.querySelector('#v-badges .clabel[style*="Badges Exercices"]');
-  if (target) {
+  // Point d'injection corrigé pour être compatible avec la fusion UI
+  var grid = $('badge-grid');
+  if (grid) {
     var old = document.getElementById('special-ach-box');
     if (old) old.remove();
     var box = document.createElement('div');
     box.id = 'special-ach-box';
     box.innerHTML = html;
-    target.parentNode.insertBefore(box, target);
+    grid.parentNode.insertBefore(box, grid);
   }
 }
 
