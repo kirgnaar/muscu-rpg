@@ -285,14 +285,25 @@
 
 /* ── Muscle Badges (Floating Pills) ──────────────────────────────────────── */
 .mbdg {
-  min-width: 140px;
-  padding: 16px;
-  background: var(--glass);
-  border: 1px solid var(--glass-border);
-  border-radius: 18px;
-  position: relative;
-  overflow: hidden;
+  min-width: 130px;
+  padding: 14px;
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
 }
+
+.mbdg.on {
+  background: rgba(34, 211, 238, 0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(34, 211, 238, 0.15);
+  transform: translateY(-2px);
+}
+
+.mbdg:active { transform: scale(0.95); }
 
 .mbdg::before {
   content: '';

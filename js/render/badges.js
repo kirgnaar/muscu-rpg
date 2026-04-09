@@ -52,12 +52,18 @@ function getPremiumVisual(type, color, isEarned) {
 
 // ── Init ──────────────────────────────────────────────────────────────────
 function initBadges() {
-  $('badge-filter').addEventListener('click', function(ev) {
-    var pill = ev.target.closest('.bfpill');
-    if (!pill) return;
-    $$('.bfpill', $('badge-filter')).forEach(function(p) { p.classList.remove('on'); });
-    pill.classList.add('on');
-    BADGES.groupFilter = pill.dataset.grp;
+  // Le filtrage se fait maintenant via les cartes de groupes musculaires
+  $('muscle-badges-row').addEventListener('click', function(ev) {
+    var card = ev.target.closest('.mbdg');
+    if (!card) return;
+    
+    BADGES.groupFilter = card.dataset.grp || '';
+    
+    // Mise à jour visuelle immédiate des cartes de groupes
+    $$('.mbdg', $('muscle-badges-row')).forEach(function(c) { 
+      c.classList.toggle('on', (c.dataset.grp || '') === BADGES.groupFilter); 
+    });
+    
     renderBadgeGrid();
   });
 }
@@ -67,24 +73,36 @@ function renderBadges() {
   renderMuscleBadges();
   renderGlobalAchievements();
   renderSpecialAchievements();
-  renderBadgeFilterPills();
   renderBadgeGrid();
 }
 
-// ── Muscle badges ─────────────────────────────────────────────────────────
+// ── Muscle badges (Combined with Filter) ──────────────────────────────────
 function renderMuscleBadges() {
   var row = $('muscle-badges-row');
   if (!row) return;
-  row.innerHTML = MUSCLES.map(function(m) {
+  
+  // 1. Bouton "Tous"
+  var allHtml = `<div class="mbdg ${BADGES.groupFilter === '' ? 'on' : ''}" data-grp="">
+    <div class="mbdg-nm">Tous</div>
+    <div class="mbdg-t">Exercices</div>
+    <div class="mbdg-pb"><div class="mbdg-pf" style="width:100%; background:var(--accent)"></div></div>
+  </div>`;
+
+  // 2. Cartes de muscles
+  var musclesHtml = MUSCLES.map(function(m) {
     var n    = seriesCountByGroup(m);
     var ti   = getTier(n);
     var pct  = (getTierProgress(n) * 100).toFixed(0);
-    return `<div class="mbdg ${ti.cls}">
+    var active = BADGES.groupFilter === m ? 'on' : '';
+    
+    return `<div class="mbdg ${ti.cls} ${active}" data-grp="${m}">
       <div class="mbdg-nm">${m}</div>
       <div class="mbdg-t" style="color:${ti.col}">${ti.name}</div>
       <div class="mbdg-pb"><div class="mbdg-pf" style="width:${pct}%; background:linear-gradient(90deg, ${ti.col}, #fff)"></div></div>
     </div>`;
   }).join('');
+
+  row.innerHTML = allHtml + musclesHtml;
 }
 
 // ── Global Stats Dashboard ────────────────────────────────────────────────
@@ -223,16 +241,6 @@ function renderSpecialAchievements() {
     box.innerHTML = html;
     target.parentNode.insertBefore(box, target);
   }
-}
-
-// ── Filter pills ──────────────────────────────────────────────────────────
-function renderBadgeFilterPills() {
-  var el = $('badge-filter');
-  if (!el) return;
-  var grps = [''].concat(MUSCLES);
-  el.innerHTML = grps.map(function(g) {
-    return `<button class="bfpill ${g === BADGES.groupFilter ? 'on' : ''}" data-grp="${g}">${g || 'Tous'}</button>`;
-  }).join('');
 }
 
 // ── Badge grid ────────────────────────────────────────────────────────────
