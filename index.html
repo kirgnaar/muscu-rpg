@@ -336,16 +336,15 @@
 <script src="js/data.js"></script>
 <script src="js/timer.js"></script>
 
-<!-- 3. Moteur 3D & Animation (High-End) -->
+<!-- 3. Moteur 3D & Animation (ULTRA HIGH-END) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
-<script src="https://unpkg.com/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-<script src="https://unpkg.com/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script>
-  if (window.THREE) {
-    if (window.GLTFLoader) THREE.GLTFLoader = window.GLTFLoader;
-    if (window.OrbitControls) THREE.OrbitControls = window.OrbitControls;
-  }
+  // Ensure Global Access for r128
+  window.GLTFLoader = THREE.GLTFLoader;
+  window.OrbitControls = THREE.OrbitControls;
 </script>
 <script src="js/body/body3d.js"></script>
 

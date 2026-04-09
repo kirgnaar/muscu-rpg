@@ -1,18 +1,20 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — body/body3d.js
-   ENGINE PRO — Medical-Grade 3D Anatomy & Shader Suite
+   ULTRA-LUXURY MEDICAL ENGINE (H-Res Humanoid & Procedural Glass Mannequin)
    ══════════════════════════════════════════════════════════════════════════ */
 
 var BODY3D = {
   scene: null, camera: null, renderer: null, controls: null, model: null,
   muscles: {},
   isInitialized: false,
+  loadTimeout: null,
 
+  // Mapping optimisé pour une visualisation écorchée / stylisée
   mapping: {
-    'Pectoralis_Major': 'Pectoraux', 'Latissimus_Dorsi': 'Dos', 'Deltoid': 'Épaules',
-    'Biceps_Brachii': 'Biceps', 'Triceps_Brachii': 'Triceps', 'Abdominal_Rectus': 'Abdominaux',
-    'Quadriceps_Femoral': 'Quadriceps', 'Gluteus_Maximus': 'Fessiers', 'Gastrocnemius': 'Mollets',
-    'Hamstrings': 'Ischios', 'Trapezius': 'Trapèzes', 'Forearms': 'Avant-bras', 'Lower_Back': 'Lombaires'
+    'Chest': 'Pectoraux', 'Back': 'Dos', 'Shoulders': 'Épaules',
+    'Biceps': 'Biceps', 'Triceps': 'Triceps', 'Abs': 'Abdominaux',
+    'Quads': 'Quadriceps', 'Glutes': 'Fessiers', 'Calves': 'Mollets',
+    'Hams': 'Ischios', 'Traps': 'Trapèzes', 'Forearms': 'Avant-bras', 'LowerBack': 'Lombaires'
   },
 
   init: function() {
@@ -21,113 +23,158 @@ var BODY3D = {
     if (!container) return;
 
     try {
+      // 1. Scene & Cinematic Camera
       this.scene = new THREE.Scene();
-      this.camera = new THREE.PerspectiveCamera(40, container.clientWidth / container.clientHeight, 0.1, 1000);
-      this.camera.position.set(0, 1.2, 3.8);
+      this.camera = new THREE.PerspectiveCamera(35, container.clientWidth / container.clientHeight, 0.1, 1000);
+      this.camera.position.set(0, 1.4, 4.5);
 
+      // 2. High-Performance Renderer
       this.renderer = new THREE.WebGLRenderer({ 
         antialias: true, 
         alpha: true, 
-        logarithmicDepthBuffer: true,
-        powerPreference: "high-performance"
+        powerPreference: "high-performance",
+        preserveDrawingBuffer: true
       });
       this.renderer.setSize(container.clientWidth, container.clientHeight);
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      this.renderer.toneMapping = THREE.ReinhardToneMapping;
-      this.renderer.toneMappingExposure = 1.2;
+      this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      this.renderer.outputEncoding = THREE.sRGBEncoding;
       container.appendChild(this.renderer.domElement);
 
-      // Lights (Studio Rig)
-      this.scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-      var light1 = new THREE.DirectionalLight(0xffffff, 1.2);
-      light1.position.set(2, 5, 5);
-      this.scene.add(light1);
+      // 3. Studio Lighting (Medical Grade)
+      this.scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+      var topLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      topLight.position.set(2, 8, 5);
+      this.scene.add(topLight);
       
-      var light2 = new THREE.PointLight(0x3b82f6, 1, 10);
-      light2.position.set(-2, 1, 2);
-      this.scene.add(light2);
+      var sideLight = new THREE.PointLight(0x3b82f6, 1.5, 10);
+      sideLight.position.set(-3, 2, 2);
+      this.scene.add(sideLight);
 
-      if (THREE.OrbitControls) {
-        this.controls = new THREE.OrbitControls(this.camera, this.renderer.domElement);
+      // 4. Advanced Orbit Controls
+      if (window.OrbitControls) {
+        this.controls = new window.OrbitControls(this.camera, this.renderer.domElement);
         this.controls.enableDamping = true;
         this.controls.dampingFactor = 0.05;
-        this.controls.minDistance = 1.2;
+        this.controls.minDistance = 1.5;
         this.controls.maxDistance = 6;
-        this.controls.target.set(0, 1, 0);
+        this.controls.target.set(0, 1.2, 0);
       }
 
-      this.loadModel();
+      // 5. Start Load Pipeline
+      this.startLoadPipeline();
+      
       this.isInitialized = true;
       this.animate();
       window.addEventListener('resize', () => this.onResize());
 
     } catch (e) {
-      console.error("BODY3D Engine Error:", e);
-      this.showErrorMessage("Échec du chargement du moteur 3D.");
+      console.error("BODY3D Luxury Engine Error:", e);
+      this.showErrorMessage("Échec critique de l'initialisation 3D.");
     }
   },
 
-  loadModel: function() {
+  startLoadPipeline: function() {
     var self = this;
-    var loader = (THREE.GLTFLoader) ? new THREE.GLTFLoader() : null;
-    
-    // High-Resolution Segmented Anatomy Model
-    var modelUrl = 'https://cdn.jsdelivr.net/gh/hpfrei/body-anatomy-3d-viewer@main/public/models/body.glb';
+    // Timeout de sécurité : si le modèle externe ne charge pas en 5s, on passe au mannequin procédural
+    this.loadTimeout = setTimeout(() => {
+      if (!self.model) {
+        console.warn("External model timed out. Switching to Procedural Glass Mannequin.");
+        self.createGlassMannequin();
+      }
+    }, 5000);
 
-    if (loader) {
-      loader.load(modelUrl, 
-        function(gltf) {
-          self.model = gltf.scene;
-          self.model.scale.set(1.15, 1.15, 1.15);
-          self.model.position.y = -1.15;
-          self.scene.add(self.model);
-
-          self.model.traverse(node => {
-            if (node.isMesh) {
-              // Medical-Grade Subsurface Material
-              node.material = new THREE.MeshPhysicalMaterial({
-                color: 0x1a2235,
-                metalness: 0.1,
-                roughness: 0.6,
-                transmission: 0,
-                thickness: 0.5,
-                emissive: new THREE.Color(0x000000),
-                emissiveIntensity: 0
-              });
-              self.muscles[node.name] = node;
-            }
-          });
-          document.getElementById('3d-loader').style.display = 'none';
-          self.updateColors();
-        },
-        undefined,
-        function(err) {
-          console.warn("Retrying with backup model...");
-          self.createFallbackMannequin();
-        }
-      );
-    } else {
-      this.createFallbackMannequin();
-    }
+    this.loadExternalModel();
   },
 
-  createFallbackMannequin: function() {
+  loadExternalModel: function() {
+    var self = this;
+    var LoaderClass = window.GLTFLoader || THREE.GLTFLoader;
+    if (!LoaderClass) return;
+
+    var loader = new LoaderClass();
+    // Utilisation d'un modèle humanoïde standard, extrêmement fiable (Standard Three.js Asset)
+    var modelUrl = 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/models/gltf/Xbot.glb';
+
+    loader.load(modelUrl, 
+      function(gltf) {
+        clearTimeout(self.loadTimeout);
+        self.model = gltf.scene;
+        self.model.scale.set(1.2, 1.2, 1.2);
+        self.model.position.y = 0;
+        self.scene.add(self.model);
+
+        self.model.traverse(node => {
+          if (node.isMesh) {
+            // "Cyber-Medical" Glass Material
+            node.material = new THREE.MeshPhysicalMaterial({
+              color: 0x1a2235,
+              metalness: 0.9,
+              roughness: 0.1,
+              transparent: true,
+              opacity: 0.6,
+              transmission: 0.5,
+              thickness: 1.0,
+              emissive: new THREE.Color(0x000000),
+              emissiveIntensity: 0
+            });
+            // On mappe les parties du Xbot sur nos groupes musculaires (simplifié)
+            if (node.name.includes('Chest')) self.muscles['Chest'] = node;
+            if (node.name.includes('Leg'))   self.muscles['Quads'] = node;
+            if (node.name.includes('Arm'))   self.muscles['Biceps'] = node;
+            if (node.name.includes('Back'))  self.muscles['Back'] = node;
+            if (node.name.includes('Head'))  node.material.opacity = 0.3;
+          }
+        });
+        document.getElementById('3d-loader').style.display = 'none';
+        self.updateColors();
+      },
+      undefined,
+      function(err) {
+        console.warn("External model failed. Using Procedural Mannequin.");
+        self.createGlassMannequin();
+      }
+    );
+  },
+
+  // LE CHEF-D'ŒUVRE : Un mannequin "Cristal" généré par code si le réseau flanche
+  createGlassMannequin: function() {
+    clearTimeout(this.loadTimeout);
     this.model = new THREE.Group();
-    const createPart = (w, h, d, y, x, name) => {
-      const geo = new THREE.CapsuleGeometry(w, h, 4, 16);
-      const mat = new THREE.MeshPhysicalMaterial({ color: 0x1a2235, roughness: 0.5 });
+    
+    const createSegment = (w, h, y, x, z, name) => {
+      const geo = new THREE.CapsuleGeometry(w, h, 8, 16);
+      const mat = new THREE.MeshPhysicalMaterial({ 
+        color: 0x22d3ee, 
+        metalness: 0.8, 
+        roughness: 0.1, 
+        transparent: true, 
+        opacity: 0.4,
+        transmission: 0.8,
+        thickness: 0.5
+      });
       const mesh = new THREE.Mesh(geo, mat);
-      mesh.position.set(x, y, 0);
+      mesh.position.set(x, y, z);
       mesh.name = name;
       this.muscles[name] = mesh;
       this.model.add(mesh);
+      return mesh;
     };
 
-    createPart(0.15, 0.4, 0.1, 1.4, 0, 'Latissimus_Dorsi');
-    createPart(0.08, 0.3, 0.08, 1.4, -0.3, 'Biceps_Brachii');
-    createPart(0.08, 0.3, 0.08, 1.4, 0.3, 'Triceps_Brachii');
-    createPart(0.12, 0.6, 0.12, 0.6, -0.15, 'Quadriceps_Femoral');
-    createPart(0.12, 0.6, 0.12, 0.6, 0.15, 'Hamstrings');
+    // Human Anatomy Assembly (Architectural Style)
+    createSegment(0.18, 0.5, 1.4, 0, 0, 'Chest');       // Torse Sup
+    createSegment(0.15, 0.4, 1.0, 0, 0, 'Abs');         // Abdominaux
+    createSegment(0.12, 0.3, 1.4, -0.35, 0, 'Biceps');  // Bras L
+    createSegment(0.12, 0.3, 1.4, 0.35, 0, 'Triceps');  // Bras R
+    createSegment(0.14, 0.6, 0.5, -0.18, 0, 'Quads');   // Jambe L
+    createSegment(0.14, 0.6, 0.5, 0.18, 0, 'Hams');    // Jambe R
+    
+    // Head (Stylized Sphere)
+    const headGeo = new THREE.IcosahedronGeometry(0.15, 2);
+    const headMat = new THREE.MeshPhysicalMaterial({ color: 0x7a8aaa, transparent: true, opacity: 0.2 });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.y = 1.9;
+    this.model.add(head);
 
     this.scene.add(this.model);
     document.getElementById('3d-loader').style.display = 'none';
@@ -138,23 +185,24 @@ var BODY3D = {
     if (!this.model || !window.gsap) return;
     var self = this;
     
-    Object.keys(this.mapping).forEach(meshName => {
-      const group = self.mapping[meshName];
-      const mesh = self.muscles[meshName];
+    Object.keys(this.mapping).forEach(key => {
+      const group = self.mapping[key];
+      const mesh = self.muscles[key];
       if (mesh && mesh.material) {
-        const targetColor = new THREE.Color(tierCol(group));
+        const targetColor = new THREE.Color(tierCol(group)); // tierCol from tiers.js
         const count = seriesCountByGroup(group);
         
-        // Smooth transition with GSAP
+        // Advanced GSAP Shader Interpolation
         gsap.to(mesh.material.color, {
           r: targetColor.r, g: targetColor.g, b: targetColor.b,
-          duration: 1.5,
-          ease: "power2.inOut"
+          duration: 1.2,
+          ease: "expo.out"
         });
 
         if (count > 0) {
           gsap.to(mesh.material, {
-            emissiveIntensity: 0.1 + Math.min(0.8, count / 150),
+            emissiveIntensity: 0.3 + Math.min(1.0, count / 100),
+            opacity: 0.8,
             duration: 2,
             ease: "sine.inOut"
           });
@@ -162,14 +210,6 @@ var BODY3D = {
         }
       }
     });
-  },
-
-  showErrorMessage: function(msg) {
-    const loader = document.getElementById('3d-loader');
-    if (loader) {
-      loader.innerHTML = `<div class="spinner"></div><p style="color:#ef4444; font-size:12px; margin-top:15px">${msg}</p>`;
-      loader.style.display = 'flex';
-    }
   },
 
   onResize: function() {
