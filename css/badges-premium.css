@@ -258,6 +258,31 @@
   letter-spacing: 1px;
 }
 
+/* ── Special Achievements Grid ───────────────────────────────────────────── */
+#special-ach-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.special-ach.bdg-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(0,0,0,0.2));
+  border-left-width: 4px;
+}
+
+.special-ach .bdg-visual {
+  background: var(--navy3);
+  border-radius: 50%;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.special-ach .bdg-title {
+  color: var(--accent);
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
 /* ── Muscle Badges (Floating Pills) ──────────────────────────────────────── */
 .mbdg {
   min-width: 140px;
