@@ -39,15 +39,15 @@ function addEntry(entry) {
   var rm1 = epley(entry.pds, entry.rep);
 
   var isPR = false;
-  if (BIG6.indexOf(entry.ex) !== -1 && entry.pds >= 10) {
+  if (entry.pds >= 1) { // PR possible sur tout exercice avec charge
     var prevBest = 0;
     for (var i = 0; i < data.length; i++) {
-      if (data[i].ex === entry.ex && data[i].pds >= 10) {
+      if (data[i].ex === entry.ex) {
         var val = epley(data[i].pds, data[i].rep);
         if (val > prevBest) prevBest = val;
       }
     }
-    if (rm1 > prevBest) isPR = true;
+    if (rm1 > prevBest && prevBest > 0) isPR = true;
   }
 
   var prevVol = 0;

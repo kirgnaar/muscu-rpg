@@ -64,10 +64,11 @@ function updatePreview1RM() {
   var prev = $('preview-1rm');
   if (rep && pds && pds > 0) {
     var rm1    = epley(pds, rep);
-    var isBig6 = BIG6.indexOf(exNm) !== -1;
+    var best   = bestRM1(exNm);
+    var isPR   = rm1 > best && best > 0;
     prev.style.display = 'block';
     prev.innerHTML = '⚡ 1RM estimé : <strong>' + rm1 + ' kg</strong>'
-      + (isBig6 ? ' &nbsp;·&nbsp; 🏆 <em>Big 6 — PR possible !</em>' : '');
+      + (isPR ? ' &nbsp;·&nbsp; 🏆 <em style="color:var(--gold)">Nouveau record !</em>' : '');
   } else {
     prev.style.display = 'none';
   }
@@ -232,16 +233,15 @@ function renderJournal() {
           + '</div>';
     items.forEach(function(e) {
       var c  = TCOL[e.type] || '#94a3b8';
-      var pr = e.isPR ? '<span style="font-size:14px">🏆</span>' : '';
+      var pr = e.isPR ? ' <span style="font-size:14px" title="Record Personnel !">🏆</span>' : '';
       html += '<div class="sitem" data-id="' + e.id + '">'
             + '<div class="sdot" style="background:' + c + '"></div>'
             + '<div class="sinfo">'
-            + '<div class="sname">' + e.ex + '</div>'
+            + '<div class="sname">' + e.ex + pr + '</div>'
             + '<div class="smeta">' + e.type + ' \u00b7 ' + e.ser + '\u00d7' + e.rep + ' \u00b7 ' + e.pds + ' kg</div>'
             + '</div>'
             + '<div style="display:flex;align-items:center;gap:2px">'
             + '<div class="svol">' + fmtV(e.vol) + '</div>'
-            + pr
             + '<button class="del-btn">\uD83D\uDDD1</button>'
             + '</div>'
             + '</div>';
