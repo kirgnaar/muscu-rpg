@@ -73,10 +73,13 @@ function levelColor(lvl) {
 }
 
 /**
- * Nombre de séries pour un groupe musculaire (Total Pondéré)
+ * Nombre de séries pour un groupe musculaire (Score Hybride Option B)
+ * Score = (Total Pondéré * 0.4) + (Meilleur Exercice Pondéré * 0.6)
+ * Évite d'être Expert sans maîtriser au moins un mouvement.
  */
 function seriesCountByGroup(grp) {
   var totalWeightedSets = 0;
+  var bestExWeightedSets = 0;
 
   for (var i = 0; i < EX.length; i++) {
     var exData = EX[i];
@@ -89,11 +92,17 @@ function seriesCountByGroup(grp) {
           setsForEx += (entry.ser || 0);
         }
       }
-      totalWeightedSets += setsForEx * influence;
+      var weighted = setsForEx * influence;
+      totalWeightedSets += weighted;
+      if (weighted > bestExWeightedSets) {
+        bestExWeightedSets = weighted;
+      }
     }
   }
 
-  return Math.floor(totalWeightedSets);
+  // Formule Hybride Option B
+  var hybridScore = (totalWeightedSets * 0.4) + (bestExWeightedSets * 0.6);
+  return Math.floor(hybridScore);
 }
 
 function tierCol(grp) {
