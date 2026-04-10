@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — body/body3d.js
-   ENGINE v4.2 — Ultra-Stable Athletic Mannequin (ES5 Stable)
+   ENGINE v4.3 — Ultra-Stable Athletic Mannequin (ES5 Stable)
    ══════════════════════════════════════════════════════════════════════════ */
 
 var BODY3D = {
@@ -64,7 +64,7 @@ var BODY3D = {
     var mat = function() {
       return new THREE.MeshStandardMaterial({
         color: 0x2d3748, metalness: 0.7, roughness: 0.2,
-        transparent: true, opacity: 0.8, emissive: 0x000000, emissiveIntensity: 0
+        transparent: true, opacity: 0.6, emissive: 0x000000, emissiveIntensity: 0
       });
     };
 
@@ -111,15 +111,29 @@ var BODY3D = {
         if (mesh && mesh.material) {
           var vol = volByGroup(group);
           var lvl = getLevel(vol);
-          var color = new THREE.Color(levelColor(lvl));
+          var prog = levelProgress(vol); // 0.0 à 1.0 dans le niveau actuel
 
-          gsap.to(mesh.material.color, { r: color.r, g: color.g, b: color.b, duration: 1.5 });
-          if (lvl > 10) {
-            gsap.to(mesh.material, { emissiveIntensity: 0.3 + (lvl / 100), opacity: 1, duration: 2 });
-            mesh.material.emissive.copy(color);
-          } else {
-            gsap.to(mesh.material, { opacity: 0.6, emissiveIntensity: 0, duration: 1.5 });
-          }
+          // 1. Interpolation de couleur entre le niveau actuel et le suivant
+          var baseCol = new THREE.Color(levelColor(lvl));
+          var nextCol = new THREE.Color(levelColor(lvl + 1));
+          var finalCol = baseCol.clone().lerp(nextCol, prog);
+
+          // 2. Calcul de l'opacité et de l'intensité (effet de "chargement" énergétique)
+          // Opacité de 0.6 (base) à 1.0 (plein) selon la progression
+          var targetOpacity = 0.6 + (prog * 0.4);
+          // Émission (glow) qui augmente avec la proximité du prochain niveau
+          var targetEmissive = prog * 0.8;
+
+          // 3. Animation fluide avec GSAP
+          gsap.to(mesh.material.color, { r: finalCol.r, g: finalCol.g, b: finalCol.b, duration: 1.5 });
+          gsap.to(mesh.material, { 
+            opacity: targetOpacity, 
+            emissiveIntensity: targetEmissive, 
+            duration: 1.5 
+          });
+          
+          // L'émission prend la couleur du niveau supérieur pour simuler l'évolution
+          mesh.material.emissive.copy(finalCol);
         }
       }
     }
