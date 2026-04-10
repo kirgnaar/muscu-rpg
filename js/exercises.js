@@ -126,7 +126,7 @@ var BIG6 = [
   "Squat barre",
   "Développé couché barre",
   "Soulevé de terre conventionnel",
-  "Développé militaire barre",
+  "Développé militaire haltères",
   "Rowing barre",
   "Leg press 45°",
 ];
@@ -319,7 +319,10 @@ function populateExerciseSelect(selectEl, includeEmpty) {
  * Helper: obtenir le groupe principal d'un exercice
  */
 function getPrimaryGroup(exName) {
-  var ex = EX.find(e => e[0] === exName);
+  var ex = null;
+  for (var i = 0; i < EX.length; i++) {
+    if (EX[i][0] === exName) { ex = EX[i]; break; }
+  }
   if (!ex) return "Full body";
   var grp = ex[2];
   return (typeof grp === 'string') ? grp : grp.p;
@@ -329,28 +332,34 @@ function getPrimaryGroup(exName) {
  * Helper: obtenir l'influence d'un exercice sur un groupe donné (0 à 1)
  */
 function getMuscleInfluence(exName, targetGrp) {
-  var ex = EX.find(e => e[0] === exName);
+  var ex = null;
+  for (var i = 0; i < EX.length; i++) {
+    if (EX[i][0] === exName) { ex = EX[i]; break; }
+  }
   if (!ex) return 0;
   var grp = ex[2];
-  
+
   // Cas 1: String simple (100% influence)
   if (typeof grp === 'string') return grp === targetGrp ? 1 : 0;
-  
+
   // Cas 2: Objet avec p (primary) et s (secondary)
   // Influence primaire
   if (grp.p === targetGrp) return 1;
-  
+
   // Influence secondaire
   if (grp.s) {
     // Si s est un tableau, influence fixe de 0.5
     if (Array.isArray(grp.s)) {
-      return grp.s.includes(targetGrp) ? 0.5 : 0;
+      for (var j = 0; j < grp.s.length; j++) {
+        if (grp.s[j] === targetGrp) return 0.5;
+      }
+      return 0;
     }
     // Si s est un objet, influence personnalisée
     if (typeof grp.s === 'object') {
       return grp.s[targetGrp] || 0;
     }
   }
-  
+
   return 0;
 }
