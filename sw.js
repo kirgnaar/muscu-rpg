@@ -1,5 +1,5 @@
 // ── Service Worker — Muscu RPG ─────────────────────────────────────────────
-var CACHE_NAME = 'muscu-rpg-v18';
+var CACHE_NAME = 'muscu-rpg-v19';
 var ASSETS = [
   '/',
   '/index.html',
@@ -26,7 +26,6 @@ var ASSETS = [
   '/js/app.js',
 ];
 
-// ── Install : cache all assets ─────────────────────────────────────────────
 self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open(CACHE_NAME).then(function(cache) {
@@ -37,7 +36,6 @@ self.addEventListener('install', function(e) {
   );
 });
 
-// ── Activate : clean old caches ────────────────────────────────────────────
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
@@ -54,14 +52,10 @@ self.addEventListener('activate', function(e) {
   );
 });
 
-// ── Fetch : network-first, cache en fallback offline ──────────────────────
 self.addEventListener('fetch', function(e) {
-  // Ne pas intercepter les requêtes non-GET
   if (e.request.method !== 'GET') return;
-
   e.respondWith(
     fetch(e.request).then(function(response) {
-      // Mettre en cache les réponses valides
       if (response && response.status === 200 && response.type === 'basic') {
         var clone = response.clone();
         caches.open(CACHE_NAME).then(function(cache) {
@@ -70,7 +64,6 @@ self.addEventListener('fetch', function(e) {
       }
       return response;
     }).catch(function() {
-      // Hors-ligne : servir depuis le cache
       return caches.match(e.request).then(function(cached) {
         return cached || caches.match('/index.html');
       });

@@ -17,9 +17,6 @@ var TIERS = [
 
 var TIER_NEXT_MIN = [10, 25, 50, 100, 250, 1000, 2500, null];
 
-/**
- * Retourne l'objet tier pour un nombre de séries donné
- */
 function getTier(n) {
   var t = TIERS[0];
   for (var i = TIERS.length - 1; i >= 0; i--) {
@@ -28,9 +25,6 @@ function getTier(n) {
   return t;
 }
 
-/**
- * Index du tier (0-7)
- */
 function getTierIndex(n) {
   var idx = 0;
   for (var i = TIERS.length - 1; i >= 0; i--) {
@@ -39,9 +33,6 @@ function getTierIndex(n) {
   return idx;
 }
 
-/**
- * Progression (0-1) dans le tier actuel
- */
 function getTierProgress(n) {
   var ti = getTierIndex(n);
   if (ti >= TIERS.length - 1) return 1;
@@ -50,9 +41,6 @@ function getTierProgress(n) {
   return Math.min(1, (n - low) / (high - low));
 }
 
-/**
- * Nombre de séries nécessaires pour le tier suivant (null si max)
- */
 function getNextTierCount(n) {
   for (var i = 1; i < TIERS.length; i++) {
     if (n < TIERS[i].min) return TIERS[i].min;
@@ -61,63 +49,31 @@ function getNextTierCount(n) {
 }
 
 // ── RPG Levels 1→100 ─────────────────────────────────────────────────────
-// Formule: XP requis pour niveau N = 5000 × N^(19/10)
-var RPG_BASE = 5000;
-var RPG_EXP  = 1.9;
 
 /**
- * Volume cumulé requis pour atteindre le niveau N
- */
-function levelThreshold(n) {
-  return RPG_BASE * Math.pow(n, RPG_EXP);
-}
-
-/**
- * Niveau actuel (0-100) pour un volume donné
- */
-function getLevel(vol) {
-  if (!vol || vol <= 0) return 0;
-  return Math.min(100, Math.floor(Math.pow(vol / RPG_BASE, 1 / RPG_EXP)));
-}
-
-/**
- * Progression (0-1) dans le niveau actuel
- */
-function levelProgress(vol) {
-  var lvl = getLevel(vol);
-  if (lvl >= 100) return 1;
-  var low  = levelThreshold(lvl);
-  var high = levelThreshold(lvl + 1);
-  return Math.min(1, (vol - low) / (high - low));
-}
-
-/**
- * Nom du niveau avec emoji de rang
+ * Titres RPG évolutifs
  */
 function levelName(lvl) {
-  if (lvl >= 100) return 'ÉLITE — Niv. 100';
-  if (lvl >= 76)  return 'EXPERT — Niv. '   + lvl;
-  if (lvl >= 51)  return 'AVANCÉ — Niv. '   + lvl;
-  if (lvl >= 26)  return 'INTERMÉDIAIRE — Niv. '   + lvl;
-  if (lvl >= 11)  return 'DÉBUTANT — Niv. ' + lvl;
-  if (lvl >= 1)   return 'NOVICE — Niv. '   + lvl;
-  return 'NOVICE — Niv. 0';
+  if (lvl >= 100) return 'LÉGENDE — Niv. 100';
+  if (lvl >= 95)  return 'GRAND MAÎTRE — Niv. ' + lvl;
+  if (lvl >= 85)  return 'MAÎTRE — Niv. '       + lvl;
+  if (lvl >= 70)  return 'EXPERT — Niv. '       + lvl;
+  if (lvl >= 50)  return 'GUERRIER — Niv. '     + lvl;
+  if (lvl >= 30)  return 'APPRENTI — Niv. '     + lvl;
+  if (lvl >= 15)  return 'NOVICE — Niv. '       + lvl;
+  if (lvl >= 5)   return 'ÉVEIL — Niv. '        + lvl;
+  return 'LATENT — Niv. ' + lvl;
 }
 
 /**
- * Couleur du niveau
+ * Synchronisation avec utils.js:getColorForLevel
  */
 function levelColor(lvl) {
-  if (lvl >= 76) return '#f97316';
-  if (lvl >= 51) return '#8b5cf6';
-  if (lvl >= 26) return '#3b82f6';
-  if (lvl >= 11) return '#10b981';
-  return '#94a3b8';
+  return getColorForLevel(lvl);
 }
 
 /**
  * Nombre de séries pour un groupe musculaire (Total Pondéré)
- * Correction : Somme du champ 'ser' au lieu de compter le nombre d'entrées.
  */
 function seriesCountByGroup(grp) {
   var totalWeightedSets = 0;
@@ -140,9 +96,6 @@ function seriesCountByGroup(grp) {
   return Math.floor(totalWeightedSets);
 }
 
-/**
- * Couleur du tier pour un groupe musculaire
- */
 function tierCol(grp) {
   return getTier(seriesCountByGroup(grp)).col;
 }

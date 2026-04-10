@@ -4,30 +4,20 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 // ── Formules de Force (1RM estimé) ─────────────────────────────────────────
-/**
- * 1RM estimé via le compromis Epley & Brzycki, arrondi au 0.5kg
- */
 function epley(poids, reps) {
   if (!poids || !reps || poids <= 0 || reps <= 0) return 0;
   if (reps === 1) return poids;
-
   var epleyVal = poids * (1 + reps / 30);
   var brzyckiVal = poids * (36 / (37 - Math.min(reps, 36)));
-
   var res = (epleyVal + brzyckiVal) / 2;
   return Math.round(res * 2) / 2;
 }
 
-/**
- * Charge recommandée pour N reps depuis un 1RM
- */
 function repWeight(rm1, reps) {
   if (!rm1 || !reps) return 0;
   if (reps === 1) return rm1;
-
   var epleyInv = rm1 / (1 + reps / 30);
   var brzyckiInv = rm1 * (37 - Math.min(reps, 36)) / 36;
-
   var res = (epleyInv + brzyckiInv) / 2;
   return Math.round(res * 2) / 2;
 }
@@ -56,6 +46,46 @@ function fmtDLong(d) {
 
 function todayISO() {
   return new Date().toISOString().split('T')[0];
+}
+
+// ── Formules RPG (Équilibrage Hook & Long-Term) ───────────────────────────
+/**
+ * Nouvelle Courbe de Progression :
+ * BASE = 500 (Le Niv. 1 s'atteint dès 500kg, très motivant)
+ * EXP  = 2.8 (La difficulté explose à haut niveau pour le challenge)
+ */
+var RPG_BASE = 500;
+var RPG_EXP  = 2.8;
+
+function levelThreshold(n) {
+  return RPG_BASE * Math.pow(n, RPG_EXP);
+}
+
+function getLevel(vol) {
+  if (!vol || vol <= 0) return 0;
+  return Math.min(100, Math.floor(Math.pow(vol / RPG_BASE, 1 / RPG_EXP)));
+}
+
+function levelProgress(vol) {
+  var lvl = getLevel(vol);
+  if (lvl >= 100) return 1;
+  var low  = levelThreshold(lvl);
+  var high = levelThreshold(lvl + 1);
+  return Math.min(1, (vol - low) / (high - low));
+}
+
+/**
+ * Palette de couleurs étendue pour marquer la progression visuelle
+ */
+function getColorForLevel(lvl) {
+  if (lvl < 5)   return '#4b5563'; // Gris (Inactif)
+  if (lvl < 15)  return '#22d3ee'; // Cyan (Éveil)
+  if (lvl < 30)  return '#10b981'; // Vert (Apprenti)
+  if (lvl < 50)  return '#3b82f6'; // Bleu (Guerrier)
+  if (lvl < 70)  return '#8b5cf6'; // Violet (Expert)
+  if (lvl < 85)  return '#ec4899'; // Rose (Maître)
+  if (lvl < 95)  return '#f97316'; // Orange (Grand Maître)
+  return '#fbbf24';                // Or (Légende)
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────
