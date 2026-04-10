@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — tiers.js
-   Système de tiers (Bronze→Platine) et niveaux RPG 1→100
-══════════════════════════════════════════════════════════════════════════ */
+   Système de tiers (Bronze→Platine) et niveaux RPG 1→100 (ES5 Stable)
+   ══════════════════════════════════════════════════════════════════════════ */
 
 // ── Tiers (basés sur nombre de séries totales par exercice) ───────────────
 var TIERS = [
@@ -29,7 +29,7 @@ function getTier(n) {
 }
 
 /**
- * Index du tier (0-5)
+ * Index du tier (0-7)
  */
 function getTierIndex(n) {
   var idx = 0;
@@ -62,10 +62,8 @@ function getNextTierCount(n) {
 
 // ── RPG Levels 1→100 ─────────────────────────────────────────────────────
 // Formule: XP requis pour niveau N = 5000 × N^(19/10)
-// Calibré pour que niveau 10 ≈ 3 mois d'entraînement régulier
-
 var RPG_BASE = 5000;
-var RPG_EXP  = 19 / 10; // 1.9
+var RPG_EXP  = 1.9;
 
 /**
  * Volume cumulé requis pour atteindre le niveau N
@@ -78,6 +76,7 @@ function levelThreshold(n) {
  * Niveau actuel (0-100) pour un volume donné
  */
 function getLevel(vol) {
+  if (!vol || vol <= 0) return 0;
   return Math.min(100, Math.floor(Math.pow(vol / RPG_BASE, 1 / RPG_EXP)));
 }
 
@@ -118,18 +117,25 @@ function levelColor(lvl) {
 
 /**
  * Nombre de séries pour un groupe musculaire (Total Pondéré)
- * Somme des (séries * influence) pour tous les exercices touchant ce groupe.
+ * Correction : Somme du champ 'ser' au lieu de compter le nombre d'entrées.
  */
 function seriesCountByGroup(grp) {
   var totalWeightedSets = 0;
 
-  EX.forEach(function(e) {
-    var influence = getMuscleInfluence(e[0], grp);
+  for (var i = 0; i < EX.length; i++) {
+    var exData = EX[i];
+    var influence = getMuscleInfluence(exData[0], grp);
     if (influence > 0) {
-      var sets = APP.data.filter(d => d.ex === e[0]).length;
-      totalWeightedSets += sets * influence;
+      var setsForEx = 0;
+      for (var j = 0; j < APP.data.length; j++) {
+        var entry = APP.data[j];
+        if (entry.ex === exData[0]) {
+          setsForEx += (entry.ser || 0);
+        }
+      }
+      totalWeightedSets += setsForEx * influence;
     }
-  });
+  }
 
   return Math.floor(totalWeightedSets);
 }

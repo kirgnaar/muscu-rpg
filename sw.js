@@ -1,6 +1,6 @@
 // ── Service Worker — Muscu RPG ─────────────────────────────────────────────
-const CACHE_NAME = 'muscu-rpg-v17';
-const ASSETS = [
+var CACHE_NAME = 'muscu-rpg-v18';
+var ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
@@ -41,10 +41,13 @@ self.addEventListener('install', function(e) {
 self.addEventListener('activate', function(e) {
   e.waitUntil(
     caches.keys().then(function(keys) {
-      return Promise.all(
-        keys.filter(function(k) { return k !== CACHE_NAME; })
-            .map(function(k) { return caches.delete(k); })
-      );
+      var promises = [];
+      for (var i = 0; i < keys.length; i++) {
+        if (keys[i] !== CACHE_NAME) {
+          promises.push(caches.delete(keys[i]));
+        }
+      }
+      return Promise.all(promises);
     }).then(function() {
       return self.clients.claim();
     })

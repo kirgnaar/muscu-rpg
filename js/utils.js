@@ -1,48 +1,38 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — utils.js
-   Fonctions utilitaires partagées: format, formules, toast, date
-══════════════════════════════════════════════════════════════════════════ */
+   Fonctions utilitaires partagées: format, formules, toast, date (ES5 Stable)
+   ══════════════════════════════════════════════════════════════════════════ */
 
 // ── Formules de Force (1RM estimé) ─────────────────────────────────────────
 /**
  * 1RM estimé via le compromis Epley & Brzycki, arrondi au 0.5kg
- * @param {number} poids - poids de la série (kg)
- * @param {number} reps  - nombre de répétitions
- * @returns {number}
  */
 function epley(poids, reps) {
   if (!poids || !reps || poids <= 0 || reps <= 0) return 0;
   if (reps === 1) return poids;
-  
-  // Formule Epley
+
   var epleyVal = poids * (1 + reps / 30);
-  // Formule Brzycki (limitée à 36 reps max pour éviter division par zéro)
   var brzyckiVal = poids * (36 / (37 - Math.min(reps, 36)));
-  
-  // Moyenne des deux pour plus de fiabilité
+
   var res = (epleyVal + brzyckiVal) / 2;
   return Math.round(res * 2) / 2;
 }
 
 /**
  * Charge recommandée pour N reps depuis un 1RM
- * Utilise l'inverse de la moyenne Epley/Brzycki
  */
 function repWeight(rm1, reps) {
   if (!rm1 || !reps) return 0;
   if (reps === 1) return rm1;
-  
+
   var epleyInv = rm1 / (1 + reps / 30);
   var brzyckiInv = rm1 * (37 - Math.min(reps, 36)) / 36;
-  
+
   var res = (epleyInv + brzyckiInv) / 2;
   return Math.round(res * 2) / 2;
 }
 
 // ── Formatage ─────────────────────────────────────────────────────────────
-/**
- * Formater un volume en kg/k/M
- */
 function fmtV(v) {
   v = v || 0;
   if (v >= 1000000) return (v / 1000000).toFixed(1) + 'M kg';
@@ -50,9 +40,6 @@ function fmtV(v) {
   return Math.round(v) + ' kg';
 }
 
-/**
- * Formater une date ISO en "4 avr."
- */
 function fmtD(d) {
   if (!d) return '—';
   return new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', {
@@ -60,9 +47,6 @@ function fmtD(d) {
   });
 }
 
-/**
- * Formater une date ISO en "lundi 4 avril"
- */
 function fmtDLong(d) {
   if (!d) return '—';
   return new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', {
@@ -70,21 +54,12 @@ function fmtDLong(d) {
   });
 }
 
-/**
- * Date du jour en format ISO YYYY-MM-DD
- */
 function todayISO() {
   return new Date().toISOString().split('T')[0];
 }
 
 // ── Toast ─────────────────────────────────────────────────────────────────
 var _toastTimer = null;
-
-/**
- * Afficher un toast
- * @param {string} msg    - message
- * @param {string} type   - '' | 'pr' | 'err'
- */
 function toast(msg, type) {
   var t = document.getElementById('toast');
   if (!t) return;
@@ -99,26 +74,24 @@ function toast(msg, type) {
 function $(id) { return document.getElementById(id); }
 function $$(sel, ctx) { return (ctx || document).querySelectorAll(sel); }
 
-/**
- * Créer un élément avec des attributs
- */
 function el(tag, attrs, text) {
   var e = document.createElement(tag);
-  if (attrs) Object.keys(attrs).forEach(function(k) {
-    if (k === 'class') e.className = attrs[k];
-    else e.setAttribute(k, attrs[k]);
-  });
+  if (attrs) {
+    for (var k in attrs) {
+      if (attrs.hasOwnProperty(k)) {
+        if (k === 'class') e.className = attrs[k];
+        else e.setAttribute(k, attrs[k]);
+      }
+    }
+  }
   if (text !== undefined) e.textContent = text;
   return e;
 }
 
 // ── Export / Import JSON ──────────────────────────────────────────────────
-/**
- * Exporter les données via Share Sheet iOS ou fallback clipboard
- */
 function exportData() {
   var data = APP.data;
-  if (!data.length) { toast('Aucune donnée à exporter', 'err'); return; }
+  if (!data.length) { toast('Aucune donnée', 'err'); return; }
   var payload = {
     version:  2,
     exported: new Date().toISOString(),
@@ -129,25 +102,23 @@ function exportData() {
   var dateStr  = todayISO();
   var filename = 'muscu-rpg-' + dateStr + '.json';
 
-  // iOS Share Sheet
   if (navigator.share && navigator.canShare) {
     var file = new File([json], filename, { type: 'application/json' });
     if (navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title: 'Muscu RPG — Sauvegarde ' + dateStr })
-        .then(function() { toast('Export partagé (' + data.length + ' séries)', ''); })
+      navigator.share({ files: [file], title: 'Muscu RPG' })
         .catch(function(err) {
-          if (err.name !== 'AbortError') fallbackExport(json, filename);
+          if (err.name !== 'AbortError') fallbackExport(json);
         });
       return;
     }
   }
-  fallbackExport(json, filename);
+  fallbackExport(json);
 }
 
-function fallbackExport(json, filename) {
+function fallbackExport(json) {
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(json)
-      .then(function() { toast('JSON copié dans le presse-papier', ''); })
+      .then(function() { toast('Copié dans le presse-papier'); })
       .catch(function() { showJsonOverlay(json); });
   } else {
     showJsonOverlay(json);
@@ -156,26 +127,20 @@ function fallbackExport(json, filename) {
 
 function showJsonOverlay(json) {
   var overlay = el('div');
-  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;flex-direction:column;padding:20px;gap:12px;';
-  var title = el('div', {}, 'Copier le JSON ci-dessous');
-  title.style.cssText = 'color:#f1f5ff;font-weight:700;font-size:16px;';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:9999;display:flex;flex-direction:column;padding:20px;gap:12px;';
+  var title = el('div', {style:'color:#fff;font-weight:700'}, 'Copier le JSON');
   var ta = el('textarea');
   ta.value = json;
   ta.readOnly = true;
-  ta.style.cssText = 'flex:1;background:#1a2235;color:#f1f5ff;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;font-size:11px;font-family:monospace;';
+  ta.style.cssText = 'flex:1;background:#111;color:#fff;padding:10px;font-family:monospace;';
   var btn = el('button', {}, '✕ Fermer');
-  btn.style.cssText = 'background:#3b82f6;color:#fff;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;';
   btn.addEventListener('click', function() { document.body.removeChild(overlay); });
   overlay.appendChild(title);
   overlay.appendChild(ta);
   overlay.appendChild(btn);
   document.body.appendChild(overlay);
-  ta.focus(); ta.select();
 }
 
-/**
- * Importer depuis un fichier JSON
- */
 function importData(file) {
   if (!file) return;
   var reader = new FileReader();
@@ -183,15 +148,21 @@ function importData(file) {
     try {
       var payload  = JSON.parse(e.target.result);
       var entries  = Array.isArray(payload) ? payload : (payload.entries || []);
-      if (!Array.isArray(entries)) throw new Error('Format invalide');
-      var existing = new Set(APP.data.map(function(d) { return d.id; }));
-      var newOnes  = entries.filter(function(d) { return !existing.has(d.id); });
+      
+      var existingIds = {};
+      for (var i = 0; i < APP.data.length; i++) existingIds[APP.data[i].id] = true;
+      
+      var newOnes = [];
+      for (var j = 0; j < entries.length; j++) {
+        if (!existingIds[entries[j].id]) newOnes.push(entries[j]);
+      }
+      
       APP.data = APP.data.concat(newOnes);
       APP.save();
       APP.render();
-      toast(newOnes.length + ' nouvelles séries importées', '');
+      toast(newOnes.length + ' séries importées');
     } catch(err) {
-      toast('Erreur : fichier JSON invalide', 'err');
+      toast('Erreur JSON', 'err');
     }
   };
   reader.readAsText(file);

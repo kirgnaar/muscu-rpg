@@ -1,7 +1,7 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — data.js
-   Couche données: localStorage, CRUD, détection PR
-══════════════════════════════════════════════════════════════════════════ */
+   Couche données: localStorage, CRUD, détection PR (ES5 Stable)
+   ══════════════════════════════════════════════════════════════════════════ */
 
 var DB_KEY = 'mrpg_v2';
 
@@ -26,31 +26,32 @@ function saveData(data) {
     localStorage.setItem(DB_KEY, JSON.stringify(data));
   } catch(e) {
     console.error('[data] Save error:', e);
-    toast('Erreur de sauvegarde', 'err');
+    if (typeof toast === 'function') toast('Erreur de sauvegarde', 'err');
   }
 }
 
 /**
  * Ajouter une entrée
- * @param {object} entry - données de la série
- * @returns {object} entry enrichie (avec id, vol, rm1, isPR)
  */
 function addEntry(entry) {
   var data = APP.data;
-
   var vol = entry.ser * entry.rep * entry.pds;
   var rm1 = epley(entry.pds, entry.rep);
 
-  // Détection PR: Big 6, poids >= 10kg, nouveau record 1RM
   var isPR = false;
   if (BIG6.indexOf(entry.ex) !== -1 && entry.pds >= 10) {
-    var prevBest = data
-      .filter(function(e) { return e.ex === entry.ex && e.pds >= 10; })
-      .reduce(function(best, e) { return Math.max(best, epley(e.pds, e.rep)); }, 0);
+    var prevBest = 0;
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].ex === entry.ex && data[i].pds >= 10) {
+        var val = epley(data[i].pds, data[i].rep);
+        if (val > prevBest) prevBest = val;
+      }
+    }
     if (rm1 > prevBest) isPR = true;
   }
 
-  var prevVol = data.reduce(function(s, e) { return s + e.vol; }, 0);
+  var prevVol = 0;
+  for (var j = 0; j < data.length; j++) prevVol += data[j].vol;
   var prevLvl = getLevel(prevVol);
 
   var newEntry = {
@@ -64,7 +65,7 @@ function addEntry(entry) {
     pds:   entry.pds,
     vol:   vol,
     rm1:   rm1,
-    isPR:  isPR,
+    isPR:  isPR
   };
 
   APP.data.push(newEntry);
@@ -84,89 +85,115 @@ function addEntry(entry) {
 }
 
 /**
- * Supprimer une entrée par id
+ * Supprimer une entrée
  */
 function deleteEntry(id) {
-  APP.data = APP.data.filter(function(e) { return e.id !== id; });
+  var newData = [];
+  for (var i = 0; i < APP.data.length; i++) {
+    if (APP.data[i].id !== id) newData.push(APP.data[i]);
+  }
+  APP.data = newData;
   APP.save();
 }
 
-// ── Statistiques ─────────────────────────────────────────────────────────
 /**
  * Nombre de séries pour un exercice
  */
 function countSeries(exName) {
-  return APP.data.filter(function(e) { return e.ex === exName; }).length;
+  var sum = 0;
+  for (var i = 0; i < APP.data.length; i++) {
+    if (APP.data[i].ex === exName) sum += (APP.data[i].ser || 0);
+  }
+  return sum;
 }
 
 /**
- * Meilleur 1RM estimé pour un exercice
+ * Meilleur 1RM historique
  */
 function bestRM1(exName) {
-  var entries = APP.data.filter(function(e) {
-    return e.ex === exName && e.pds >= 10;
-  });
-  if (!entries.length) return 0;
-  return entries.reduce(function(best, e) {
-    return Math.max(best, epley(e.pds, e.rep));
-  }, 0);
+  var best = 0;
+  for (var i = 0; i < APP.data.length; i++) {
+    if (APP.data[i].ex === exName && APP.data[i].pds >= 10) {
+      var val = epley(APP.data[i].pds, APP.data[i].rep);
+      if (val > best) best = val;
+    }
+  }
+  return best;
 }
 
 /**
- * Entrée du meilleur 1RM pour un exercice
+ * Entrée correspondant au record 1RM
  */
 function bestRM1Entry(exName) {
-  var entries = APP.data.filter(function(e) {
-    return e.ex === exName && e.pds >= 10;
-  });
-  if (!entries.length) return null;
-  return entries.reduce(function(best, e) {
-    return epley(e.pds, e.rep) > epley(best.pds, best.rep) ? e : best;
-  });
+  var bestVal = 0;
+  var bestE = null;
+  for (var i = 0; i < APP.data.length; i++) {
+    if (APP.data[i].ex === exName && APP.data[i].pds >= 10) {
+      var val = epley(APP.data[i].pds, APP.data[i].rep);
+      if (val > bestVal) {
+        bestVal = val;
+        bestE = APP.data[i];
+      }
+    }
+  }
+  return bestE;
 }
 
 /**
  * Meilleur 1RM pour un exercice à une date donnée
  */
 function bestRM1ForDate(exName, date) {
-  var entries = APP.data.filter(function(e) {
-    return e.ex === exName && e.date === date && e.pds >= 10;
-  });
-  if (!entries.length) return 0;
-  return entries.reduce(function(best, e) {
-    return Math.max(best, epley(e.pds, e.rep));
-  }, 0);
+  var best = 0;
+  for (var i = 0; i < APP.data.length; i++) {
+    var e = APP.data[i];
+    if (e.ex === exName && e.date === date && e.pds >= 10) {
+      var val = epley(e.pds, e.rep);
+      if (val > best) best = val;
+    }
+  }
+  return best;
 }
 
 /**
- * Volume total pour un groupe musculaire (prend en compte les influences primaires et secondaires)
+ * Volume total pour un groupe musculaire
  */
 function volByGroup(grp) {
-  return APP.data.reduce(function(s, e) {
+  var sum = 0;
+  for (var i = 0; i < APP.data.length; i++) {
+    var e = APP.data[i];
     var influence = getMuscleInfluence(e.ex, grp);
-    return s + (e.vol * influence);
-  }, 0);
+    sum += (e.vol * influence);
+  }
+  return sum;
 }
 
 /**
- * Volume total pour un exercice par date (pour les graphiques)
- * Retourne [{date, vol, rm1}, ...]
+ * Historique par date pour un exercice
  */
 function exerciseHistory(exName) {
   var byDate = {};
-  APP.data
-    .filter(function(e) { return e.ex === exName; })
-    .forEach(function(e) {
+  for (var i = 0; i < APP.data.length; i++) {
+    var e = APP.data[i];
+    if (e.ex === exName) {
       if (!byDate[e.date]) byDate[e.date] = { date: e.date, vol: 0, rm1: 0 };
       byDate[e.date].vol += e.vol;
-      byDate[e.date].rm1  = Math.max(byDate[e.date].rm1, epley(e.pds, e.rep));
-    });
-  return Object.values(byDate).sort(function(a, b) { return a.date.localeCompare(b.date); });
+      var val = epley(e.pds, e.rep);
+      if (val > byDate[e.date].rm1) byDate[e.date].rm1 = val;
+    }
+  }
+  var keys = [];
+  for (var k in byDate) keys.push(byDate[k]);
+  return keys.sort(function(a, b) { return a.date.localeCompare(b.date); });
 }
 
 /**
  * Toutes les dates de séances uniques, triées desc
  */
 function allDates() {
-  return [...new Set(APP.data.map(function(e) { return e.date; }))].sort().reverse();
+  var dates = [];
+  for (var i = 0; i < APP.data.length; i++) {
+    var d = APP.data[i].date;
+    if (dates.indexOf(d) === -1) dates.push(d);
+  }
+  return dates.sort().reverse();
 }
