@@ -89,8 +89,13 @@ var BODY3D = {
     addPart(boxGeo(0.45, 0.6, 0.1), 1.35, 0, -0.08, 0, 0, 'back');
     addPart(sphGeo(0.12), 1.6, -0.28, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 1.6, 0.28, 0, 0, 0, 'shoulders_r');
-    addPart(cylGeo(0.07, 0.06, 0.35), 1.4, -0.35, 0, 0, 0.2, 'biceps_l');
-    addPart(cylGeo(0.07, 0.06, 0.35), 1.4, 0.35, 0, 0, -0.2, 'biceps_r');
+    
+    // Bras plus ouverts (angle 0.45 rad) et ajout avant-bras
+    addPart(cylGeo(0.07, 0.06, 0.35), 1.45, -0.36, 0, 0, 0.45, 'biceps_l');
+    addPart(cylGeo(0.07, 0.06, 0.35), 1.45, 0.36, 0, 0, -0.45, 'biceps_r');
+    addPart(cylGeo(0.055, 0.045, 0.35), 1.15, -0.52, 0, 0, 0.65, 'forearms_l');
+    addPart(cylGeo(0.055, 0.045, 0.35), 1.15, 0.52, 0, 0, -0.65, 'forearms_r');
+
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, -0.18, 0, 0, 0.05, 'quads_l');
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, 0.18, 0, 0, -0.05, 'quads_r');
     addPart(cylGeo(0.1, 0.08, 0.4), -0.15, -0.2, 0, 0, 0.02, 'calves_l');
