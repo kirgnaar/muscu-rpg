@@ -85,7 +85,7 @@ var BODY3D = {
     var sphGeo = function(r) { return new THREE.SphereGeometry(r, 16, 16); };
 
     addPart(boxGeo(0.25, 0.5, 0.15), 1.1, 0, 0, 0, 0, 'abs');
-    addPart(cylGeo(0.45, 0.35, 0.4), 1.5, 0, 0, 0, 0, 'pecs');
+    addPart(cylGeo(0.36, 0.28, 0.32), 1.5, 0, 0, 0, 0, 'pecs');
     addPart(boxGeo(0.45, 0.6, 0.1), 1.35, 0, -0.08, 0, 0, 'back');
     addPart(sphGeo(0.12), 1.6, -0.28, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 1.6, 0.28, 0, 0, 0, 'shoulders_r');
