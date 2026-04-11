@@ -91,10 +91,10 @@ var BODY3D = {
     addPart(sphGeo(0.12), 1.6, -0.32, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 1.6, 0.32, 0, 0, 0, 'shoulders_r');
     
-    // BRAS (Biceps/Triceps) - Correction GÉOMÉTRIQUE FINALE (v33)
-    // Alignement mathématique strict : Épaule (0.32) <-> Coude (0.48)
-    addPart(cylGeo(0.07, 0.06, 0.36), 1.45, -0.40, 0.075, 0.47, 0.50, 'biceps_l');
-    addPart(cylGeo(0.07, 0.06, 0.36), 1.45, 0.40, 0.075, 0.47, -0.50, 'biceps_r');
+    // BRAS (Biceps/Triceps) - Correction d'alignement par inversion des pôles (v34)
+    // Le haut (0.07) est maintenant ancré à l'épaule et le bas (0.06) au coude
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.45, -0.40, 0.075, 0.47, -0.50, 'biceps_l');
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.45, 0.40, 0.075, 0.47, 0.50, 'biceps_r');
 
     // Avant-bras (Connectés au bout du bras supérieur)
     addPart(cylGeo(0.055, 0.045, 0.4), 1.17, -0.62, 0.15, 0, 0.8, 'forearms_l');
