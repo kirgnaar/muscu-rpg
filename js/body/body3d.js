@@ -102,15 +102,14 @@ var BODY3D = {
     addPart(sphGeo(0.12), 0.32, 1.6, 0, 0, 0, 'shoulders_r');
     
     // 1. LE BRAS (Haut) - ANCRAGE STRICT AU CENTRE DE L'ÉPAULE
-    // PivotAtTop=true place le haut du bras à la position spécifiée (x,y,z)
-    addPart(cylGeo(0.07, 0.06, 0.36), -0.32, 1.6, 0, 0, -0.785, 'bras_l', true);
-    addPart(cylGeo(0.07, 0.06, 0.36), 0.32, 1.6, 0, 0, 0.785, 'bras_r', true);
+    // Radii grossis de 20% (0.07->0.084, 0.06->0.072)
+    addPart(cylGeo(0.084, 0.072, 0.36), -0.32, 1.6, 0, 0, -0.785, 'bras_l', true);
+    addPart(cylGeo(0.084, 0.072, 0.36), 0.32, 1.6, 0, 0, 0.785, 'bras_r', true);
 
     // 2. L'AVANT-BRAS (Bas) - ANCRAGE STRICT AU COUDE
-    // Le coude est à x = shoulder_x + L*sin(rz), y = shoulder_y - L*cos(rz)
-    // x = 0.32 + 0.36*0.707 = 0.574 | y = 1.6 - 0.36*0.707 = 1.346
-    addPart(cylGeo(0.055, 0.045, 0.4), -0.574, 1.346, 0, 0, 0.785, 'avantbras_l', true);
-    addPart(cylGeo(0.055, 0.045, 0.4), 0.574, 1.346, 0, 0, -0.785, 'avantbras_r', true);
+    // Radii grossis de 10% (0.055->0.06, 0.045->0.05)
+    addPart(cylGeo(0.06, 0.05, 0.4), -0.574, 1.346, 0, 0, 0.785, 'avantbras_l', true);
+    addPart(cylGeo(0.06, 0.05, 0.4), 0.574, 1.346, 0, 0, -0.785, 'avantbras_r', true);
 
     addPart(cylGeo(0.16, 0.12, 0.7), -0.18, 0.5, 0, 0, 0.05, 'quads_l');
     addPart(cylGeo(0.16, 0.12, 0.7), 0.18, 0.5, 0, 0, -0.05, 'quads_r');
