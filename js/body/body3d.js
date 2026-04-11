@@ -91,14 +91,14 @@ var BODY3D = {
     addPart(sphGeo(0.12), 1.6, -0.32, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 1.6, 0.32, 0, 0, 0, 'shoulders_r');
     
-    // BRAS (Biceps/Triceps) - Correction Inversion et Alignement 45° (v39)
-    // rz négatif pour le bras gauche pour ancrer le haut (0.07) à l'épaule
+    // BRAS (Biceps/Triceps) - Ouverture 45° (v39 stable)
     addPart(cylGeo(0.07, 0.06, 0.36), 1.47, -0.45, 0.05, 0, -0.785, 'biceps_l');
     addPart(cylGeo(0.07, 0.06, 0.36), 1.47, 0.45, 0.05, 0, 0.785, 'biceps_r');
 
-    // AVANT-BRAS - Prolongement vertical (Rotation 0° = 45° vers le buste)
-    addPart(cylGeo(0.055, 0.045, 0.4), 1.14, -0.58, 0.05, 0, 0, 'forearms_l');
-    addPart(cylGeo(0.055, 0.045, 0.4), 1.14, 0.58, 0.05, 0, 0, 'forearms_r');
+    // AVANT-BRAS - Rotation 45° vers le buste (v40)
+    // Aligné au coude (1.34) et incliné vers l'intérieur (0.785 rad)
+    addPart(cylGeo(0.055, 0.045, 0.4), 1.20, -0.44, 0.05, 0, 0.785, 'forearms_l');
+    addPart(cylGeo(0.055, 0.045, 0.4), 1.20, 0.44, 0.05, 0, -0.785, 'forearms_r');
 
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, -0.18, 0, 0, 0.05, 'quads_l');
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, 0.18, 0, 0, -0.05, 'quads_r');
