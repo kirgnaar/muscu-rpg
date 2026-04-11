@@ -92,13 +92,13 @@ var BODY3D = {
     addPart(sphGeo(0.12), 1.6, -0.32, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 1.6, 0.32, 0, 0, 0, 'shoulders_r');
     
-    // 1. LE BRAS (Haut) - 45° vers l'extérieur
-    addPart(cylGeo(0.07, 0.06, 0.36), 1.47, -0.45, 0.05, 0, -0.785, 'bras_l');
-    addPart(cylGeo(0.07, 0.06, 0.36), 1.47, 0.45, 0.05, 0, 0.785, 'bras_r');
+    // 1. LE BRAS (Haut) - Ouverture 45° vers l'extérieur (Centré Profil v46)
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.47, -0.45, 0, 0, -0.785, 'bras_l');
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.47, 0.45, 0, 0, 0.785, 'bras_r');
 
-    // 2. L'AVANT-BRAS (Bas) - Rotation 45° vers le buste (v45)
-    addPart(cylGeo(0.055, 0.045, 0.4), 1.20, -0.44, 0.05, 0, 0.785, 'avantbras_l');
-    addPart(cylGeo(0.055, 0.045, 0.4), 1.20, 0.44, 0.05, 0, -0.785, 'avantbras_r');
+    // 2. L'AVANT-BRAS (Bas) - Rotation 45° vers le buste (Centré Profil v46)
+    addPart(cylGeo(0.055, 0.045, 0.4), 1.20, -0.44, 0, 0, 0.785, 'avantbras_l');
+    addPart(cylGeo(0.055, 0.045, 0.4), 1.20, 0.44, 0, 0, -0.785, 'avantbras_r');
 
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, -0.18, 0, 0, 0.05, 'quads_l');
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, 0.18, 0, 0, -0.05, 'quads_r');
