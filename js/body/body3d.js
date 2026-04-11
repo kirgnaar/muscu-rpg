@@ -98,15 +98,15 @@ var BODY3D = {
     addPart(sphGeo(0.12), -0.32, 1.6, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 0.32, 1.6, 0, 0, 0, 'shoulders_r');
     
-    // 1. LE BRAS (Haut) - MASSIVE MUSCLE (v52)
-    // Rayon 0.16 (Ancien 0.10)
-    addPart(cylGeo(0.16, 0.14, 0.36), -0.46, 1.6, 0, 0, -0.785, 'bras_l', true);
-    addPart(cylGeo(0.16, 0.14, 0.36), 0.46, 1.6, 0, 0, 0.785, 'bras_r', true);
+    // 1. LE BRAS (Haut) - Réduction 20% (v53)
+    // Rayon 0.128 (v52: 0.16)
+    addPart(cylGeo(0.128, 0.112, 0.36), -0.45, 1.6, 0, 0, -0.785, 'bras_l', true);
+    addPart(cylGeo(0.128, 0.112, 0.36), 0.45, 1.6, 0, 0, 0.785, 'bras_r', true);
 
-    // 2. L'AVANT-BRAS (Bas) - MASSIVE MUSCLE (v52)
-    // Rayon 0.10 (Ancien 0.06)
-    addPart(cylGeo(0.10, 0.08, 0.4), -0.714, 1.346, 0, 0, 0.785, 'avantbras_l', true);
-    addPart(cylGeo(0.10, 0.08, 0.4), 0.714, 1.346, 0, 0, -0.785, 'avantbras_r', true);
+    // 2. L'AVANT-BRAS (Bas) - Réduction 10% (v53)
+    // Rayon 0.09 (v52: 0.10)
+    addPart(cylGeo(0.09, 0.072, 0.4), -0.704, 1.346, 0, 0, 0.785, 'avantbras_l', true);
+    addPart(cylGeo(0.09, 0.072, 0.4), 0.704, 1.346, 0, 0, -0.785, 'avantbras_r', true);
 
     addPart(cylGeo(0.16, 0.12, 0.7), -0.18, 0.5, 0, 0, 0.05, 'quads_l');
     addPart(cylGeo(0.16, 0.12, 0.7), 0.18, 0.5, 0, 0, -0.05, 'quads_r');
