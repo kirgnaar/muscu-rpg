@@ -91,15 +91,10 @@ var BODY3D = {
     addPart(sphGeo(0.12), 1.6, -0.32, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 1.6, 0.32, 0, 0, 0, 'shoulders_r');
     
-    // BRAS SUPÉRIEUR (Biceps & Triceps séparés pour un rendu indépendant)
-    // Alignement précis entre l'Épaule (1.6) et le Coude (1.31)
-    // Biceps (Face avant)
-    addPart(cylGeo(0.06, 0.05, 0.36), 1.45, -0.40, 0.10, 0.45, 0.5, 'biceps_l');
-    addPart(cylGeo(0.06, 0.05, 0.36), 1.45, 0.40, 0.10, 0.45, -0.5, 'biceps_r');
-    
-    // Triceps (Face arrière - les oubliés des versions précédentes)
-    addPart(cylGeo(0.06, 0.05, 0.36), 1.45, -0.40, 0.04, 0.45, 0.5, 'triceps_l');
-    addPart(cylGeo(0.06, 0.05, 0.36), 1.45, 0.40, 0.04, 0.45, -0.5, 'triceps_r');
+    // BRAS (Biceps/Triceps) - Alignement GÉOMÉTRIQUE STRICT (v31)
+    // Pont direct entre l'Épaule (1.6) et le Coude (1.31)
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.45, -0.40, 0.08, 0.45, 0.48, 'biceps_l');
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.45, 0.40, 0.08, 0.45, -0.48, 'biceps_r');
 
     // Avant-bras (Connectés au bout du bras supérieur)
     addPart(cylGeo(0.055, 0.045, 0.4), 1.17, -0.62, 0.15, 0, 0.8, 'forearms_l');
