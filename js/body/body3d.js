@@ -88,18 +88,19 @@ var BODY3D = {
     addPart(cylGeo(0.36, 0.28, 0.32), 1.5, 0, 0, 0, 0, 'pecs');
     addPart(boxGeo(0.45, 0.6, 0.1), 1.35, 0, -0.08, 0, 0, 'back');
     
-    // Épaules
+    // Épaules (Z=0)
     addPart(sphGeo(0.12), 1.6, -0.32, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 1.6, 0.32, 0, 0, 0, 'shoulders_r');
     
-    // 1. LE BRAS (Haut) - Ouverture 45° vers l'extérieur (Centré Profil v46)
-    addPart(cylGeo(0.07, 0.06, 0.36), 1.47, -0.45, 0, 0, -0.785, 'bras_l');
-    addPart(cylGeo(0.07, 0.06, 0.36), 1.47, 0.45, 0, 0, 0.785, 'bras_r');
+    // 1. LE BRAS (Haut) - Z=0, Aligné centre épaule
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.473, -0.447, 0, 0, -0.785, 'bras_l');
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.473, 0.447, 0, 0, 0.785, 'bras_r');
 
-    // 2. L'AVANT-BRAS (Bas) - Rotation 45° vers le buste (Centré Profil v46)
-    addPart(cylGeo(0.055, 0.045, 0.4), 1.20, -0.44, 0, 0, 0.785, 'avantbras_l');
-    addPart(cylGeo(0.055, 0.045, 0.4), 1.20, 0.44, 0, 0, -0.785, 'avantbras_r');
+    // 2. L'AVANT-BRAS (Bas) - Z=0, Aligné coude
+    addPart(cylGeo(0.055, 0.045, 0.4), 1.205, -0.433, 0, 0, 0.785, 'avantbras_l');
+    addPart(cylGeo(0.055, 0.045, 0.4), 1.205, 0.433, 0, 0, -0.785, 'avantbras_r');
 
+    // Jambes centrées Z=0
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, -0.18, 0, 0, 0.05, 'quads_l');
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, 0.18, 0, 0, -0.05, 'quads_r');
     addPart(cylGeo(0.1, 0.08, 0.4), -0.15, -0.2, 0, 0, 0.02, 'calves_l');
@@ -118,7 +119,6 @@ var BODY3D = {
         var group = this.mapping[key];
         var mesh = this.muscles[key];
         if (mesh && mesh.material) {
-          // Fusion Biceps + Triceps pour le segment du bras
           var vol = (key.indexOf('bras') !== -1) ? (volByGroup('Biceps') + volByGroup('Triceps')) : volByGroup(group);
           var lvl = getLevel(vol);
           var prog = levelProgress(vol);
