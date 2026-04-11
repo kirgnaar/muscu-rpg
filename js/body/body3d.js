@@ -91,14 +91,15 @@ var BODY3D = {
     addPart(sphGeo(0.12), 1.6, -0.32, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 1.6, 0.32, 0, 0, 0, 'shoulders_r');
     
-    // BRAS (Biceps/Triceps) - Alignement Anatomique Externe (v37)
-    // Position excentrée (0.60) et rotation accentuée (0.95) pour jonction coude parfaite
-    addPart(cylGeo(0.065, 0.055, 0.38), 1.45, -0.60, 0.085, -0.37, -0.95, 'biceps_l');
-    addPart(cylGeo(0.065, 0.055, 0.38), 1.45, 0.60, 0.085, -0.37, 0.95, 'biceps_r');
+    // BRAS (Biceps/Triceps) - Géométrie Simplifiée 45° (v38)
+    // Ouverture 45° (0.785 rad) vers l'extérieur
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.47, -0.45, 0.05, 0, 0.785, 'biceps_l');
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.47, 0.45, 0.05, 0, -0.785, 'biceps_r');
 
-    // Avant-bras (Connectés au bout du bras supérieur)
-    addPart(cylGeo(0.055, 0.045, 0.4), 1.17, -0.62, 0.15, 0, 0.8, 'forearms_l');
-    addPart(cylGeo(0.055, 0.045, 0.4), 1.17, 0.62, 0.15, 0, -0.8, 'forearms_r');
+    // AVANT-BRAS - Alignés au coude et ramenés à la verticale (v38)
+    // Rotation 0° relative au buste = 45° relative au bras
+    addPart(cylGeo(0.055, 0.045, 0.4), 1.15, -0.57, 0.05, 0, 0, 'forearms_l');
+    addPart(cylGeo(0.055, 0.045, 0.4), 1.15, 0.57, 0.05, 0, 0, 'forearms_r');
 
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, -0.18, 0, 0, 0.05, 'quads_l');
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, 0.18, 0, 0, -0.05, 'quads_r');
