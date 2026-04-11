@@ -32,14 +32,16 @@ var BODY3D = {
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       container.appendChild(this.renderer.domElement);
 
-      this.scene.add(new THREE.AmbientLight(0xffffff, 0.4));
-      var light1 = new THREE.DirectionalLight(0xffffff, 1);
+      this.scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+      var light1 = new THREE.DirectionalLight(0xffffff, 1.2);
       light1.position.set(5, 5, 5);
       this.scene.add(light1);
       
-      var light2 = new THREE.DirectionalLight(0xffffff, 0.5);
+      var light2 = new THREE.DirectionalLight(0xffffff, 0.7);
       light2.position.set(-5, 2, -5);
       this.scene.add(light2);
+
+      console.log("MUSCU RPG BODY3D v54: Radii Bras=0.128, AvBras=0.09 Applied.");
 
       var OrbitControlsClass = window.THREE.OrbitControls || window.OrbitControls;
       if (OrbitControlsClass) {
