@@ -90,9 +90,10 @@ var BODY3D = {
     addPart(sphGeo(0.12), 1.6, -0.32, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 1.6, 0.32, 0, 0, 0, 'shoulders_r');
     
-    // Bras plus ouverts (Abduction 35° / 0.6 rad)
-    addPart(cylGeo(0.07, 0.06, 0.35), 1.45, -0.42, 0.1, 0, 0.6, 'biceps_l');
-    addPart(cylGeo(0.07, 0.06, 0.35), 1.45, 0.42, 0.1, 0, -0.6, 'biceps_r');
+    // Bras (Biceps/Triceps) - Alignement précis Épaule <-> Avant-bras
+    // Position x=0.40, y=1.45, z=0.07 | Rotation rx=0.42 (avant), rz=0.5 (ouverture)
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.45, -0.4, 0.07, 0.42, 0.5, 'biceps_l');
+    addPart(cylGeo(0.07, 0.06, 0.36), 1.45, 0.4, 0.07, 0.42, -0.5, 'biceps_r');
 
     // Avant-bras synchronisés avec l'ouverture des bras
     addPart(cylGeo(0.055, 0.045, 0.4), 1.17, -0.62, 0.15, 0, 0.8, 'forearms_l');
