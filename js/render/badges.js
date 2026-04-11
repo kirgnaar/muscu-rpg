@@ -88,15 +88,21 @@ function calculateSpecialAchievementsProgress() {
   for (var n = 0; n < APP.data.length; n++) {
     totalReps += (APP.data[n].ser * APP.data[n].rep);
   }
-  var maxWeight = 0;
+  
+  // Calcul SBD pour Monolithes
+  var maxS = 0, maxB = 0, maxD = 0;
   for (var o = 0; o < APP.data.length; o++) {
-    if (BIG6.indexOf(APP.data[o].ex) !== -1 && APP.data[o].pds > maxWeight) {
-      maxWeight = APP.data[o].pds;
-    }
+    var ent = APP.data[o];
+    if (ent.ex === "Squat barre" && ent.pds > maxS) maxS = ent.pds;
+    if (ent.ex === "Développé couché barre" && ent.pds > maxB) maxB = ent.pds;
+    if (ent.ex === "Soulevé de terre conventionnel" && ent.pds > maxD) maxD = ent.pds;
   }
+  var totalSBD = maxS + maxB + maxD;
+
   var specs = [
     {v:totalVol,m:5000000}, {v:totalSes,m:500}, {v:big6Total,m:1250}, {v:uniqueEx,m:100},
-    {v:maxSessionVol,m:20000}, {v:totalPRs,m:250}, {v:totalReps,m:100000}, {v:maxWeight,m:300}
+    {v:maxSessionVol,m:20000}, {v:totalPRs,m:250}, {v:totalReps,m:100000}, 
+    {v:totalSBD,m:900}, {v:maxS,m:300}, {v:maxB,m:300}, {v:maxD,m:300}
   ];
   var totalSumPct = 0;
   for (var p = 0; p < specs.length; p++) {
@@ -150,19 +156,40 @@ function renderSpecialAchievements() {
   for (var n = 0; n < BIG6.length; n++) {
     if (exCounts[BIG6[n]]) big6Done++;
   }
-  var maxWeight = 0;
+  
+  // Calcul SBD pour Monolithes
+  var maxS = 0, maxB = 0, maxD = 0;
   for (var o = 0; o < APP.data.length; o++) {
-    if (BIG6.indexOf(APP.data[o].ex) !== -1 && APP.data[o].pds > maxWeight) {
-      maxWeight = APP.data[o].pds;
-    }
+    var ent = APP.data[o];
+    if (ent.ex === "Squat barre" && ent.pds > maxS) maxS = ent.pds;
+    if (ent.ex === "Développé couché barre" && ent.pds > maxB) maxB = ent.pds;
+    if (ent.ex === "Soulevé de terre conventionnel" && ent.pds > maxD) maxD = ent.pds;
   }
+  var totalSBD = maxS + maxB + maxD;
+
+  var monoPaliere = [
+    {n:100,l:'Acier',r:'RARE',c:'#3b82f6'},
+    {n:150,l:'Béton',r:'ÉPIQUE',c:'#a855f7'},
+    {n:200,l:'Monolithe',r:'LÉGENDAIRE',c:'#fbbf24'},
+    {n:300,l:'La Montagne',r:'MYTHIQUE',c:'#22d3ee'}
+  ];
+  var totalMonoPaliere = [
+    {n:300,l:'Fondation',r:'RARE',c:'#3b82f6'},
+    {n:450,l:'Structure',r:'ÉPIQUE',c:'#a855f7'},
+    {n:600,l:'Monolithe Total',r:'LÉGENDAIRE',c:'#fbbf24'},
+    {n:900,l:'Le Colosse',r:'MYTHIQUE',c:'#22d3ee'}
+  ];
+
   var specs = [
     {id:'titan', name:'Le Titan du Volume', icon:'trophy', val:totalVol, paliere:[{n:10000,l:'Poids Plume',r:'COMMUN',c:'#94a3b8'},{n:100000,l:'Poids Moyen',r:'RARE',c:'#3b82f6'},{n:500000,l:'Poids Lourd',r:'ÉPIQUE',c:'#a855f7'},{n:1000000,l:'Le Titan',r:'LÉGENDAIRE',c:'#fbbf24'},{n:5000000,l:'Atlas',r:'MYTHIQUE',c:'#22d3ee'}]},
     {id:'pilier', name:'Le Pilier du Club', icon:'trophy', val:totalSes, paliere:[{n:10,l:'Visiteur',r:'COMMUN',c:'#94a3b8'},{n:50,l:'Habitué',r:'RARE',c:'#3b82f6'},{n:100,l:'Adepte',r:'ÉPIQUE',c:'#a855f7'},{n:250,l:'Pilier de Fer',r:'LÉGENDAIRE',c:'#fbbf24'},{n:500,l:'Légende Vivante',r:'MYTHIQUE',c:'#22d3ee'}]},
     {id:'briseur', name:'Le Briseur de Limites', icon:'trophy', val:totalPRs, paliere:[{n:10,l:'Déterminé',r:'RARE',c:'#3b82f6'},{n:50,l:'Inarrêtable',r:'ÉPIQUE',c:'#a855f7'},{n:100,l:'Briseur de Plafond',r:'LÉGENDAIRE',c:'#fbbf24'},{n:250,l:'L\'Anomalie',r:'MYTHIQUE',c:'#22d3ee'}]},
     {id:'acharne', name:'L\'Acharné', icon:'trophy', val:totalReps, paliere:[{n:1000,l:'Cadence I',r:'COMMUN',c:'#94a3b8'},{n:10000,l:'Cadence II',r:'RARE',c:'#3b82f6'},{n:50000,l:'Mécanique',r:'ÉPIQUE',c:'#a855f7'},{n:100000,l:'L\'Horloge de Fer',r:'LÉGENDAIRE',c:'#fbbf24'}]},
     {id:'chelem', name:'Le Grand Chelem', icon:'trophy', val:big6Done, paliere:[{n:2,l:'Apprenti',r:'RARE',c:'#3b82f6'},{n:4,l:'Guerrier Complet',r:'ÉPIQUE',c:'#a855f7'},{n:6,l:'Le Grand Chelem',r:'LÉGENDAIRE',c:'#fbbf24'}]},
-    {id:'monolithe', name:'Le Monolithe', icon:'trophy', val:maxWeight, paliere:[{n:100,l:'Acier',r:'RARE',c:'#3b82f6'},{n:150,l:'Béton',r:'ÉPIQUE',c:'#a855f7'},{n:200,l:'Monolithe',r:'LÉGENDAIRE',c:'#fbbf24'},{n:300,l:'La Montagne',r:'MYTHIQUE',c:'#22d3ee'}]},
+    {id:'monolithe', name:'Le Monolithe (SBD)', icon:'trophy', val:totalSBD, paliere:totalMonoPaliere},
+    {id:'monolithe_s', name:'Monolithe S (Squat)', icon:'trophy', val:maxS, paliere:monoPaliere},
+    {id:'monolithe_b', name:'Monolithe B (Couché)', icon:'trophy', val:maxB, paliere:monoPaliere},
+    {id:'monolithe_d', name:'Monolithe D (Terre)', icon:'trophy', val:maxD, paliere:monoPaliere},
     {id:'cameleon', name:'Le Caméléon', icon:'trophy', val:uniqueEx, paliere:[{n:10,l:'Curieux',r:'COMMUN',c:'#94a3b8'},{n:25,l:'Polyvalent',r:'RARE',c:'#3b82f6'},{n:50,l:'Spécialiste',r:'ÉPIQUE',c:'#a855f7'},{n:75,l:'Encyclopédie',r:'LÉGENDAIRE',c:'#fbbf24'},{n:100,l:'Maître de la Salle',r:'MYTHIQUE',c:'#22d3ee'}]}
   ];
   var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">Hauts Faits Spéciaux</div><div id="special-ach-grid">';
