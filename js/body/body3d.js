@@ -90,11 +90,14 @@ var BODY3D = {
     addPart(sphGeo(0.12), 1.6, -0.28, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 1.6, 0.28, 0, 0, 0, 'shoulders_r');
     
-    // Bras plus ouverts (angle 0.45 rad) et ajout avant-bras
-    addPart(cylGeo(0.07, 0.06, 0.35), 1.45, -0.36, 0, 0, 0.45, 'biceps_l');
-    addPart(cylGeo(0.07, 0.06, 0.35), 1.45, 0.36, 0, 0, -0.45, 'biceps_r');
-    addPart(cylGeo(0.055, 0.045, 0.35), 1.15, -0.52, 0, 0, 0.65, 'forearms_l');
-    addPart(cylGeo(0.055, 0.045, 0.35), 1.15, 0.52, 0, 0, -0.65, 'forearms_r');
+    // Bras articulés et avant-bras (Calcul géométrique des jonctions)
+    // Biceps (Longueur 0.35, angle 0.45 rad)
+    addPart(cylGeo(0.07, 0.06, 0.35), 1.44, -0.36, 0.05, 0, 0.45, 'biceps_l');
+    addPart(cylGeo(0.07, 0.06, 0.35), 1.44, 0.36, 0.05, 0, -0.45, 'biceps_r');
+
+    // Avant-bras (Longueur 0.4, angle 0.65 rad) - Connectés aux coudes
+    addPart(cylGeo(0.055, 0.045, 0.4), 1.13, -0.55, 0.1, 0, 0.65, 'forearms_l');
+    addPart(cylGeo(0.055, 0.045, 0.4), 1.13, 0.55, 0.1, 0, -0.65, 'forearms_r');
 
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, -0.18, 0, 0, 0.05, 'quads_l');
     addPart(cylGeo(0.16, 0.12, 0.7), 0.5, 0.18, 0, 0, -0.05, 'quads_r');
