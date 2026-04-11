@@ -1,6 +1,6 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — body/body3d.js
-   ENGINE v4.5 — Ultra-Stable Athletic Mannequin (ES5 Stable)
+   ENGINE v4.9 — Massive Muscle Edition (ES5 Stable)
    ══════════════════════════════════════════════════════════════════════════ */
 
 var BODY3D = {
@@ -37,7 +37,6 @@ var BODY3D = {
       light1.position.set(5, 5, 5);
       this.scene.add(light1);
       
-      // Lumière secondaire pour le relief de profil
       var light2 = new THREE.DirectionalLight(0xffffff, 0.5);
       light2.position.set(-5, 2, -5);
       this.scene.add(light2);
@@ -73,7 +72,6 @@ var BODY3D = {
       });
     };
 
-    // Helper amélioré avec gestion du Pivot au sommet pour l'alignement
     var addPart = function(geo, x, y, z, rx, rz, name, pivotAtTop) {
       if (pivotAtTop) {
         geo.translate(0, -geo.parameters.height / 2, 0);
@@ -97,19 +95,18 @@ var BODY3D = {
     addPart(cylGeo(0.36, 0.28, 0.32), 0, 1.5, 0, 0, 0, 'pecs');
     addPart(boxGeo(0.45, 0.6, 0.1), 0, 1.35, -0.08, 0, 0, 'back');
     
-    // Épaules (Z=0 fixe)
     addPart(sphGeo(0.12), -0.32, 1.6, 0, 0, 0, 'shoulders_l');
     addPart(sphGeo(0.12), 0.32, 1.6, 0, 0, 0, 'shoulders_r');
     
-    // 1. LE BRAS (Haut) - DÉSINSÉRÉ DE L'ÉPAULE (v51)
-    // Ancrage décalé à x=0.44 (bord externe de la sphère)
-    addPart(cylGeo(0.109, 0.094, 0.36), -0.44, 1.6, 0, 0, -0.785, 'bras_l', true);
-    addPart(cylGeo(0.109, 0.094, 0.36), 0.44, 1.6, 0, 0, 0.785, 'bras_r', true);
+    // 1. LE BRAS (Haut) - MASSIVE MUSCLE (v52)
+    // Rayon 0.16 (Ancien 0.10)
+    addPart(cylGeo(0.16, 0.14, 0.36), -0.46, 1.6, 0, 0, -0.785, 'bras_l', true);
+    addPart(cylGeo(0.16, 0.14, 0.36), 0.46, 1.6, 0, 0, 0.785, 'bras_r', true);
 
-    // 2. L'AVANT-BRAS (Bas) - RECALCULÉ POUR SOUDURE COUDE (v51)
-    // x = 0.44 + 0.36*sin(45°) = 0.694
-    addPart(cylGeo(0.069, 0.058, 0.4), -0.694, 1.346, 0, 0, 0.785, 'avantbras_l', true);
-    addPart(cylGeo(0.069, 0.058, 0.4), 0.694, 1.346, 0, 0, -0.785, 'avantbras_r', true);
+    // 2. L'AVANT-BRAS (Bas) - MASSIVE MUSCLE (v52)
+    // Rayon 0.10 (Ancien 0.06)
+    addPart(cylGeo(0.10, 0.08, 0.4), -0.714, 1.346, 0, 0, 0.785, 'avantbras_l', true);
+    addPart(cylGeo(0.10, 0.08, 0.4), 0.714, 1.346, 0, 0, -0.785, 'avantbras_r', true);
 
     addPart(cylGeo(0.16, 0.12, 0.7), -0.18, 0.5, 0, 0, 0.05, 'quads_l');
     addPart(cylGeo(0.16, 0.12, 0.7), 0.18, 0.5, 0, 0, -0.05, 'quads_r');
