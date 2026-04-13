@@ -136,24 +136,50 @@ var BODY3D = {
     this.group.add(head);
   },
 
-  updateColors: function() {
+  updateColors: function(precalcVols) {
     if (!this.isInitialized || !window.gsap) return;
     var self = this;
+
+    var muscleVols = precalcVols;
+    if (!muscleVols) {
+      muscleVols = {};
+      for (var i = 0; i < MUSCLES.length; i++) muscleVols[MUSCLES[i]] = 0;
+      for (var j = 0; j < APP.data.length; j++) {
+        var entry = APP.data[j];
+        for (var k = 0; k < MUSCLES.length; k++) {
+          var m = MUSCLES[k];
+          if (getMuscleInfluence(entry.ex, m) > 0) muscleVols[m] += entry.vol;
+        }
+      }
+    }
+
     for (var key in this.mapping) {
       if (this.mapping.hasOwnProperty(key)) {
         var group = this.mapping[key];
         var mesh = this.muscles[key];
         if (mesh && mesh.material) {
-          var vol = volByGroup(group);
+          var vol = muscleVols[group] || 0;
           var lvl = getLevel(vol);
           var prog = levelProgress(vol);
+          
           var baseCol = new THREE.Color(levelColor(lvl));
           var nextCol = new THREE.Color(levelColor(lvl + 1));
           var finalCol = baseCol.clone().lerp(nextCol, prog);
+          
           var targetOpacity = 0.7 + (prog * 0.3);
           var targetEmissive = prog * 0.8;
-          gsap.to(mesh.material.color, { r: finalCol.r, g: finalCol.g, b: finalCol.b, duration: 1.5 });
-          gsap.to(mesh.material, { opacity: targetOpacity, emissiveIntensity: targetEmissive, duration: 1.5 });
+
+          // Only animate if values changed significantly or to prevent tween buildup
+          gsap.to(mesh.material.color, { 
+            r: finalCol.r, g: finalCol.g, b: finalCol.b, 
+            duration: 1.2, overwrite: 'auto' 
+          });
+          gsap.to(mesh.material, { 
+            opacity: targetOpacity, 
+            emissiveIntensity: targetEmissive, 
+            duration: 1.2, 
+            overwrite: 'auto' 
+          });
           mesh.material.emissive.copy(finalCol);
         }
       }

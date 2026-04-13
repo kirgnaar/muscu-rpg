@@ -59,7 +59,7 @@ var APP = {
         BODY3D.init();
       } else {
         BODY3D.onResize();
-        BODY3D.updateColors();
+        // BODY3D.updateColors is now handled inside renderBadges
       }
     }
   },
