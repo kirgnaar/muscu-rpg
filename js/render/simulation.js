@@ -127,8 +127,11 @@ function handleAddExToBlock() {
 }
 
 function renderSimulation() {
+  $('v-simulation').querySelector('.stitle span').textContent = APP.t('stitle_programs');
+  $('sim-new-block-btn').textContent = '+ ' + APP.t('btn_new');
+
   var list = $('sim-blocks-list');
-  if (SIM.blocks.length === 0) { list.innerHTML = '<div class="empty"><p>Aucun programme.</p></div>'; return; }
+  if (SIM.blocks.length === 0) { list.innerHTML = '<div class="empty"><p>' + (APP.user.langue === 'fr' ? 'Aucun programme.' : 'No programs.') + '</p></div>'; return; }
   var html = '';
   for (var i = 0; i < SIM.blocks.length; i++) {
     var b = SIM.blocks[i];
@@ -141,7 +144,7 @@ function renderSimulation() {
       }
       distHtml += '</div>';
     }
-    html += '<div class="card" style="margin-bottom:10px"><div class="flex-between"><div><div style="font-weight:800; color:#fff">' + b.name + '</div><div style="font-size:11px; color:var(--accent); font-weight:700">' + (b.type || 'Hypertrophie') + '</div><div style="font-size:10px; color:var(--text2); margin-top:2px">' + b.exercises.length + ' exercices</div></div><div style="display:flex; gap:8px"><button class="btn btn-s sim-block-edit" data-id="' + b.id + '">Éditer</button><button class="btn btn-s sim-block-del" data-id="' + b.id + '" style="background:rgba(239,68,68,0.1); color:#ef4444">✕</button></div></div>' + distHtml + '</div>';
+    html += '<div class="card" style="margin-bottom:10px"><div class="flex-between"><div><div style="font-weight:800; color:#fff">' + b.name + '</div><div style="font-size:11px; color:var(--accent); font-weight:700">' + b.type + '</div><div style="font-size:10px; color:var(--text2); margin-top:2px">' + b.exercises.length + ' ' + (APP.user.langue === 'fr' ? 'exercices' : 'exercises') + '</div></div><div style="display:flex; gap:8px"><button class="btn btn-s sim-block-edit" data-id="' + b.id + '">' + (APP.user.langue === 'fr' ? 'Éditer' : 'Edit') + '</button><button class="btn btn-s sim-block-del" data-id="' + b.id + '" style="background:rgba(239,68,68,0.1); color:#ef4444">✕</button></div></div>' + distHtml + '</div>';
   }
   list.innerHTML = html;
 }
@@ -174,13 +177,39 @@ function calculateMuscleDistribution(exercises) {
 }
 
 function renderEditor() {
+  var editor = $('sim-editor');
+  editor.querySelector('.fgroup .flabel').textContent = APP.t('label_prog_type');
+  editor.querySelectorAll('.fgroup .flabel')[1].textContent = APP.t('label_add_ex');
+  var subLabels = editor.querySelectorAll('.card div .flabel');
+  subLabels[0].textContent = APP.t('label_ser');
+  subLabels[1].textContent = APP.t('label_rep');
+  subLabels[2].textContent = APP.t('label_pds');
+  $('sim-add-ex-btn').textContent = '+ ' + APP.t('btn_add_list');
+  editor.querySelector('.stitle').textContent = APP.t('stitle_content_block');
+  $('sim-results').querySelector('.stitle').textContent = APP.t('stitle_gains');
+  $('sim-results').querySelector('.clabel').textContent = APP.t('label_gain_global');
+  $('sim-confirm-btn').textContent = '⚡ ' + APP.t('btn_confirm_session');
+  $('sim-back-btn').textContent = APP.t('btn_back');
+
+  // Peupler les types de séances traduits pour l'éditeur
+  var typeSel = $('sim-block-type');
+  var currentType = SIM.currentBlock.type || "Hypertrophie";
+  typeSel.innerHTML = '';
+  ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'].forEach(function(k) {
+    var o = document.createElement('option');
+    o.value = I18N['fr'][k];
+    o.textContent = APP.t(k);
+    typeSel.appendChild(o);
+  });
+  typeSel.value = currentType;
+
   var list = $('sim-ex-list');
   var exList = SIM.currentBlock.exercises;
-  if (exList.length === 0) { list.innerHTML = '<div class="empty" style="padding:20px"><p>Liste vide.</p></div>'; calculateSimResults([]); return; }
+  if (exList.length === 0) { list.innerHTML = '<div class="empty" style="padding:20px"><p>' + (APP.user.langue === 'fr' ? 'Liste vide.' : 'Empty list.') + '</p></div>'; calculateSimResults([]); return; }
   var html = '';
   for (var i = 0; i < exList.length; i++) {
     var item = exList[i];
-    html += '<div class="sitem" style="flex-direction:column; align-items:stretch; gap:8px; padding:12px"><div class="flex-between"><div class="sname" style="font-size:14px">' + item.ex + '</div><button class="sim-ex-del" data-idx="' + i + '" style="background:none; border:none; color:#ef4444; font-size:18px; padding:0">✕</button></div><div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px"><div><label class="flabel" style="font-size:9px">Séries</label><input type="number" class="sim-inline-input" data-idx="' + i + '" data-field="ser" value="' + item.ser + '"></div><div><label class="flabel" style="font-size:9px">Reps</label><input type="number" class="sim-inline-input" data-idx="' + i + '" data-field="rep" value="' + item.rep + '"></div><div><label class="flabel" style="font-size:9px">Poids (kg)</label><input type="number" class="sim-inline-input" data-idx="' + i + '" data-field="pds" step="0.5" value="' + item.pds + '"></div></div></div>';
+    html += '<div class="sitem" style="flex-direction:column; align-items:stretch; gap:8px; padding:12px"><div class="flex-between"><div class="sname" style="font-size:14px">' + item.ex + '</div><button class="sim-ex-del" data-idx="' + i + '" style="background:none; border:none; color:#ef4444; font-size:18px; padding:0">✕</button></div><div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px"><div><label class="flabel" style="font-size:9px">' + APP.t('label_ser') + '</label><input type="number" class="sim-inline-input" data-idx="' + i + '" data-field="ser" value="' + item.ser + '"></div><div><label class="flabel" style="font-size:9px">' + APP.t('label_rep') + '</label><input type="number" class="sim-inline-input" data-idx="' + i + '" data-field="rep" value="' + item.rep + '"></div><div><label class="flabel" style="font-size:9px">' + APP.t('label_pds') + '</label><input type="number" class="sim-inline-input" data-idx="' + i + '" data-field="pds" step="0.5" value="' + item.pds + '"></div></div></div>';
   }
   list.innerHTML = html;
   calculateSimResults(exList);
@@ -195,12 +224,12 @@ function calculateSimResults(simList) {
   var currentLvl = getLevel(currentVol);
   var nextLvl = getLevel(newVolTotal);
   $('sim-xp-gain').textContent = '+ ' + fmtV(simVolGain) + ' XP Global';
-  var lvlHtml = '<div style="font-weight:700">Niveau Global : ' + currentLvl + ' → ' + nextLvl + '</div>';
-  if (nextLvl > currentLvl) lvlHtml += '<div style="color:var(--green); font-size:12px; margin-top:4px; font-weight:800">✨ MONTÉE DE NIVEAU GLOBALE !</div>';
+  var lvlHtml = '<div style="font-weight:700">' + (APP.user.langue === 'fr' ? 'Niveau Global' : 'Global Level') + ' : ' + currentLvl + ' → ' + nextLvl + '</div>';
+  if (nextLvl > currentLvl) lvlHtml += '<div style="color:var(--green); font-size:12px; margin-top:4px; font-weight:800">✨ ' + (APP.user.langue === 'fr' ? 'MONTÉE DE NIVEAU GLOBALE !' : 'GLOBAL LEVEL UP!') + '</div>';
   else {
     var nextThr = levelThreshold(nextLvl + 1);
     var remaining = nextThr - newVolTotal;
-    lvlHtml += '<div style="color:var(--text2); font-size:11px; margin-top:4px">Encore ' + fmtV(remaining) + ' XP pour le niveau ' + (currentLvl + 1) + '</div>';
+    lvlHtml += '<div style="color:var(--text2); font-size:11px; margin-top:4px">' + (APP.user.langue === 'fr' ? 'Encore ' + fmtV(remaining) + ' XP pour le niveau ' + (currentLvl + 1) : fmtV(remaining) + ' XP left for level ' + (currentLvl + 1)) + '</div>';
   }
   $('sim-lvl-preview').innerHTML = lvlHtml;
   var muscleGains = {};
@@ -220,8 +249,8 @@ function calculateSimResults(simList) {
     var curL = getLevel(currentVolGrp);
     var nxtL = getLevel(newVolGrp);
     var color = levelColor(nxtL);
-    var subText = nxtL > curL ? '<span style="color:var(--green); font-weight:800">LEVEL UP ! (+' + (nxtL - curL) + ')</span>' : '<span style="opacity:0.6">Manque ' + fmtV(levelThreshold(curL + 1) - newVolGrp) + ' XP</span>';
-    muscleHtml += '<div class="card" style="margin-bottom:8px; border-left: 4px solid ' + color + '; padding: 12px"><div class="flex-between"><div><div style="font-size:14px; font-weight:900; color:#fff">' + grpName + '</div><div style="font-size:12px; color:' + color + '; font-weight:700">Niv. ' + curL + ' ➔ ' + nxtL + '</div></div><div style="text-align:right"><div style="font-size:11px; font-weight:600">' + subText + '</div><div style="font-size:9px; color:var(--text2); margin-top:2px">+ ' + fmtV(gainVolGrp) + ' XP</div></div></div><div class="bar-bg" style="height:4px; margin-top:8px"><div class="bar-fill" style="width:' + (levelProgress(newVolGrp)*100).toFixed(0) + '%; background:' + color + '"></div></div></div>';
+    var subText = nxtL > curL ? '<span style="color:var(--green); font-weight:800">LEVEL UP ! (+' + (nxtL - curL) + ')</span>' : '<span style="opacity:0.6">' + (APP.user.langue === 'fr' ? 'Manque ' + fmtV(levelThreshold(curL + 1) - newVolGrp) + ' XP' : fmtV(levelThreshold(curL + 1) - newVolGrp) + ' XP missing') + '</span>';
+    muscleHtml += '<div class="card" style="margin-bottom:8px; border-left: 4px solid ' + color + '; padding: 12px"><div class="flex-between"><div><div style="font-size:14px; font-weight:900; color:#fff">' + grpName + '</div><div style="font-size:12px; color:' + color + '; font-weight:700">' + APP.t('lvl') + ' ' + curL + ' ➔ ' + nxtL + '</div></div><div style="text-align:right"><div style="font-size:11px; font-weight:600">' + subText + '</div><div style="font-size:9px; color:var(--text2); margin-top:2px">+ ' + fmtV(gainVolGrp) + ' XP</div></div></div><div class="bar-bg" style="height:4px; margin-top:8px"><div class="bar-fill" style="width:' + (levelProgress(newVolGrp)*100).toFixed(0) + '%; background:' + color + '"></div></div></div>';
   }
   $('sim-muscle-results').innerHTML = muscleHtml;
 }

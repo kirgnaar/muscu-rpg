@@ -11,6 +11,48 @@ var JOURNAL = {
 
 // ── Initialisation ────────────────────────────────────────────────────────
 function initJournal() {
+  // Traduction des labels statiques (non gérés par APP.updateStaticUI)
+  $('v-seances').querySelector('.stitle').textContent = APP.t('stitle_new_serie');
+  $$('.flabel', $('v-seances')).forEach(function(l) {
+    if (l.htmlFor === 'in-date') l.textContent = APP.t('label_date');
+    if (l.htmlFor === 'sel-type') l.textContent = APP.t('label_type');
+    if (l.htmlFor === 'sel-ex') l.textContent = APP.t('label_ex');
+    if (l.htmlFor === 'in-ser') l.textContent = APP.t('label_ser');
+    if (l.htmlFor === 'in-rep') l.textContent = APP.t('label_rep');
+    if (l.htmlFor === 'in-pds') l.textContent = APP.t('label_pds');
+  });
+  $('btn-save').textContent = '✓ ' + APP.t('btn_save');
+  $('timer-card').querySelector('.clabel span').textContent = '⌛ ' + APP.t('label_timer');
+  $('timer-start-btn').textContent = '▶ ' + APP.t('timer_start');
+  $('timer-stop-btn').textContent = '⏹ ' + APP.t('timer_stop');
+  $('timer-reset-btn').textContent = '🔄 ' + APP.t('timer_reset');
+  $('v-seances').querySelector('.stitle.flex-between span').textContent = APP.t('stitle_journal');
+
+  var pills = $$('.fpill', $('filter-bar'));
+  pills[0].textContent = APP.t('filter_all');
+  pills[1].textContent = APP.t('filter_ex');
+  pills[2].textContent = APP.t('filter_type');
+  pills[3].textContent = APP.t('filter_date');
+
+  // Peupler les types de séances traduits
+  var typeSel = $('sel-type');
+  typeSel.innerHTML = '';
+  ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'].forEach(function(k) {
+    var o = document.createElement('option');
+    o.value = I18N['fr'][k]; // On garde les valeurs FR en DB pour la compatibilité
+    o.textContent = APP.t(k);
+    typeSel.appendChild(o);
+  });
+
+  var fTypeSel = $('f-type-sel');
+  fTypeSel.innerHTML = '<option value="">' + APP.t('filter_all_types') + '</option>';
+  ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'].forEach(function(k) {
+    var o = document.createElement('option');
+    o.value = I18N['fr'][k];
+    o.textContent = APP.t(k);
+    fTypeSel.appendChild(o);
+  });
+
   // Peupler le select exercice principal
   populateExerciseSelect($('sel-ex'), true);
 
@@ -67,8 +109,8 @@ function updatePreview1RM() {
     var best   = bestRM1(exNm);
     var isPR   = rm1 > best && best > 0;
     prev.style.display = 'block';
-    prev.innerHTML = '⚡ 1RM estimé : <strong>' + rm1 + ' kg</strong>'
-      + (isPR ? ' &nbsp;·&nbsp; 🏆 <em style="color:var(--gold)">Nouveau record !</em>' : '');
+    prev.innerHTML = '⚡ 1RM ' + (APP.user.langue === 'ja' ? '推定' : 'estimé') + ' : <strong>' + rm1 + ' kg</strong>'
+      + (isPR ? ' &nbsp;·&nbsp; 🏆 <em style="color:var(--gold)">' + (APP.user.langue === 'fr' ? 'Nouveau record !' : 'New record!') + '</em>' : '');
   } else {
     prev.style.display = 'none';
   }
@@ -113,11 +155,14 @@ function handleSave() {
   }
 
   if (entry.isPR) {
-    toast('🏆 NOUVEAU PR ! ' + entry.rm1 + ' kg', 'pr');
+    var prTxt = APP.user.langue === 'fr' ? '🏆 NOUVEAU PR ! ' : '🏆 NEW PR! ';
+    toast(prTxt + entry.rm1 + ' kg', 'pr');
   } else if (entry.isLevelUp) {
-    toast('✨ LEVEL UP ! Niveau ' + entry.newLvl, 'pr');
+    var lvlTxt = APP.user.langue === 'fr' ? '✨ LEVEL UP ! Niveau ' : '✨ LEVEL UP! Level ';
+    toast(lvlTxt + entry.newLvl, 'pr');
   } else {
-    toast('✓ Enregistré · ' + fmtV(entry.vol), '');
+    var savedTxt = APP.user.langue === 'fr' ? '✓ Enregistré · ' : '✓ Saved · ';
+    toast(savedTxt + fmtV(entry.vol), '');
   }
 
   // Animation XP
@@ -136,7 +181,7 @@ function handleConfirmDelete(id, btn) {
   if (item.dataset.confirm === '1') {
     deleteEntry(id);
     APP.render();
-    toast('Série supprimée', '');
+    toast(APP.user.langue === 'fr' ? 'Série supprimée' : 'Set deleted', '');
   } else {
     item.dataset.confirm = '1';
     btn.dataset.confirm  = '1';
@@ -200,14 +245,14 @@ function renderJournal() {
   if (JOURNAL.filterType === 'date') dateSel.value = JOURNAL.filterVal;
 
   var filtered = applyFilter(APP.data.slice());
-  $('jcount').textContent = filtered.length + ' / ' + APP.data.length + ' séries';
+  $('jcount').textContent = filtered.length + ' / ' + APP.data.length + ' ' + (APP.user.langue === 'fr' ? 'séries' : 'sets');
 
   if (!APP.data.length) {
-    list.innerHTML = '<div class="empty"><span class="empty-icon">🏋️</span><p>Aucune série.<br>Saisis ta première entrée !</p></div>';
+    list.innerHTML = '<div class="empty"><span class="empty-icon">🏋️</span><p>' + (APP.user.langue === 'fr' ? 'Aucune série.<br>Saisis ta première entrée !' : 'No sets.<br>Record your first one!') + '</p></div>';
     return;
   }
   if (!filtered.length) {
-    list.innerHTML = '<div class="empty"><span class="empty-icon">🔍</span><p>Aucune série pour ce filtre.</p></div>';
+    list.innerHTML = '<div class="empty"><span class="empty-icon">🔍</span><p>' + (APP.user.langue === 'fr' ? 'Aucune série pour ce filtre.' : 'No sets for this filter.') + '</p></div>';
     return;
   }
 

@@ -495,9 +495,12 @@
       <div class="clabel">Paramètres</div>
       <div class="card">
         <label class="flabel">Langue</label>
-        <select id="set-lang">
+        <select id="set-lang" onchange="changeLang(this.value)">
           <option value="fr">Français 🇫🇷</option>
           <option value="en">English 🇬🇧</option>
+          <option value="de">Deutsch 🇩🇪</option>
+          <option value="es">Español 🇪🇸</option>
+          <option value="ja">日本語 🇯🇵</option>
         </select>
       </div>
 
@@ -534,6 +537,7 @@
 <script src="js/exercises.js"></script>
 
 <!-- 2. Logique métier -->
+<script src="js/lang.js"></script>
 <script src="js/tiers.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/data.js"></script>

@@ -24,6 +24,13 @@ var APP = {
     document.getElementById('burger').classList.remove('open');
   },
 
+  t: function(key) {
+    var lang = (APP.user && APP.user.langue) || 'fr';
+    if (I18N[lang] && I18N[lang][key]) return I18N[lang][key];
+    if (I18N['fr'][key]) return I18N['fr'][key];
+    return key;
+  },
+
   switchView: function(name) {
     APP.view = name;
 
@@ -86,15 +93,16 @@ function renderHeader() {
 
   var hdrXp = document.getElementById('hdr-xp');
   if (hdrXp) hdrXp.textContent = fmtV(total);
-  
+
   var hdrLvlName = document.getElementById('hdr-lvl-name');
-  if (hdrLvlName) hdrLvlName.textContent = levelName(lvl);
-  
+  if (hdrLvlName) hdrLvlName.textContent = APP.t('lvl') + ' ' + lvl;
+
   var hdrLvlBar = document.getElementById('hdr-lvl-bar');
   if (hdrLvlBar) hdrLvlBar.style.width = pct + '%';
 
   var d = new Date();
-  var dayStr = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+  var langCode = APP.user ? APP.user.langue : 'fr';
+  var dayStr = d.toLocaleDateString(langCode + '-' + langCode.toUpperCase(), { weekday: 'long', day: 'numeric', month: 'long' });
   var hdrDate = document.getElementById('hdr-date');
   if (hdrDate) hdrDate.textContent = dayStr.charAt(0).toUpperCase() + dayStr.slice(1);
 
@@ -102,11 +110,56 @@ function renderHeader() {
     var menuName = document.getElementById('menu-user-name');
     if (menuName) menuName.textContent = APP.user.prenom + ' ' + APP.user.nom;
     var menuStats = document.getElementById('menu-user-stats');
-    if (menuStats) menuStats.textContent = APP.user.age + ' ans • ' + APP.user.poids + ' kg';
+    if (menuStats) menuStats.textContent = APP.user.age + ' ' + APP.t('label_age').toLowerCase() + ' • ' + APP.user.poids + ' kg';
   }
 }
 
+function changeLang(val) {
+  if (!APP.user) return;
+  APP.user.langue = val;
+  saveUser(APP.user);
+  APP.updateStaticUI();
+  APP.render();
+  if (typeof toast === 'function') toast('Langue : ' + val.toUpperCase());
+}
+
+APP.updateStaticUI = function() {
+  // Tabs
+  var tabSeances = document.querySelector('.tab[data-v="seances"] span:last-child');
+  if (tabSeances) tabSeances.textContent = APP.t('tab_seances');
+  var tabPR = document.querySelector('.tab[data-v="pr"] span:last-child');
+  if (tabPR) tabPR.textContent = APP.t('tab_pr');
+  var tabRPG = document.querySelector('.tab[data-v="rpg"] span:last-child');
+  if (tabRPG) tabRPG.textContent = APP.t('tab_rpg');
+  var tabSimu = document.querySelector('.tab[data-v="simulation"] span:last-child');
+  if (tabSimu) tabSimu.textContent = APP.t('tab_simu');
+  var tabStats = document.querySelector('.tab[data-v="stats"] span:last-child');
+  if (tabStats) tabStats.textContent = APP.t('tab_stats');
+  var tabBadges = document.querySelector('.tab[data-v="badges"] span:last-child');
+  if (tabBadges) tabBadges.textContent = APP.t('tab_badges');
+
+  // Menu burger
+  var menuHome = document.querySelector('.menu-item[data-v="rpg"]');
+  if (menuHome) menuHome.innerHTML = '<span>🏠</span> ' + APP.t('menu_home');
+  var menuProfil = document.querySelector('.menu-item[data-v="profil"]');
+  if (menuProfil) menuProfil.innerHTML = '<span>👤</span> ' + APP.t('menu_profil');
+  var menuSettings = document.querySelector('.menu-item[data-v="settings"]');
+  if (menuSettings) menuSettings.innerHTML = '<span>⚙️</span> ' + APP.t('menu_settings');
+
+  // Other UI elements that are always present or re-rendered
+  // We'll call re-renderers for specific views
+};
+
 function renderProfil() {
+  $('v-profil').querySelector('.clabel').textContent = APP.t('menu_profil');
+  var labels = $$('.flabel', $('v-profil'));
+  labels[0].textContent = APP.t('label_prenom');
+  labels[1].textContent = APP.t('label_nom');
+  labels[2].textContent = APP.t('label_age');
+  labels[3].textContent = APP.t('label_poids');
+  labels[4].textContent = APP.t('label_taille');
+  $('v-profil').querySelector('button').textContent = APP.t('btn_save_profile');
+
   if (!APP.user) return;
   document.getElementById('prof-prenom').value = APP.user.prenom;
   document.getElementById('prof-nom').value = APP.user.nom;
@@ -123,10 +176,19 @@ function saveProfile() {
   APP.user.taille = parseInt(document.getElementById('prof-taille').value) || 0;
   saveUser(APP.user);
   renderHeader();
-  if (typeof toast === 'function') toast('Profil enregistré !');
+  if (typeof toast === 'function') toast(APP.user.langue === 'fr' ? 'Profil enregistré !' : 'Profile saved!');
 }
 
 function renderSettings() {
+  $('v-settings').querySelectorAll('.clabel')[0].textContent = APP.t('menu_settings');
+  $('v-settings').querySelector('.flabel').textContent = APP.t('label_lang');
+  $('v-settings').querySelectorAll('.clabel')[1].textContent = APP.t('label_theme');
+  
+  var themeLabels = $$('.theme-opt div:last-child', $('v-settings'));
+  themeLabels[0].textContent = APP.t('theme_dark');
+  themeLabels[1].textContent = APP.t('theme_light');
+  themeLabels[2].textContent = APP.t('theme_amber');
+
   if (!APP.user) return;
   document.getElementById('set-lang').value = APP.user.langue;
   
@@ -136,6 +198,7 @@ function renderSettings() {
     opts[i].style.borderColor = opts[i].dataset.theme === APP.user.theme ? 'var(--accent)' : 'transparent';
   }
 }
+
 
 function setTheme(theme) {
   APP.user.theme = theme;
@@ -155,6 +218,7 @@ document.addEventListener('DOMContentLoaded', function() {
   APP.data = loadData();
   APP.user = loadUser();
   applyTheme(APP.user.theme);
+  APP.updateStaticUI();
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(function(err) {

@@ -32,14 +32,16 @@ function fmtV(v) {
 
 function fmtD(d) {
   if (!d) return '—';
-  return new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', {
+  var langCode = (typeof APP !== 'undefined' && APP.user) ? APP.user.langue : 'fr';
+  return new Date(d + 'T12:00:00').toLocaleDateString(langCode + '-' + langCode.toUpperCase(), {
     day: 'numeric', month: 'short'
   });
 }
 
 function fmtDLong(d) {
   if (!d) return '—';
-  return new Date(d + 'T12:00:00').toLocaleDateString('fr-FR', {
+  var langCode = (typeof APP !== 'undefined' && APP.user) ? APP.user.langue : 'fr';
+  return new Date(d + 'T12:00:00').toLocaleDateString(langCode + '-' + langCode.toUpperCase(), {
     weekday: 'long', day: 'numeric', month: 'long'
   });
 }

@@ -37,6 +37,9 @@ function initBadges() {
 }
 
 function renderBadges() {
+  $('v-badges').querySelector('.stitle').textContent = APP.t('stitle_badges');
+  $('v-badges').querySelectorAll('.clabel')[1].textContent = APP.t('label_muscles');
+  
   renderMuscleBadges();
   renderGlobalAchievements();
   renderBadgeGrid();
@@ -45,9 +48,13 @@ function renderBadges() {
 function renderMuscleBadges() {
   var row = document.getElementById('muscle-badges-row');
   if (!row) return;
-  var allHtml = '<div class="mbdg '+(BADGES.groupFilter===''?'on':'')+'" data-grp=""><div class="mbdg-nm">Tous</div><div class="mbdg-t">Exercices</div><div class="mbdg-pb"><div class="mbdg-pf" style="width:100%; background:var(--accent)"></div></div></div>';
+  var allTxt = APP.user.langue === 'fr' ? 'Tous' : 'All';
+  var allExTxt = APP.user.langue === 'fr' ? 'Exercices' : 'Exercises';
+  var allHtml = '<div class="mbdg '+(BADGES.groupFilter===''?'on':'')+'" data-grp=""><div class="mbdg-nm">'+allTxt+'</div><div class="mbdg-t">'+allExTxt+'</div><div class="mbdg-pb"><div class="mbdg-pf" style="width:100%; background:var(--accent)"></div></div></div>';
   var specialProgress = calculateSpecialAchievementsProgress();
-  var specHtml = '<div class="mbdg '+(BADGES.groupFilter==='special'?'on':'')+'" data-grp="special"><div class="mbdg-nm">Succès</div><div class="mbdg-t">Spéciaux</div><div class="mbdg-pb"><div class="mbdg-pf" style="width:'+specialProgress+'%; background:var(--gold)"></div></div></div>';
+  var succTxt = APP.user.langue === 'fr' ? 'Succès' : 'Achievements';
+  var specTxt = APP.user.langue === 'fr' ? 'Spéciaux' : 'Special';
+  var specHtml = '<div class="mbdg '+(BADGES.groupFilter==='special'?'on':'')+'" data-grp="special"><div class="mbdg-nm">'+succTxt+'</div><div class="mbdg-t">'+specTxt+'</div><div class="mbdg-pb"><div class="mbdg-pf" style="width:'+specialProgress+'%; background:var(--gold)"></div></div></div>';
   var musclesHtml = '';
   for (var i = 0; i < MUSCLES.length; i++) {
     var m = MUSCLES[i];
@@ -88,7 +95,7 @@ function calculateSpecialAchievementsProgress() {
   for (var n = 0; n < APP.data.length; n++) {
     totalReps += (APP.data[n].ser * APP.data[n].rep);
   }
-  
+
   // Calcul SBD pour Monolithes
   var maxS = 0, maxB = 0, maxD = 0;
   for (var o = 0; o < APP.data.length; o++) {
@@ -101,7 +108,7 @@ function calculateSpecialAchievementsProgress() {
 
   var specs = [
     {v:totalVol,m:5000000}, {v:totalSes,m:500}, {v:big6Total,m:1250}, {v:uniqueEx,m:100},
-    {v:maxSessionVol,m:20000}, {v:totalPRs,m:250}, {v:totalReps,m:100000}, 
+    {v:maxSessionVol,m:20000}, {v:totalPRs,m:250}, {v:totalReps,m:100000},
     {v:totalSBD,m:900}, {v:maxS,m:300}, {v:maxB,m:300}, {v:maxD,m:300}
   ];
   var totalSumPct = 0;
@@ -119,8 +126,9 @@ function renderGlobalAchievements() {
   for (var j = 0; j < APP.data.length; j++) {
     if (APP.data[j].isPR) prCount++;
   }
-  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">Statistiques de Carrière</div><div class="ach-grid"><div class="ach-card"><div class="ach-val">'+fmtV(totalVol)+'</div><div class="ach-lbl">Volume (KG)</div></div><div class="ach-card"><div class="ach-val">'+totalSes+'</div><div class="ach-lbl">Séances</div></div><div class="ach-card"><div class="ach-val">'+prCount+'</div><div class="ach-lbl">Records</div></div></div>';
-  var target = document.querySelector('#v-badges .clabel[style*="Badges Exercices"]');
+  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + (APP.user.langue === 'fr' ? 'Statistiques de Carrière' : 'Career Statistics') + '</div><div class="ach-grid"><div class="ach-card"><div class="ach-val">'+fmtV(totalVol)+'</div><div class="ach-lbl">' + (APP.user.langue === 'fr' ? 'Volume (KG)' : 'Volume (KG)') + '</div></div><div class="ach-card"><div class="ach-val">'+totalSes+'</div><div class="ach-lbl">' + APP.t('label_sessions') + '</div></div><div class="ach-card"><div class="ach-val">'+prCount+'</div><div class="ach-lbl">' + (APP.user.langue === 'fr' ? 'Records' : 'Records') + '</div></div></div>';
+  var target = document.querySelector('#v-badges .clabel[style*="Groupes Musculaires"]');
+
   if (target) {
     var old = document.getElementById('global-ach-box');
     if (old) old.remove();
@@ -156,7 +164,7 @@ function renderSpecialAchievements() {
   for (var n = 0; n < BIG6.length; n++) {
     if (exCounts[BIG6[n]]) big6Done++;
   }
-  
+
   // Calcul SBD pour Monolithes
   var maxS = 0, maxB = 0, maxD = 0;
   for (var o = 0; o < APP.data.length; o++) {
@@ -167,32 +175,34 @@ function renderSpecialAchievements() {
   }
   var totalSBD = maxS + maxB + maxD;
 
+  var isFR = APP.user.langue === 'fr';
+
   var monoPaliere = [
-    {n:100,l:'Acier',r:'RARE',c:'#3b82f6'},
-    {n:150,l:'Béton',r:'ÉPIQUE',c:'#a855f7'},
-    {n:200,l:'Monolithe',r:'LÉGENDAIRE',c:'#fbbf24'},
-    {n:300,l:'La Montagne',r:'MYTHIQUE',c:'#22d3ee'}
+    {n:100,l:isFR?'Acier':'Steel',r:isFR?'RARE':'RARE',c:'#3b82f6'},
+    {n:150,l:isFR?'Béton':'Concrete',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},
+    {n:200,l:isFR?'Monolithe':'Monolith',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},
+    {n:300,l:isFR?'La Montagne':'The Mountain',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}
   ];
   var totalMonoPaliere = [
-    {n:300,l:'Fondation',r:'RARE',c:'#3b82f6'},
-    {n:450,l:'Structure',r:'ÉPIQUE',c:'#a855f7'},
-    {n:600,l:'Monolithe Total',r:'LÉGENDAIRE',c:'#fbbf24'},
-    {n:900,l:'Le Colosse',r:'MYTHIQUE',c:'#22d3ee'}
+    {n:300,l:isFR?'Fondation':'Foundation',r:isFR?'RARE':'RARE',c:'#3b82f6'},
+    {n:450,l:isFR?'Structure':'Structure',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},
+    {n:600,l:isFR?'Monolithe Total':'Total Monolith',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},
+    {n:900,l:isFR?'Le Colosse':'The Colossus',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}
   ];
 
   var specs = [
-    {id:'titan', name:'Le Titan du Volume', icon:'trophy', val:totalVol, paliere:[{n:10000,l:'Poids Plume',r:'COMMUN',c:'#94a3b8'},{n:100000,l:'Poids Moyen',r:'RARE',c:'#3b82f6'},{n:500000,l:'Poids Lourd',r:'ÉPIQUE',c:'#a855f7'},{n:1000000,l:'Le Titan',r:'LÉGENDAIRE',c:'#fbbf24'},{n:5000000,l:'Atlas',r:'MYTHIQUE',c:'#22d3ee'}]},
-    {id:'pilier', name:'Le Pilier du Club', icon:'trophy', val:totalSes, paliere:[{n:10,l:'Visiteur',r:'COMMUN',c:'#94a3b8'},{n:50,l:'Habitué',r:'RARE',c:'#3b82f6'},{n:100,l:'Adepte',r:'ÉPIQUE',c:'#a855f7'},{n:250,l:'Pilier de Fer',r:'LÉGENDAIRE',c:'#fbbf24'},{n:500,l:'Légende Vivante',r:'MYTHIQUE',c:'#22d3ee'}]},
-    {id:'briseur', name:'Le Briseur de Limites', icon:'trophy', val:totalPRs, paliere:[{n:10,l:'Déterminé',r:'RARE',c:'#3b82f6'},{n:50,l:'Inarrêtable',r:'ÉPIQUE',c:'#a855f7'},{n:100,l:'Briseur de Plafond',r:'LÉGENDAIRE',c:'#fbbf24'},{n:250,l:'L\'Anomalie',r:'MYTHIQUE',c:'#22d3ee'}]},
-    {id:'acharne', name:'L\'Acharné', icon:'trophy', val:totalReps, paliere:[{n:1000,l:'Cadence I',r:'COMMUN',c:'#94a3b8'},{n:10000,l:'Cadence II',r:'RARE',c:'#3b82f6'},{n:50000,l:'Mécanique',r:'ÉPIQUE',c:'#a855f7'},{n:100000,l:'L\'Horloge de Fer',r:'LÉGENDAIRE',c:'#fbbf24'}]},
-    {id:'chelem', name:'Le Grand Chelem', icon:'trophy', val:big6Done, paliere:[{n:2,l:'Apprenti',r:'RARE',c:'#3b82f6'},{n:4,l:'Guerrier Complet',r:'ÉPIQUE',c:'#a855f7'},{n:6,l:'Le Grand Chelem',r:'LÉGENDAIRE',c:'#fbbf24'}]},
-    {id:'monolithe', name:'Le Monolithe (SBD)', icon:'trophy', val:totalSBD, paliere:totalMonoPaliere},
-    {id:'monolithe_s', name:'Monolithe S (Squat)', icon:'trophy', val:maxS, paliere:monoPaliere},
-    {id:'monolithe_b', name:'Monolithe B (Couché)', icon:'trophy', val:maxB, paliere:monoPaliere},
-    {id:'monolithe_d', name:'Monolithe D (Terre)', icon:'trophy', val:maxD, paliere:monoPaliere},
-    {id:'cameleon', name:'Le Caméléon', icon:'trophy', val:uniqueEx, paliere:[{n:10,l:'Curieux',r:'COMMUN',c:'#94a3b8'},{n:25,l:'Polyvalent',r:'RARE',c:'#3b82f6'},{n:50,l:'Spécialiste',r:'ÉPIQUE',c:'#a855f7'},{n:75,l:'Encyclopédie',r:'LÉGENDAIRE',c:'#fbbf24'},{n:100,l:'Maître de la Salle',r:'MYTHIQUE',c:'#22d3ee'}]}
+    {id:'titan', name:isFR?'Le Titan du Volume':'Volume Titan', icon:'trophy', val:totalVol, paliere:[{n:10000,l:isFR?'Poids Plume':'Featherweight',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:100000,l:isFR?'Poids Moyen':'Middleweight',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:500000,l:isFR?'Poids Lourd':'Heavyweight',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:1000000,l:isFR?'Le Titan':'The Titan',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:5000000,l:'Atlas',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
+    {id:'pilier', name:isFR?'Le Pilier du Club':'Club Pillar', icon:'trophy', val:totalSes, paliere:[{n:10,l:isFR?'Visiteur':'Visitor',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:50,l:isFR?'Habitué':'Regular',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:100,l:isFR?'Adepte':'Adept',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:250,l:isFR?'Pilier de Fer':'Iron Pillar',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:500,l:isFR?'Légende Vivante':'Living Legend',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
+    {id:'briseur', name:isFR?'Le Briseur de Limites':'Limit Breaker', icon:'trophy', val:totalPRs, paliere:[{n:10,l:isFR?'Déterminé':'Determined',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:isFR?'Inarrêtable':'Unstoppable',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:100,l:isFR?'Briseur de Plafond':'Ceiling Breaker',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:250,l:isFR?'L\'Anomalie':'The Anomaly',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
+    {id:'acharne', name:isFR?'L\'Acharné':'Hard Worker', icon:'trophy', val:totalReps, paliere:[{n:1000,l:isFR?'Cadence I':'Cadence I',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:10000,l:isFR?'Cadence II':'Cadence II',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50000,l:isFR?'Mécanique':'Mechanical',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:100000,l:isFR?'L\'Horloge de Fer':'Iron Clock',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'}]},
+    {id:'chelem', name:isFR?'Le Grand Chelem':'Grand Slam', icon:'trophy', val:big6Done, paliere:[{n:2,l:isFR?'Apprenti':'Apprentice',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:4,l:isFR?'Guerrier Complet':'Complete Warrior',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:6,l:isFR?'Le Grand Chelem':'Grand Slam',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'}]},
+    {id:'monolithe', name:isFR?'Le Monolithe (SBD)':'Monolith (SBD)', icon:'trophy', val:totalSBD, paliere:totalMonoPaliere},
+    {id:'monolithe_s', name:isFR?'Monolithe S (Squat)':'Monolith S (Squat)', icon:'trophy', val:maxS, paliere:monoPaliere},
+    {id:'monolithe_b', name:isFR?'Monolithe B (Couché)':'Monolith B (Bench)', icon:'trophy', val:maxB, paliere:monoPaliere},
+    {id:'monolithe_d', name:isFR?'Monolithe D (Terre)':'Monolith D (Deadlift)', icon:'trophy', val:maxD, paliere:monoPaliere},
+    {id:'cameleon', name:isFR?'Le Caméléon':'Chameleon', icon:'trophy', val:uniqueEx, paliere:[{n:10,l:isFR?'Curieux':'Curious',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:25,l:isFR?'Polyvalent':'Versatile',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:isFR?'Spécialiste':'Specialist',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:75,l:isFR?'Encyclopédie':'Encyclopedia',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:100,l:isFR?'Maître de la Salle':'Gym Master',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]}
   ];
-  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">Hauts Faits Spéciaux</div><div id="special-ach-grid">';
+  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + (isFR?'Hauts Faits Spéciaux':'Special Achievements') + '</div><div id="special-ach-grid">';
   for (var q = 0; q < specs.length; q++) {
     var s = specs[q];
     var current = s.paliere[0];
@@ -206,12 +216,12 @@ function renderSpecialAchievements() {
     }
     var pct = next ? (s.val / next.n * 100).toFixed(0) : 100;
     var unit = 'kg';
-    if (s.id === 'pilier') unit = 'séances';
-    else if (s.id === 'cameleon') unit = 'exercices';
+    if (s.id === 'pilier') unit = isFR?'séances':'sessions';
+    else if (s.id === 'cameleon') unit = isFR?'exercices':'exercises';
     else if (s.id === 'briseur') unit = 'PR';
     else if (s.id === 'acharne') unit = 'reps';
     else if (s.id === 'chelem') unit = '/ 6 ex';
-    html += '<div class="bdg-card special-ach '+(earned?'earned':'')+'" style="border-left: 4px solid '+current.c+'"><div class="bdg-visual">'+getPremiumVisual(s.icon, current.c, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+(earned?current.l:s.name)+'</div><div class="bdg-meta">'+s.name+' <span class="bdg-rarity-pill" style="color:'+current.c+'">'+current.r+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+current.c+'"></div></div><div class="bdg-rate" style="color:#fff; opacity:1">Progression : '+s.val.toLocaleString()+' '+unit+'</div></div></div>';
+    html += '<div class="bdg-card special-ach '+(earned?'earned':'')+'" style="border-left: 4px solid '+current.c+'"><div class="bdg-visual">'+getPremiumVisual(s.icon, current.c, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+(earned?current.l:s.name)+'</div><div class="bdg-meta">'+s.name+' <span class="bdg-rarity-pill" style="color:'+current.c+'">'+current.r+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+current.c+'"></div></div><div class="bdg-rate" style="color:#fff; opacity:1">'+(isFR?'Progression':'Progress')+' : '+s.val.toLocaleString()+' '+unit+'</div></div></div>';
   }
   html += '</div>';
   var grid = document.getElementById('badge-grid');
@@ -263,6 +273,7 @@ function renderBadgeGrid() {
   });
   var allEx = unlocked.concat(locked);
   var htmlStr = '';
+  var isFR = APP.user.langue === 'fr';
   for (var j = 0; j < allEx.length; j++) {
     var ex = allEx[j];
     var name = ex[0];
@@ -279,7 +290,7 @@ function renderBadgeGrid() {
     else if (group === 'Biceps') type = 'curl';
     else if (name.indexOf('Soulevé') !== -1) type = 'deadlift';
     if (ICON_MAP[name]) type = ICON_MAP[name];
-    htmlStr += '<div class="bdg-card '+ti.cls+' '+(earned?'earned':'')+'" data-rarity="'+ti.label+'"><div class="bdg-visual">'+getPremiumVisual(type, ti.col, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+name+'</div><div class="bdg-meta">'+group+' <span class="bdg-rarity-pill" style="color:'+ti.col+'">'+ti.label+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+ti.col+'; box-shadow:0 0 10px '+ti.col+'"></div></div>'+(earned?'<div class="bdg-rate">Débloqué par seulement '+ti.rate+' des athlètes</div>':'')+'</div><div class="bdg-aside" style="text-align:right"><div class="bdg-stat-v">'+(earned ? max1RM + 'kg' : '--')+'</div><div class="bdg-stat-l">1RM MAX</div></div></div>';
+    htmlStr += '<div class="bdg-card '+ti.cls+' '+(earned?'earned':'')+'" data-rarity="'+ti.label+'"><div class="bdg-visual">'+getPremiumVisual(type, ti.col, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+name+'</div><div class="bdg-meta">'+group+' <span class="bdg-rarity-pill" style="color:'+ti.col+'">'+ti.label+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+ti.col+'; box-shadow:0 0 10px '+ti.col+'"></div></div>'+(earned?'<div class="bdg-rate">'+(isFR?'Débloqué par seulement ':'Unlocked by only ')+ti.rate+(isFR?' des athlètes':' of athletes')+'</div>':'')+'</div><div class="bdg-aside" style="text-align:right"><div class="bdg-stat-v">'+(earned ? max1RM + 'kg' : '--')+'</div><div class="bdg-stat-l">1RM MAX</div></div></div>';
   }
   grid.innerHTML = htmlStr;
   if (window.gsap) {

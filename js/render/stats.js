@@ -12,7 +12,7 @@ function initStats() {
   populateExerciseSelect($('stat-ex-sel'), false);
   var emptyOpt = document.createElement('option');
   emptyOpt.value = '';
-  emptyOpt.textContent = '-- Choisir un exercice --';
+  emptyOpt.textContent = '-- ' + (APP.user.langue === 'fr' ? 'Choisir un exercice' : 'Choose an exercise') + ' --';
   $('stat-ex-sel').insertBefore(emptyOpt, $('stat-ex-sel').firstChild);
   $('stat-ex-sel').value = '';
 
@@ -34,6 +34,19 @@ function initStats() {
  * Rendu des KPIs globaux
  */
 function renderStats() {
+  $('v-stats').querySelector('.stitle').textContent = APP.t('stitle_stats');
+  $('btn-export').textContent = '⬆️ ' + APP.t('btn_export');
+  $('v-stats').querySelector('label[for="btn-import"]').textContent = '⬇️ ' + APP.t('btn_import');
+  
+  var kpis = $$('.kpi-l', $('v-stats'));
+  kpis[0].textContent = APP.t('label_vol_total');
+  kpis[1].textContent = APP.t('label_sessions');
+  kpis[2].textContent = APP.t('label_pr_done');
+  kpis[3].textContent = APP.t('label_ex_diff');
+  
+  $('v-stats').querySelector('.fgroup .flabel').textContent = APP.t('label_ex_analyze');
+  $('chart-empty').querySelector('div').textContent = APP.t('label_chart_empty');
+
   var data = APP.data;
   var total = 0;
   var sessionsSet = {};
@@ -91,7 +104,7 @@ function renderStatsCharts(exName) {
     if (EX[i][0] === exName) { exData = EX[i]; break; }
   }
   var color = exData ? (MCOL[exData[2].p || exData[2]] || '#3b82f6') : '#3b82f6';
-  
+
   var dates = [];
   var vols = [];
   var rms = [];
@@ -102,16 +115,17 @@ function renderStatsCharts(exName) {
   }
 
   cardVol.style.display = 'block';
-  $('chart-vol-title').textContent = 'Volume par séance — ' + exName;
+  $('chart-vol-title').textContent = APP.t('label_chart_vol') + ' — ' + exName;
   $('chart-vol-legend').innerHTML  = '<span><span class="ch-dot" style="background:' + color + '"></span>Volume (kg)</span>';
   setTimeout(function() { drawChart('chart-vol', dates, [{ values: vols, color: color }]); }, 30);
 
   cardPR.style.display = 'block';
-  $('chart-pr-title').textContent = '1RM estimé — ' + exName + (BIG6.indexOf(exName) !== -1 ? ' 🏆' : '');
+  $('chart-pr-title').textContent = APP.t('label_chart_pr') + ' — ' + exName + (BIG6.indexOf(exName) !== -1 ? ' 🏆' : '');
   // Correction de la légende : Afficher Hybride au lieu d'Epley
-  $('chart-pr-legend').innerHTML  = '<span><span class="ch-dot" style="background:#10b981"></span>1RM estimé Hybride (kg)</span>';
+  $('chart-pr-legend').innerHTML  = '<span><span class="ch-dot" style="background:#10b981"></span>' + (APP.user.langue === 'fr' ? '1RM estimé Hybride' : 'Est. Hybrid 1RM') + ' (kg)</span>';
   setTimeout(function() { drawChart('chart-pr', dates, [{ values: rms, color: '#10b981' }]); }, 30);
 }
+
 
 /**
  * Moteur de rendu Canvas
