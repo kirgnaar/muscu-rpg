@@ -1,5 +1,5 @@
 // ── Service Worker — Muscu RPG ─────────────────────────────────────────────
-var CACHE_NAME = 'muscu-rpg-v76';
+var CACHE_NAME = 'muscu-rpg-v77';
 var ASSETS = [
   '/',
   '/index.html',
@@ -25,6 +25,9 @@ var ASSETS = [
   '/js/body/front.js',
   '/js/body/back.js',
   '/js/app.js',
+  '/js/firebase-config.js',
+  '/js/auth.js',
+  '/js/sync.js',
 ];
 
 self.addEventListener('install', function(e) {

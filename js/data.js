@@ -29,11 +29,23 @@ function loadUser() {
 }
 
 /**
- * Sauvegarder le profil utilisateur
+ * Sauvegarder le profil utilisateur et déclencher la sync
  */
 function saveUser(user) {
   try {
     localStorage.setItem(USER_KEY, JSON.stringify(user));
+    var timestamp = Date.now();
+    localStorage.setItem('mrpg_last_sync', timestamp.toString());
+
+    if (window.Auth && window.Auth.user) {
+      import('./sync.js').then(function(m) {
+        m.pushToCloud(window.Auth.user.uid, {
+          sessions: APP.data,
+          user: APP.user,
+          blocks: (window.SIM && SIM.blocks) ? SIM.blocks : []
+        });
+      });
+    }
   } catch(e) {}
 }
 
@@ -51,11 +63,25 @@ function loadData() {
 }
 
 /**
- * Sauvegarder les données dans localStorage
+ * Sauvegarder les données dans localStorage et déclencher la sync cloud
  */
 function saveData(data) {
   try {
     localStorage.setItem(DB_KEY, JSON.stringify(data));
+    var timestamp = Date.now();
+    localStorage.setItem('mrpg_last_sync', timestamp.toString());
+
+    // Déclencher la sync Cloud si l'utilisateur est connecté
+    // On utilise dynamic import pour rester compatible ES5 et éviter les erreurs de chargement
+    if (window.Auth && window.Auth.user) {
+      import('./sync.js').then(function(m) {
+        m.pushToCloud(window.Auth.user.uid, {
+          sessions: APP.data,
+          user: APP.user,
+          blocks: (window.SIM && SIM.blocks) ? SIM.blocks : []
+        });
+      });
+    }
   } catch(e) {
     console.error('[data] Save error:', e);
     if (typeof toast === 'function') toast('Erreur de sauvegarde', 'err');

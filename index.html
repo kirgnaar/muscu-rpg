@@ -436,6 +436,23 @@
   <!-- ── Menu Latéral ────────────────────────────────────────────────────── -->
   <div class="menu-overlay" id="menu-overlay"></div>
   <nav class="side-menu" id="side-menu">
+    <!-- ── Section Authentification ── -->
+    <div class="auth-widget" style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
+      <button id="auth-login-btn" class="btn btn-s" style="width:100%; background:#fff; color:#000; font-weight:700; border-radius:8px; display:flex; align-items:center; justify-content:center; gap:8px">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:16px">
+        Connexion Google
+      </button>
+
+      <div id="auth-user-profile" style="display:none; align-items:center; gap:12px">
+        <img id="auth-user-photo" src="" style="width:38px; height:38px; border-radius:50%; border: 2px solid var(--accent); background: #1e293b">
+        <div style="flex:1; overflow:hidden">
+          <div id="auth-user-name" style="font-size:14px; font-weight:800; color:#fff; white-space:nowrap; text-overflow:ellipsis; overflow:hidden"></div>
+          <div id="sync-status" style="font-size:10px; opacity:0.6; display:flex; align-items:center; gap:4px">🌐 Hors ligne</div>
+        </div>
+        <button id="auth-logout-btn" class="btn btn-s" style="background:rgba(255,255,255,0.05); color:var(--text2); padding:8px; border-radius:8px">✕</button>
+      </div>
+    </div>
+
     <div class="menu-hdr">
       <div class="menu-hdr-name" id="menu-user-name">Guerrier Muscu</div>
       <div class="menu-hdr-sub" id="menu-user-stats">25 ans • 75 kg</div>
@@ -564,6 +581,20 @@
 
 <!-- 5. App (doit être en dernier) -->
 <script src="js/app.js"></script>
+
+<!-- 6. Firebase & Auth (Modules ESM) -->
+<script type="module">
+  import { Auth } from './js/auth.js';
+  // Rendre global pour les boutons si nécessaire (ou attacher les listeners ici)
+  window.Auth = Auth;
+  Auth.init();
+  
+  const loginBtn = document.getElementById('auth-login-btn');
+  const logoutBtn = document.getElementById('auth-logout-btn');
+  
+  if (loginBtn) loginBtn.addEventListener('click', function() { Auth.login(); });
+  if (logoutBtn) logoutBtn.addEventListener('click', function() { Auth.logout(); });
+</script>
 
 </body>
 </html>
