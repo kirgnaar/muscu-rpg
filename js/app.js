@@ -37,6 +37,13 @@ var APP = {
       views[j].classList.toggle('on', views[j].id === 'v-' + name);
     }
 
+    // Masquer la barre d'onglets pour le profil et les paramètres
+    var tabsBar = document.querySelector('.tabs');
+    if (tabsBar) {
+      var isFullPage = (name === 'profil' || name === 'settings');
+      tabsBar.style.display = isFullPage ? 'none' : 'flex';
+    }
+
     APP.renderView(name);
 
     // Initialisation différée du mannequin 3D quand on affiche l'onglet Badges
