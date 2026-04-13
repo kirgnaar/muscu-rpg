@@ -109,8 +109,12 @@ function updatePreview1RM() {
     var best   = bestRM1(exNm);
     var isPR   = rm1 > best && best > 0;
     prev.style.display = 'block';
-    prev.innerHTML = '⚡ 1RM ' + (APP.user.langue === 'ja' ? '推定' : 'estimé') + ' : <strong>' + rm1 + ' kg</strong>'
-      + (isPR ? ' &nbsp;·&nbsp; 🏆 <em style="color:var(--gold)">' + (APP.user.langue === 'fr' ? 'Nouveau record !' : 'New record!') + '</em>' : '');
+    
+    var label1RM = APP.user.langue === 'ja' ? '1RM 推定' : '⚡ 1RM ' + APP.t('progress').toLowerCase();
+    var recordTxt = APP.user.langue === 'fr' ? 'Nouveau record !' : 'New record!';
+    
+    prev.innerHTML = label1RM + ' : <strong>' + rm1 + ' kg</strong>'
+      + (isPR ? ' &nbsp;·&nbsp; 🏆 <em style="color:var(--gold)">' + recordTxt + '</em>' : '');
   } else {
     prev.style.display = 'none';
   }
@@ -245,14 +249,14 @@ function renderJournal() {
   if (JOURNAL.filterType === 'date') dateSel.value = JOURNAL.filterVal;
 
   var filtered = applyFilter(APP.data.slice());
-  $('jcount').textContent = filtered.length + ' / ' + APP.data.length + ' ' + (APP.user.langue === 'fr' ? 'séries' : 'sets');
+  $('jcount').textContent = filtered.length + ' / ' + APP.data.length + ' ' + APP.t('sets');
 
   if (!APP.data.length) {
-    list.innerHTML = '<div class="empty"><span class="empty-icon">🏋️</span><p>' + (APP.user.langue === 'fr' ? 'Aucune série.<br>Saisis ta première entrée !' : 'No sets.<br>Record your first one!') + '</p></div>';
+    list.innerHTML = '<div class="empty"><span class="empty-icon">🏋️</span><p>' + APP.t('no_sets') + '</p></div>';
     return;
   }
   if (!filtered.length) {
-    list.innerHTML = '<div class="empty"><span class="empty-icon">🔍</span><p>' + (APP.user.langue === 'fr' ? 'Aucune série pour ce filtre.' : 'No sets for this filter.') + '</p></div>';
+    list.innerHTML = '<div class="empty"><span class="empty-icon">🔍</span><p>' + APP.t('no_sets_filter') + '</p></div>';
     return;
   }
 
@@ -279,11 +283,22 @@ function renderJournal() {
     items.forEach(function(e) {
       var c  = TCOL[e.type] || '#94a3b8';
       var pr = e.isPR ? ' <span style="font-size:14px" title="Record Personnel !">🏆</span>' : '';
+      
+      // Get translated type name
+      var typeKey = {
+        'Hypertrophie': 'hypertrophy',
+        'Force': 'strength',
+        'Hyperforce (PR)': 'hyperstrength',
+        'Endurance musculaire': 'endurance',
+        'Décharge': 'deload'
+      }[e.type] || '';
+      var translatedType = typeKey ? APP.t(typeKey) : e.type;
+
       html += '<div class="sitem" data-id="' + e.id + '">'
             + '<div class="sdot" style="background:' + c + '"></div>'
             + '<div class="sinfo">'
             + '<div class="sname">' + e.ex + pr + '</div>'
-            + '<div class="smeta">' + e.type + ' \u00b7 ' + e.ser + '\u00d7' + e.rep + ' \u00b7 ' + e.pds + ' kg</div>'
+            + '<div class="smeta">' + translatedType + ' \u00b7 ' + e.ser + '\u00d7' + e.rep + ' \u00b7 ' + e.pds + ' kg</div>'
             + '</div>'
             + '<div style="display:flex;align-items:center;gap:2px">'
             + '<div class="svol">' + fmtV(e.vol) + '</div>'

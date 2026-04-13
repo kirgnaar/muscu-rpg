@@ -24,10 +24,18 @@ function renderRPG() {
     var lc   = levelColor(lvl);
     var mc   = MCOL[m] || '#94a3b8';
     var xp   = lvl < 100 ? Math.ceil(levelThreshold(lvl + 1) - vol) : 0;
+    
+    // Translate muscle group names
+    var mKey = {
+      'Pectoraux': 'pecs', 'Dorsaux': 'back', 'Épaules': 'shoulders', 
+      'Biceps': 'biceps', 'Triceps': 'triceps', 'Quadriceps': 'quads', 
+      'Ischios': 'hams', 'Fessiers': 'glutes', 'Mollets': 'calves', 'Abdos': 'abs'
+    }[m] || m;
+    var translatedM = APP.t(mKey);
 
     return '<div class="rpgcard">'
          + '<div class="rpgtop">'
-         + '<span class="rpgm" style="color:' + mc + '">' + m + '</span>'
+         + '<span class="rpgm" style="color:' + mc + '">' + translatedM + '</span>'
          + '<span class="rpgl" style="color:' + lc + '">' + APP.t('lvl') + ' ' + lvl + '</span>'
          + '</div>'
          + '<div class="bar-bg"><div class="bar-fill" style="width:'

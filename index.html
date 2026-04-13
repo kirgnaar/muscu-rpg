@@ -98,7 +98,7 @@
     </div>
     <div style="flex: 1">
       <div class="hdr-title">Muscu RPG</div>
-      <div class="hdr-lvl" id="hdr-lvl-name">Niveau 0</div>
+      <div class="hdr-lvl" id="hdr-lvl-name"></div>
       <div class="hdr-sub" id="hdr-date"></div>
     </div>
     <div style="text-align: right">
@@ -117,56 +117,50 @@
     ════════════════════════════════════════════════════════════════════ -->
     <div class="view on" id="v-seances">
 
-      <div class="stitle">Nouvelle série</div>
+      <div class="stitle" data-i18n="stitle_new_serie">Nouvelle série</div>
 
       <div class="addform">
 
         <div class="fgroup">
-          <label class="flabel" for="in-date">Date</label>
+          <label class="flabel" for="in-date" data-i18n="label_date">Date</label>
           <input type="date" id="in-date">
         </div>
 
         <div class="fgroup">
-          <label class="flabel" for="sel-type">Type de séance</label>
-          <select id="sel-type">
-            <option>Hypertrophie</option>
-            <option>Force</option>
-            <option>Hyperforce (PR)</option>
-            <option>Endurance musculaire</option>
-            <option>Décharge</option>
-          </select>
+          <label class="flabel" for="sel-type" data-i18n="label_type">Type de séance</label>
+          <select id="sel-type"></select>
         </div>
 
         <div class="fgroup">
-          <label class="flabel" for="sel-ex">Exercice</label>
+          <label class="flabel" for="sel-ex" data-i18n="label_ex">Exercice</label>
           <select id="sel-ex"></select>
         </div>
 
         <div class="fgroup">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:6px">
             <div>
-              <label class="flabel" for="in-ser">Séries</label>
+              <label class="flabel" for="in-ser" data-i18n="label_ser">Séries</label>
               <input type="number" id="in-ser" placeholder="4" min="1" max="20">
             </div>
             <div>
-              <label class="flabel" for="in-rep">Répétitions</label>
+              <label class="flabel" for="in-rep" data-i18n="label_rep">Répétitions</label>
               <input type="number" id="in-rep" placeholder="10" min="1" max="100">
             </div>
           </div>
-          <label class="flabel" for="in-pds">Poids (kg)</label>
+          <label class="flabel" for="in-pds" data-i18n="label_pds">Poids (kg)</label>
           <input type="number" id="in-pds" placeholder="70" min="0" max="500" step="0.5">
         </div>
 
         <div class="preview-box" id="preview-1rm"></div>
 
-        <button class="btn btn-p" id="btn-save">✓ Enregistrer</button>
+        <button class="btn btn-p" id="btn-save" data-i18n="btn_save">✓ Enregistrer</button>
 
       </div><!-- /addform -->
 
       <!-- ── Chrono de repos ─────────────────────────────────────────── -->
       <div class="card timer-card" id="timer-card" style="margin-bottom:12px">
         <div class="clabel flex-between">
-          <span>⌛ Chrono de repos</span>
+          <span data-i18n="label_timer">⌛ Chrono de repos</span>
           <div class="timer-opts">
             <button class="timer-opt" data-d="60">1:00</button>
             <button class="timer-opt active" data-d="90">1:30</button>
@@ -177,9 +171,9 @@
         <div class="timer-main">
           <div class="timer-display" id="timer-display">1:30</div>
           <div class="timer-controls">
-            <button class="btn btn-s" id="timer-start-btn">▶ Démarrer</button>
-            <button class="btn btn-s" id="timer-stop-btn" style="display:none">⏹ Arrêter</button>
-            <button class="btn btn-s" id="timer-reset-btn">🔄 Reset</button>
+            <button class="btn btn-s" id="timer-start-btn" data-i18n="timer_start">▶ Démarrer</button>
+            <button class="btn btn-s" id="timer-stop-btn" style="display:none" data-i18n="timer_stop">⏹ Arrêter</button>
+            <button class="btn btn-s" id="timer-reset-btn" data-i18n="timer_reset">🔄 Reset</button>
           </div>
         </div>
         <div class="timer-progress-bar">
@@ -188,30 +182,21 @@
       </div>
 
       <div class="stitle flex-between">
-        <span>Journal</span>
+        <span data-i18n="stitle_journal">Journal</span>
         <span style="font-size:12px;color:var(--text2)" id="jcount"></span>
       </div>
 
       <!-- Filtres -->
       <div id="filter-bar" style="margin-bottom:12px">
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-          <button class="fpill on" data-ftype="none">Tout</button>
-          <button class="fpill" data-ftype="ex">Exercice</button>
-          <button class="fpill" data-ftype="type">Type séance</button>
-          <button class="fpill" data-ftype="date">Date</button>
+          <button class="fpill on" data-ftype="none" data-i18n="filter_all">Tout</button>
+          <button class="fpill" data-ftype="ex" data-i18n="filter_ex">Exercice</button>
+          <button class="fpill" data-ftype="type" data-i18n="filter_type">Type séance</button>
+          <button class="fpill" data-ftype="date" data-i18n="filter_date">Date</button>
         </div>
         <select id="f-ex-sel"   style="display:none"></select>
-        <select id="f-type-sel" style="display:none">
-          <option value="">-- Tous les types --</option>
-          <option>Hypertrophie</option>
-          <option>Force</option>
-          <option>Hyperforce (PR)</option>
-          <option>Endurance musculaire</option>
-          <option>Décharge</option>
-        </select>
-        <select id="f-date-sel" style="display:none">
-          <option value="">-- Toutes les dates --</option>
-        </select>
+        <select id="f-type-sel" style="display:none"></select>
+        <select id="f-date-sel" style="display:none"></select>
       </div>
 
       <div id="journal"></div>
@@ -222,7 +207,7 @@
          PR BIG 6
     ════════════════════════════════════════════════════════════════════ -->
     <div class="view" id="v-pr">
-      <div class="stitle">PR — Big 6</div>
+      <div class="stitle" data-i18n="stitle_pr">PR — Big 6</div>
       <div id="pr-list"></div>
     </div>
 
@@ -230,9 +215,9 @@
          RPG
     ════════════════════════════════════════════════════════════════════ -->
     <div class="view" id="v-rpg">
-      <div class="stitle">Progression RPG</div>
+      <div class="stitle" data-i18n="stitle_rpg">Progression RPG</div>
       <div class="card card-rpg-score" style="margin-bottom:10px">
-        <div class="clabel clabel-accent">Score Global</div>
+        <div class="clabel clabel-accent" data-i18n="label_score_global">Score Global</div>
         <div style="font-size:30px;font-weight:800;letter-spacing:-1px" id="rpg-score">0 XP</div>
         <div style="font-size:11px;color:var(--text2);margin-top:3px" id="rpg-sub"></div>
       </div>
@@ -244,8 +229,8 @@
     ════════════════════════════════════════════════════════════════════ -->
     <div class="view" id="v-simulation">
       <div class="stitle flex-between">
-        <span>Mes Programmes</span>
-        <button class="btn btn-s" id="sim-new-block-btn">+ Nouveau</button>
+        <span data-i18n="stitle_programs">Mes Programmes</span>
+        <button class="btn btn-s" id="sim-new-block-btn" data-i18n="btn_new">+ Nouveau</button>
       </div>
       
       <!-- Liste des Blocs -->
@@ -256,47 +241,48 @@
         <div class="card" style="margin-bottom:15px; border-left: 4px solid var(--accent)">
           <div class="flex-between" style="margin-bottom:12px">
             <input type="text" id="sim-block-name" placeholder="Nom du programme..." style="background:none; border:none; color:#fff; font-size:18px; font-weight:800; width:70%">
-            <button class="btn btn-s" id="sim-save-block-btn">Sauver</button>
+            <button class="btn btn-s" id="sim-save-block-btn" data-i18n="btn_save_prog">Sauver</button>
           </div>
-
+  
           <div class="fgroup">
-            <label class="flabel">Type de séance (appliqué au log)</label>
+            <label class="flabel" data-i18n="label_prog_type">Type de séance (appliqué au log)</label>
             <select id="sim-block-type">
-              <option>Hypertrophie</option>
-              <option>Force</option>
-              <option>Hyperforce (PR)</option>
-              <option>Endurance musculaire</option>
-              <option>Décharge</option>
+              <option data-i18n="hypertrophy">Hypertrophie</option>
+              <option data-i18n="strength">Force</option>
+              <option data-i18n="hyperstrength">Hyperforce (PR)</option>
+              <option data-i18n="endurance">Endurance musculaire</option>
+              <option data-i18n="deload">Décharge</option>
             </select>
           </div>
-          
+  
           <div class="fgroup">
-            <label class="flabel">Ajouter un exercice</label>
+            <label class="flabel" data-i18n="label_add_ex">Ajouter un exercice</label>
             <select id="sim-ex-sel"></select>
           </div>
           <div style="display:grid; grid-template-columns:1fr 1fr 1.2fr; gap:8px; margin-bottom:10px">
-            <div><label class="flabel">Séries</label><input type="number" id="sim-ser" placeholder="4"></div>
-            <div><label class="flabel">Reps</label><input type="number" id="sim-rep" placeholder="10"></div>
-            <div><label class="flabel">Poids</label><input type="number" id="sim-pds" placeholder="60" step="0.5"></div>
+            <div><label class="flabel" data-i18n="label_ser">Séries</label><input type="number" id="sim-ser" placeholder="4"></div>
+            <div><label class="flabel" data-i18n="label_rep">Reps</label><input type="number" id="sim-rep" placeholder="10"></div>
+            <div><label class="flabel" data-i18n="label_pds">Poids</label><input type="number" id="sim-pds" placeholder="60" step="0.5"></div>
           </div>
-          <button class="btn btn-p" id="sim-add-ex-btn">+ Ajouter à la liste</button>
+          <button class="btn btn-p" id="sim-add-ex-btn" data-i18n="btn_add_list">+ Ajouter à la liste</button>
         </div>
-
-        <div class="stitle">Contenu du bloc</div>
+  
+        <div class="stitle" data-i18n="stitle_content_block">Contenu du bloc</div>
         <div id="sim-ex-list" style="margin-bottom:20px"></div>
-
+  
         <div id="sim-results">
-          <div class="stitle">Prévisions de Gain</div>
+          <div class="stitle" data-i18n="stitle_gains">Prévisions de Gain</div>
           <div class="card card-rpg-score" style="margin-bottom:12px">
-            <div class="clabel clabel-accent">Gain Global Estimé</div>
+            <div class="clabel clabel-accent" data-i18n="label_gain_global">Gain Global Estimé</div>
             <div style="font-size:24px; font-weight:900" id="sim-xp-gain">+ 0 XP</div>
             <div id="sim-lvl-preview" style="margin-top:8px"></div>
           </div>
           <div id="sim-muscle-results" style="margin-bottom:20px"></div>
-          
-          <button class="btn btn-p" id="sim-confirm-btn" style="background:var(--green); margin-bottom:15px">⚡ Confirmer la séance (Log)</button>
-          <button class="btn btn-s" id="sim-back-btn" style="width:100%">Retour aux programmes</button>
+  
+          <button class="btn btn-p" id="sim-confirm-btn" style="background:var(--green); margin-bottom:15px" data-i18n="btn_confirm_session">⚡ Confirmer la séance (Log)</button>
+          <button class="btn btn-s" id="sim-back-btn" style="width:100%" data-i18n="btn_back">Retour aux programmes</button>
         </div>
+
       </div>
 
     </div><!-- /v-simulation -->
@@ -305,12 +291,12 @@
          STATS
     ════════════════════════════════════════════════════════════════════ -->
     <div class="view" id="v-stats">
-      <div class="stitle">Statistiques</div>
+      <div class="stitle" data-i18n="stitle_stats">Statistiques</div>
 
       <!-- Export / Import -->
       <div class="export-row">
-        <button class="btn btn-s" id="btn-export">⬆️ Exporter</button>
-   <label for="btn-import" class="btn btn-s" style="display:flex;align-items:center;justify-content:center;cursor:pointer">
+        <button class="btn btn-s" id="btn-export" data-i18n="btn_export">⬆️ Exporter</button>
+   <label for="btn-import" class="btn btn-s" style="display:flex;align-items:center;justify-content:center;cursor:pointer" data-i18n="btn_import">
   ⬇️ Importer
 </label>
 <input type="file" id="btn-import" accept=".json" style="display:none">
@@ -318,37 +304,49 @@
 
       <!-- KPIs -->
       <div class="kpi-row">
-        <div class="kpi"><div class="kpi-v" id="st-vol">0</div><div class="kpi-l">Volume total</div></div>
-        <div class="kpi"><div class="kpi-v" id="st-ses">0</div><div class="kpi-l">Séances</div></div>
+        <div class="kpi"><div class="kpi-v" id="st-vol">0</div><div class="kpi-l" data-i18n="label_vol_total">Volume total</div></div>
+        <div class="kpi"><div class="kpi-v" id="st-ses">0</div><div class="kpi-l" data-i18n="label_sessions">Séances</div></div>
       </div>
       <div class="kpi-row">
-        <div class="kpi"><div class="kpi-v" id="st-pr">0</div><div class="kpi-l">PR réalisés</div></div>
-        <div class="kpi"><div class="kpi-v" id="st-ex">0</div><div class="kpi-l">Exercices diff.</div></div>
+        <div class="kpi"><div class="kpi-v" id="st-pr">0</div><div class="kpi-l" data-i18n="label_pr_done">PR réalisés</div></div>
+        <div class="kpi"><div class="kpi-v" id="st-ex">0</div><div class="kpi-l" data-i18n="label_ex_diff">Exercices diff.</div></div>
       </div>
 
-      <!-- Sélecteur exercice -->
-      <div class="fgroup">
-        <label class="flabel">Exercice à analyser</label>
-        <select id="stat-ex-sel"></select>
+      <!-- Sélecteur exercice & période -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px">
+        <div class="fgroup">
+          <label class="flabel" data-i18n="label_ex_analyze">Exercice à analyser</label>
+          <select id="stat-ex-sel"></select>
+        </div>
+        <div class="fgroup">
+          <label class="flabel" data-i18n="filter_date">Période</label>
+          <select id="stat-period-sel">
+            <option value="7d" data-i18n="p_7d">7 derniers jours</option>
+            <option value="30d" data-i18n="p_30d">30 derniers jours</option>
+            <option value="90d" data-i18n="p_90d">90 derniers jours</option>
+            <option value="1y" data-i18n="p_1y">1 an</option>
+            <option value="all" data-i18n="p_all" selected>Tout</option>
+          </select>
+        </div>
       </div>
 
       <!-- Graphique Volume -->
       <div class="card" id="chart-vol-card">
-        <div class="clabel" id="chart-vol-title">Volume par séance</div>
+        <div class="clabel" id="chart-vol-title" data-i18n="label_chart_vol">Volume par séance</div>
         <div class="chart-wrap"><canvas id="chart-vol"></canvas></div>
         <div class="chart-legend" id="chart-vol-legend"></div>
       </div>
 
       <!-- Graphique 1RM -->
       <div class="card" id="chart-pr-card">
-        <div class="clabel" id="chart-pr-title">Évolution 1RM estimé</div>
+        <div class="clabel" id="chart-pr-title" data-i18n="label_chart_pr">Évolution 1RM estimé</div>
         <div class="chart-wrap"><canvas id="chart-pr"></canvas></div>
         <div class="chart-legend" id="chart-pr-legend"></div>
       </div>
 
       <!-- Empty -->
       <div class="card" id="chart-empty">
-        <div style="text-align:center;padding:20px;color:var(--text2);font-size:13px">
+        <div style="text-align:center;padding:20px;color:var(--text2);font-size:13px" data-i18n="label_chart_empty">
           Sélectionne un exercice pour voir son évolution
         </div>
       </div>
@@ -359,7 +357,7 @@
          BADGES
     ════════════════════════════════════════════════════════════════════ -->
     <div class="view" id="v-badges">
-      <div class="stitle">Badges & Progression</div>
+      <div class="stitle" data-i18n="stitle_badges">Badges & Progression</div>
 
       <div class="card" style="padding:0; margin-bottom:15px; border:none; overflow:hidden; position:relative">
         <div id="body-3d-container">
@@ -415,7 +413,7 @@
       </div>
 
       <!-- Badges groupes musculaires (Filtrage Interactif) -->
-      <div class="clabel" style="margin:14px 0 8px">Groupes Musculaires</div>
+      <div class="clabel" style="margin:14px 0 8px" data-i18n="label_muscles">Groupes Musculaires</div>
       <div class="muscle-badge-row" id="muscle-badges-row"></div>
 
       <!-- Grille badges -->
@@ -427,12 +425,12 @@
 
   <!-- ── Tab bar ────────────────────────────────────────────────────────── -->
   <div class="tabs">
-    <div class="tab on" data-v="seances"><span>📋</span><span>Séances</span></div>
-    <div class="tab" data-v="pr"><span>🏆</span><span>PR Big 6</span></div>
-    <div class="tab" data-v="rpg"><span>⚔️</span><span>RPG</span></div>
-    <div class="tab" data-v="simulation"><span>🧪</span><span>Simu</span></div>
-    <div class="tab" data-v="stats"><span>📊</span><span>Stats</span></div>
-    <div class="tab" data-v="badges"><span>🏅</span><span>Badges</span></div>
+    <div class="tab on" data-v="seances"><span class="tab-icon">📋</span><span class="tab-label" data-i18n="tab_seances">Séances</span></div>
+    <div class="tab" data-v="pr"><span class="tab-icon">🏆</span><span class="tab-label" data-i18n="tab_pr">PR Big 6</span></div>
+    <div class="tab" data-v="rpg"><span class="tab-icon">⚔️</span><span class="tab-label" data-i18n="tab_rpg">RPG</span></div>
+    <div class="tab" data-v="simulation"><span class="tab-icon">🧪</span><span class="tab-label" data-i18n="tab_simu">Simu</span></div>
+    <div class="tab" data-v="stats"><span class="tab-icon">📊</span><span class="tab-label" data-i18n="tab_stats">Stats</span></div>
+    <div class="tab" data-v="badges"><span class="tab-icon">🏅</span><span class="tab-label" data-i18n="tab_badges">Badges</span></div>
   </div>
 
   <!-- ── Menu Latéral ────────────────────────────────────────────────────── -->
@@ -443,13 +441,13 @@
       <div class="menu-hdr-sub" id="menu-user-stats">25 ans • 75 kg</div>
     </div>
     <div class="menu-items">
-      <div class="menu-item active" data-v="rpg" onclick="APP.closeMenu(); APP.switchView('rpg')">
+      <div class="menu-item active" data-v="rpg" onclick="APP.closeMenu(); APP.switchView('rpg')" data-i18n="menu_home">
         <span>🏠</span> RPG (Accueil)
       </div>
-      <div class="menu-item" data-v="profil" onclick="APP.closeMenu(); APP.switchView('profil')">
+      <div class="menu-item" data-v="profil" onclick="APP.closeMenu(); APP.switchView('profil')" data-i18n="menu_profil">
         <span>👤</span> Profil
       </div>
-      <div class="menu-item" data-v="settings" onclick="APP.closeMenu(); APP.switchView('settings')">
+      <div class="menu-item" data-v="settings" onclick="APP.closeMenu(); APP.switchView('settings')" data-i18n="menu_settings">
         <span>⚙️</span> Paramètres
       </div>
     </div>
@@ -459,42 +457,42 @@
   </nav>
 
   <!-- ── Vues Additionnelles ─────────────────────────────────────────────── -->
-  <div class="view" id="v-profil">
+    <div class="view" id="v-profil">
     <div class="content">
-      <div class="clabel">Mon Profil</div>
+      <div class="clabel" data-i18n="menu_profil">Mon Profil</div>
       <div class="card">
         <div class="fgroup">
-          <label class="flabel">Prénom</label>
+          <label class="flabel" data-i18n="label_prenom">Prénom</label>
           <input type="text" id="prof-prenom" placeholder="Prénom">
         </div>
         <div class="fgroup">
-          <label class="flabel">Nom</label>
+          <label class="flabel" data-i18n="label_nom">Nom</label>
           <input type="text" id="prof-nom" placeholder="Nom">
         </div>
         <div class="kpi-row">
           <div class="fgroup">
-            <label class="flabel">Âge</label>
+            <label class="flabel" data-i18n="label_age">Âge</label>
             <input type="number" id="prof-age" placeholder="25">
           </div>
           <div class="fgroup">
-            <label class="flabel">Poids (kg)</label>
+            <label class="flabel" data-i18n="label_poids">Poids (kg)</label>
             <input type="number" id="prof-poids" placeholder="75">
           </div>
         </div>
         <div class="fgroup">
-          <label class="flabel">Taille (cm)</label>
+          <label class="flabel" data-i18n="label_taille">Taille (cm)</label>
           <input type="number" id="prof-taille" placeholder="180">
         </div>
-        <button class="btn btn-p" onclick="saveProfile()">Enregistrer le Profil</button>
+        <button class="btn btn-p" onclick="saveProfile()" data-i18n="btn_save_profile">Enregistrer le Profil</button>
       </div>
     </div>
   </div>
 
   <div class="view" id="v-settings">
     <div class="content">
-      <div class="clabel">Paramètres</div>
+      <div class="clabel" data-i18n="menu_settings">Paramètres</div>
       <div class="card">
-        <label class="flabel">Langue</label>
+        <label class="flabel" data-i18n="label_lang">Langue</label>
         <div style="display:flex; gap:8px">
           <select id="set-lang" style="flex:1">
             <option value="fr">Français 🇫🇷</option>
@@ -503,23 +501,23 @@
             <option value="es">Español 🇪🇸</option>
             <option value="ja">日本語 🇯🇵</option>
           </select>
-          <button class="btn btn-p btn-sm" id="btn-confirm-lang" onclick="confirmLang()" style="margin:0; width:auto">OK</button>
+          <button class="btn btn-p btn-sm" id="btn-confirm-lang" onclick="confirmLang()">OK</button>
         </div>
       </div>
 
-      <div class="clabel" style="margin-top:20px">Thème Visuel</div>
+      <div class="clabel" style="margin-top:20px" data-i18n="label_theme">Thème Visuel</div>
       <div class="theme-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
         <div class="theme-opt active" data-theme="dark" onclick="setTheme('dark')" style="background:#0a0f1e; border:2px solid var(--accent); height:80px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:5px; cursor:pointer;">
           <div style="font-size:20px">🌑</div>
-          <div style="font-size:10px; font-weight:700">SOMBRE</div>
+          <div style="font-size:10px; font-weight:700" data-i18n="theme_dark">SOMBRE</div>
         </div>
         <div class="theme-opt" data-theme="light" onclick="setTheme('light')" style="background:#f8fafc; border:2px solid transparent; height:80px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:5px; cursor:pointer; color:#0f172a;">
           <div style="font-size:20px">☀️</div>
-          <div style="font-size:10px; font-weight:700">CLAIR</div>
+          <div style="font-size:10px; font-weight:700" data-i18n="theme_light">CLAIR</div>
         </div>
         <div class="theme-opt" data-theme="amber" onclick="setTheme('amber')" style="background:#1a1610; border:2px solid transparent; height:80px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:5px; cursor:pointer; color:#f59e0b;">
           <div style="font-size:20px">✨</div>
-          <div style="font-size:10px; font-weight:700">AMBRE</div>
+          <div style="font-size:10px; font-weight:700" data-i18n="theme_amber">AMBRE</div>
         </div>
       </div>
     </div>

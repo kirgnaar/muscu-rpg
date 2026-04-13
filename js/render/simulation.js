@@ -53,7 +53,8 @@ function saveBlocks() {
 }
 
 function handleNewBlock() {
-  SIM.currentBlock = { id: Date.now(), name: "Nouveau Programme", type: "Hypertrophie", exercises: [] };
+  var name = APP.user.langue === 'fr' ? "Nouveau Programme" : "New Program";
+  SIM.currentBlock = { id: Date.now(), name: name, type: "Hypertrophie", exercises: [] };
   openEditor();
 }
 
@@ -89,7 +90,8 @@ function closeEditor() {
 
 function saveCurrentBlock() {
   if (!SIM.currentBlock) return;
-  SIM.currentBlock.name = $('sim-block-name').value || "Sans nom";
+  var defaultName = APP.user.langue === 'fr' ? "Sans nom" : "Untitled";
+  SIM.currentBlock.name = $('sim-block-name').value || defaultName;
   SIM.currentBlock.type = $('sim-block-type').value;
   var foundIdx = -1;
   for (var i = 0; i < SIM.blocks.length; i++) {
@@ -106,7 +108,8 @@ function saveCurrentBlock() {
 }
 
 function deleteBlock(id) {
-  if (!confirm("Supprimer ?")) return;
+  var msg = APP.user.langue === 'fr' ? "Supprimer ?" : "Delete?";
+  if (!confirm(msg)) return;
   var newBlocks = [];
   for (var i = 0; i < SIM.blocks.length; i++) {
     if (SIM.blocks[i].id !== id) newBlocks.push(SIM.blocks[i]);
@@ -144,7 +147,17 @@ function renderSimulation() {
       }
       distHtml += '</div>';
     }
-    html += '<div class="card" style="margin-bottom:10px"><div class="flex-between"><div><div style="font-weight:800; color:#fff">' + b.name + '</div><div style="font-size:11px; color:var(--accent); font-weight:700">' + b.type + '</div><div style="font-size:10px; color:var(--text2); margin-top:2px">' + b.exercises.length + ' ' + (APP.user.langue === 'fr' ? 'exercices' : 'exercises') + '</div></div><div style="display:flex; gap:8px"><button class="btn btn-s sim-block-edit" data-id="' + b.id + '">' + (APP.user.langue === 'fr' ? 'Éditer' : 'Edit') + '</button><button class="btn btn-s sim-block-del" data-id="' + b.id + '" style="background:rgba(239,68,68,0.1); color:#ef4444">✕</button></div></div>' + distHtml + '</div>';
+    
+    var typeKey = {
+      'Hypertrophie': 'hypertrophy',
+      'Force': 'strength',
+      'Hyperforce (PR)': 'hyperstrength',
+      'Endurance musculaire': 'endurance',
+      'Décharge': 'deload'
+    }[b.type] || '';
+    var translatedType = typeKey ? APP.t(typeKey) : b.type;
+
+    html += '<div class="card" style="margin-bottom:10px"><div class="flex-between"><div><div style="font-weight:800; color:#fff">' + b.name + '</div><div style="font-size:11px; color:var(--accent); font-weight:700">' + translatedType + '</div><div style="font-size:10px; color:var(--text2); margin-top:2px">' + b.exercises.length + ' ' + (APP.user.langue === 'fr' ? 'exercices' : 'exercises') + '</div></div><div style="display:flex; gap:8px"><button class="btn btn-s sim-block-edit" data-id="' + b.id + '">' + (APP.user.langue === 'fr' ? 'Éditer' : 'Edit') + '</button><button class="btn btn-s sim-block-del" data-id="' + b.id + '" style="background:rgba(239,68,68,0.1); color:#ef4444">✕</button></div></div>' + distHtml + '</div>';
   }
   list.innerHTML = html;
 }
@@ -257,7 +270,8 @@ function calculateSimResults(simList) {
 
 function confirmSession() {
   if (!SIM.currentBlock || SIM.currentBlock.exercises.length === 0) return;
-  if (!confirm("Confirmer la séance ?")) return;
+  var msg = APP.user.langue === 'fr' ? "Confirmer la séance ?" : "Confirm session?";
+  if (!confirm(msg)) return;
   var date = todayISO();
   var type = SIM.currentBlock.type || "Hypertrophie";
   for (var i = 0; i < SIM.currentBlock.exercises.length; i++) {

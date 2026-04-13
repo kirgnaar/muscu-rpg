@@ -78,10 +78,54 @@ var APP = {
     renderHeader();
   },
 
-  render: function() {
-    APP.renderView(APP.view);
+  updateStaticUI: function() {
+    var els = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < els.length; i++) {
+      var key = els[i].getAttribute('data-i18n');
+      var txt = APP.t(key);
+      if (!txt) continue;
+
+      // Special case for elements with icons in span (Tabs)
+      var iconSpan = els[i].previousElementSibling;
+      if (iconSpan && iconSpan.classList.contains('tab-icon')) {
+        els[i].textContent = txt;
+        continue;
+      }
+
+      // Generic: if element has an icon as first child span or emoji prefix
+      var hasIcon = els[i].querySelector('span');
+      if (hasIcon) {
+        // Assume the first span is the icon
+        var labels = els[i].childNodes;
+        for(var n=0; n<labels.length; n++) {
+          if (labels[n].nodeType === 3 && labels[n].textContent.trim().length > 1) {
+             labels[n].textContent = ' ' + txt;
+          }
+        }
+      } else {
+        // Direct text replacement
+        els[i].textContent = txt;
+      }
+    }
+
+    // Session type selects (keep FR values for DB compatibility)
+    var typeSelects = [$('sel-type'), $('f-type-sel'), $('sim-block-type')];
+    var typeKeys = ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'];
+
+    typeSelects.forEach(function(sel) {
+      if (!sel) return;
+      var curVal = sel.value;
+      var isFilter = sel.id === 'f-type-sel';
+      sel.innerHTML = isFilter ? '<option value="">' + APP.t('filter_all_types') + '</option>' : '';
+      typeKeys.forEach(function(key) {
+        var o = document.createElement('option');
+        o.value = I18N['fr'][key]; 
+        o.textContent = APP.t(key);
+        sel.appendChild(o);
+      });
+      sel.value = curVal;
+    });
   },
-};
 
 function renderHeader() {
   var total = 0;
@@ -119,124 +163,26 @@ function changeLang(val) {
   APP.user.langue = val;
   saveUser(APP.user);
   APP.updateStaticUI();
+
+  renderHeader();
   APP.render();
-  
-  var msg = '';
-  if (val === 'fr') msg = 'Langue : Français';
-  else if (val === 'en') msg = 'Language: English';
-  else if (val === 'de') msg = 'Sprache: Deutsch';
-  else if (val === 'es') msg = 'Idioma: Español';
-  else if (val === 'ja') msg = '言語: 日本語';
-  
+
+  var msg = APP.t('lang_updated_to') + ': ' + {
+    fr: 'Français', en: 'English', de: 'Deutsch', es: 'Español', ja: '日本語'
+  }[val];
+
   if (typeof toast === 'function') toast(msg);
 }
+
+
 
 function confirmLang() {
   var val = document.getElementById('set-lang').value;
   changeLang(val);
 }
 
-APP.updateStaticUI = function() {
-  // Tabs
-  var tabSeances = document.querySelector('.tab[data-v="seances"] span:last-child');
-  if (tabSeances) tabSeances.textContent = APP.t('tab_seances');
-  var tabPR = document.querySelector('.tab[data-v="pr"] span:last-child');
-  if (tabPR) tabPR.textContent = APP.t('tab_pr');
-  var tabRPG = document.querySelector('.tab[data-v="rpg"] span:last-child');
-  if (tabRPG) tabRPG.textContent = APP.t('tab_rpg');
-  var tabSimu = document.querySelector('.tab[data-v="simulation"] span:last-child');
-  if (tabSimu) tabSimu.textContent = APP.t('tab_simu');
-  var tabStats = document.querySelector('.tab[data-v="stats"] span:last-child');
-  if (tabStats) tabStats.textContent = APP.t('tab_stats');
-  var tabBadges = document.querySelector('.tab[data-v="badges"] span:last-child');
-  if (tabBadges) tabBadges.textContent = APP.t('tab_badges');
-
-  // Menu burger
-  var menuHome = document.querySelector('.menu-item[data-v="rpg"]');
-  if (menuHome) menuHome.innerHTML = '<span>🏠</span> ' + APP.t('menu_home');
-  var menuProfil = document.querySelector('.menu-item[data-v="profil"]');
-  if (menuProfil) menuProfil.innerHTML = '<span>👤</span> ' + APP.t('menu_profil');
-  var menuSettings = document.querySelector('.menu-item[data-v="settings"]');
-  if (menuSettings) menuSettings.innerHTML = '<span>⚙️</span> ' + APP.t('menu_settings');
-
-  var btnConfirm = document.getElementById('btn-confirm-lang');
-  if (btnConfirm) btnConfirm.textContent = 'OK';
-
-  // Journal View Labels
-  var vSeances = $('v-seances');
-  if (vSeances) {
-    vSeances.querySelector('.stitle').textContent = APP.t('stitle_new_serie');
-    var labels = $$('.flabel', vSeances);
-    labels.forEach(function(l) {
-      if (l.htmlFor === 'in-date') l.textContent = APP.t('label_date');
-      if (l.htmlFor === 'sel-type') l.textContent = APP.t('label_type');
-      if (l.htmlFor === 'sel-ex') l.textContent = APP.t('label_ex');
-      if (l.htmlFor === 'in-ser') l.textContent = APP.t('label_ser');
-      if (l.htmlFor === 'in-rep') l.textContent = APP.t('label_rep');
-      if (l.htmlFor === 'in-pds') l.textContent = APP.t('label_pds');
-    });
-    $('btn-save').textContent = '✓ ' + APP.t('btn_save');
-    var timerTitle = $('timer-card') ? $('timer-card').querySelector('.clabel span') : null;
-    if (timerTitle) timerTitle.textContent = '⌛ ' + APP.t('label_timer');
-    if ($('timer-start-btn')) $('timer-start-btn').textContent = '▶ ' + APP.t('timer_start');
-    if ($('timer-stop-btn')) $('timer-stop-btn').textContent = '⏹ ' + APP.t('timer_stop');
-    if ($('timer-reset-btn')) $('timer-reset-btn').textContent = '🔄 ' + APP.t('timer_reset');
-    var journalTitle = vSeances.querySelector('.stitle.flex-between span');
-    if (journalTitle) journalTitle.textContent = APP.t('stitle_journal');
-
-    var pills = $$('.fpill', $('filter-bar'));
-    if (pills.length >= 4) {
-      pills[0].textContent = APP.t('filter_all');
-      pills[1].textContent = APP.t('filter_ex');
-      pills[2].textContent = APP.t('filter_type');
-      pills[3].textContent = APP.t('filter_date');
-    }
-
-    var typeSel = $('sel-type');
-    if (typeSel) {
-      var curVal = typeSel.value;
-      typeSel.innerHTML = '';
-      ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'].forEach(function(k) {
-        var o = document.createElement('option');
-        o.value = I18N['fr'][k];
-        o.textContent = APP.t(k);
-        typeSel.appendChild(o);
-      });
-      typeSel.value = curVal;
-    }
-  }
-
-  // Profil View Labels
-  var vProfil = $('v-profil');
-  if (vProfil) {
-    vProfil.querySelector('.clabel').textContent = APP.t('menu_profil');
-    var profLabels = $$('.flabel', vProfil);
-    if (profLabels.length >= 5) {
-      profLabels[0].textContent = APP.t('label_prenom');
-      profLabels[1].textContent = APP.t('label_nom');
-      profLabels[2].textContent = APP.t('label_age');
-      profLabels[3].textContent = APP.t('label_poids');
-      profLabels[4].textContent = APP.t('label_taille');
-    }
-    vProfil.querySelector('button').textContent = APP.t('btn_save_profile');
-  }
-
-  // Settings View Labels
-  var vSettings = $('v-settings');
-  if (vSettings) {
-    vSettings.querySelectorAll('.clabel')[0].textContent = APP.t('menu_settings');
-    vSettings.querySelector('.flabel').textContent = APP.t('label_lang');
-    vSettings.querySelectorAll('.clabel')[1].textContent = APP.t('label_theme');
-    var themeLabels = $$('.theme-opt div:last-child', vSettings);
-    if (themeLabels.length >= 3) {
-      themeLabels[0].textContent = APP.t('theme_dark');
-      themeLabels[1].textContent = APP.t('theme_light');
-      themeLabels[2].textContent = APP.t('theme_amber');
-    }
-  }
-};
-
 function renderProfil() {
+
   $('v-profil').querySelector('.clabel').textContent = APP.t('menu_profil');
   var labels = $$('.flabel', $('v-profil'));
   labels[0].textContent = APP.t('label_prenom');
@@ -262,8 +208,9 @@ function saveProfile() {
   APP.user.taille = parseInt(document.getElementById('prof-taille').value) || 0;
   saveUser(APP.user);
   renderHeader();
-  if (typeof toast === 'function') toast(APP.user.langue === 'fr' ? 'Profil enregistré !' : 'Profile saved!');
+  if (typeof toast === 'function') toast(APP.t('profile_saved'));
 }
+
 
 function renderSettings() {
   if (!APP.user) return;

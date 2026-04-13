@@ -48,12 +48,12 @@ function renderBadges() {
 function renderMuscleBadges() {
   var row = document.getElementById('muscle-badges-row');
   if (!row) return;
-  var allTxt = APP.user.langue === 'fr' ? 'Tous' : 'All';
-  var allExTxt = APP.user.langue === 'fr' ? 'Exercices' : 'Exercises';
+  var allTxt = APP.t('all');
+  var allExTxt = APP.t('exercises');
   var allHtml = '<div class="mbdg '+(BADGES.groupFilter===''?'on':'')+'" data-grp=""><div class="mbdg-nm">'+allTxt+'</div><div class="mbdg-t">'+allExTxt+'</div><div class="mbdg-pb"><div class="mbdg-pf" style="width:100%; background:var(--accent)"></div></div></div>';
   var specialProgress = calculateSpecialAchievementsProgress();
-  var succTxt = APP.user.langue === 'fr' ? 'Succès' : 'Achievements';
-  var specTxt = APP.user.langue === 'fr' ? 'Spéciaux' : 'Special';
+  var succTxt = APP.t('achievements');
+  var specTxt = APP.t('special');
   var specHtml = '<div class="mbdg '+(BADGES.groupFilter==='special'?'on':'')+'" data-grp="special"><div class="mbdg-nm">'+succTxt+'</div><div class="mbdg-t">'+specTxt+'</div><div class="mbdg-pb"><div class="mbdg-pf" style="width:'+specialProgress+'%; background:var(--gold)"></div></div></div>';
   var musclesHtml = '';
   for (var i = 0; i < MUSCLES.length; i++) {
@@ -62,19 +62,45 @@ function renderMuscleBadges() {
     var ti = getTier(n);
     var pct = (getTierProgress(n) * 100).toFixed(0);
     var active = BADGES.groupFilter === m ? 'on' : '';
-    musclesHtml += '<div class="mbdg '+ti.cls+' '+active+'" data-grp="'+m+'"><div class="mbdg-nm">'+m+'</div><div class="mbdg-t" style="color:'+ti.col+'">'+ti.name+'</div><div class="mbdg-pb"><div class="mbdg-pf" style="width:'+pct+'%; background:linear-gradient(90deg, '+ti.col+', #fff)"></div></div></div>';
+    
+    // Translate muscle group names
+    var mKey = {
+      'Pectoraux': 'pecs', 'Dorsaux': 'back', 'Épaules': 'shoulders', 
+      'Biceps': 'biceps', 'Triceps': 'triceps', 'Quadriceps': 'quads', 
+      'Ischios': 'hams', 'Fessiers': 'glutes', 'Mollets': 'calves', 'Abdos': 'abs'
+    }[m] || m;
+    var translatedM = APP.t(mKey);
+
+    musclesHtml += '<div class="mbdg '+ti.cls+' '+active+'" data-grp="'+m+'"><div class="mbdg-nm">'+translatedM+'</div><div class="mbdg-t" style="color:'+ti.col+'">'+ti.name+'</div><div class="mbdg-pb"><div class="mbdg-pf" style="width:'+pct+'%; background:linear-gradient(90deg, '+ti.col+', #fff)"></div></div></div>';
   }
   row.innerHTML = allHtml + specHtml + musclesHtml;
 }
 
 function calculateSpecialAchievementsProgress() {
+  var allData = APP.data;
   var totalVol = 0;
-  for (var i = 0; i < APP.data.length; i++) totalVol += APP.data[i].vol;
-  var totalSes = allDates().length;
-  var exNames = [];
-  for (var j = 0; j < APP.data.length; j++) {
-    if (exNames.indexOf(APP.data[j].ex) === -1) exNames.push(APP.data[j].ex);
+  var prCount = 0;
+  var repCount = 0;
+  var uniqueEx = new Set();
+  var sessions = allDates().length;
+
+  for (var i = 0; i < allData.length; i++) {
+    var d = allData[i];
+    totalVol += d.vol;
+    if (d.isPR) prCount++;
+    repCount += (d.rep * d.set);
+    uniqueEx.add(d.ex);
   }
+
+  var vPct = Math.min(100, (totalVol / 1000000) * 100);
+  var sPct = Math.min(100, (sessions / 100) * 100);
+  var ePct = Math.min(100, (uniqueEx.size / 50) * 100);
+  var pPct = Math.min(100, (prCount / 100) * 100);
+  var rPct = Math.min(100, (repCount / 10000) * 100);
+
+  return ((vPct + sPct + ePct + pPct + rPct) / 5).toFixed(0);
+}
+
   var uniqueEx = exNames.length;
   var big6Total = 0;
   for (var k = 0; k < BIG6.length; k++) big6Total += bestRM1(BIG6[k]);
@@ -126,7 +152,7 @@ function renderGlobalAchievements() {
   for (var j = 0; j < APP.data.length; j++) {
     if (APP.data[j].isPR) prCount++;
   }
-  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + (APP.user.langue === 'fr' ? 'Statistiques de Carrière' : 'Career Statistics') + '</div><div class="ach-grid"><div class="ach-card"><div class="ach-val">'+fmtV(totalVol)+'</div><div class="ach-lbl">' + (APP.user.langue === 'fr' ? 'Volume (KG)' : 'Volume (KG)') + '</div></div><div class="ach-card"><div class="ach-val">'+totalSes+'</div><div class="ach-lbl">' + APP.t('label_sessions') + '</div></div><div class="ach-card"><div class="ach-val">'+prCount+'</div><div class="ach-lbl">' + (APP.user.langue === 'fr' ? 'Records' : 'Records') + '</div></div></div>';
+  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + APP.t('career_stats') + '</div><div class="ach-grid"><div class="ach-card"><div class="ach-val">'+fmtV(totalVol)+'</div><div class="ach-lbl">Volume (KG)</div></div><div class="ach-card"><div class="ach-val">'+totalSes+'</div><div class="ach-lbl">' + APP.t('sessions') + '</div></div><div class="ach-card"><div class="ach-val">'+prCount+'</div><div class="ach-lbl">' + APP.t('records') + '</div></div></div>';
   var target = document.querySelector('#v-badges .clabel[style*="Groupes Musculaires"]');
 
   if (target) {
@@ -202,7 +228,7 @@ function renderSpecialAchievements() {
     {id:'monolithe_d', name:isFR?'Monolithe D (Terre)':'Monolith D (Deadlift)', icon:'trophy', val:maxD, paliere:monoPaliere},
     {id:'cameleon', name:isFR?'Le Caméléon':'Chameleon', icon:'trophy', val:uniqueEx, paliere:[{n:10,l:isFR?'Curieux':'Curious',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:25,l:isFR?'Polyvalent':'Versatile',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:isFR?'Spécialiste':'Specialist',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:75,l:isFR?'Encyclopédie':'Encyclopedia',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:100,l:isFR?'Maître de la Salle':'Gym Master',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]}
   ];
-  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + (isFR?'Hauts Faits Spéciaux':'Special Achievements') + '</div><div id="special-ach-grid">';
+  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + APP.t('special_achievements') + '</div><div id="special-ach-grid">';
   for (var q = 0; q < specs.length; q++) {
     var s = specs[q];
     var current = s.paliere[0];
@@ -216,12 +242,12 @@ function renderSpecialAchievements() {
     }
     var pct = next ? (s.val / next.n * 100).toFixed(0) : 100;
     var unit = 'kg';
-    if (s.id === 'pilier') unit = isFR?'séances':'sessions';
-    else if (s.id === 'cameleon') unit = isFR?'exercices':'exercises';
+    if (s.id === 'pilier') unit = APP.t('sessions');
+    else if (s.id === 'cameleon') unit = APP.t('diff_exercises');
     else if (s.id === 'briseur') unit = 'PR';
     else if (s.id === 'acharne') unit = 'reps';
     else if (s.id === 'chelem') unit = '/ 6 ex';
-    html += '<div class="bdg-card special-ach '+(earned?'earned':'')+'" style="border-left: 4px solid '+current.c+'"><div class="bdg-visual">'+getPremiumVisual(s.icon, current.c, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+(earned?current.l:s.name)+'</div><div class="bdg-meta">'+s.name+' <span class="bdg-rarity-pill" style="color:'+current.c+'">'+current.r+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+current.c+'"></div></div><div class="bdg-rate" style="color:#fff; opacity:1">'+(isFR?'Progression':'Progress')+' : '+s.val.toLocaleString()+' '+unit+'</div></div></div>';
+    html += '<div class="bdg-card special-ach '+(earned?'earned':'')+'" style="border-left: 4px solid '+current.c+'"><div class="bdg-visual">'+getPremiumVisual(s.icon, current.c, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+(earned?current.l:s.name)+'</div><div class="bdg-meta">'+s.name+' <span class="bdg-rarity-pill" style="color:'+current.c+'">'+current.r+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+current.c+'"></div></div><div class="bdg-rate" style="color:#fff; opacity:1">'+APP.t('progress')+' : '+s.val.toLocaleString()+' '+unit+'</div></div></div>';
   }
   html += '</div>';
   var grid = document.getElementById('badge-grid');
@@ -290,7 +316,18 @@ function renderBadgeGrid() {
     else if (group === 'Biceps') type = 'curl';
     else if (name.indexOf('Soulevé') !== -1) type = 'deadlift';
     if (ICON_MAP[name]) type = ICON_MAP[name];
-    htmlStr += '<div class="bdg-card '+ti.cls+' '+(earned?'earned':'')+'" data-rarity="'+ti.label+'"><div class="bdg-visual">'+getPremiumVisual(type, ti.col, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+name+'</div><div class="bdg-meta">'+group+' <span class="bdg-rarity-pill" style="color:'+ti.col+'">'+ti.label+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+ti.col+'; box-shadow:0 0 10px '+ti.col+'"></div></div>'+(earned?'<div class="bdg-rate">'+(isFR?'Débloqué par seulement ':'Unlocked by only ')+ti.rate+(isFR?' des athlètes':' of athletes')+'</div>':'')+'</div><div class="bdg-aside" style="text-align:right"><div class="bdg-stat-v">'+(earned ? max1RM + 'kg' : '--')+'</div><div class="bdg-stat-l">1RM MAX</div></div></div>';
+    
+    // Translate muscle group names for badges
+    var mKey = {
+      'Pectoraux': 'pecs', 'Dorsaux': 'back', 'Épaules': 'shoulders', 
+      'Biceps': 'biceps', 'Triceps': 'triceps', 'Quadriceps': 'quads', 
+      'Ischios': 'hams', 'Fessiers': 'glutes', 'Mollets': 'calves', 'Abdos': 'abs'
+    }[group] || group;
+    var translatedGroup = APP.t(mKey);
+
+    var rateTxt = APP.t('unlocked_by').replace('{{rate}}', ti.rate);
+
+    htmlStr += '<div class="bdg-card '+ti.cls+' '+(earned?'earned':'')+'" data-rarity="'+ti.label+'"><div class="bdg-visual">'+getPremiumVisual(type, ti.col, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+name+'</div><div class="bdg-meta">'+translatedGroup+' <span class="bdg-rarity-pill" style="color:'+ti.col+'">'+ti.label+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+ti.col+'; box-shadow:0 0 10px '+ti.col+'"></div></div>'+(earned?'<div class="bdg-rate">'+rateTxt+'</div>':'')+'</div><div class="bdg-aside" style="text-align:right"><div class="bdg-stat-v">'+(earned ? max1RM + 'kg' : '--')+'</div><div class="bdg-stat-l">1RM MAX</div></div></div>';
   }
   grid.innerHTML = htmlStr;
   if (window.gsap) {

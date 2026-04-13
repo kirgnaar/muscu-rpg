@@ -20,7 +20,7 @@ function renderPR() {
       return '<div class="prcard" style="border-color:' + color + '">'
            + '<div class="prname" style="color:' + color + '">' + ex + '</div>'
            + '<div class="pr1rm" style="color:' + color + '">—</div>'
-           + '<div class="prsub">' + (APP.user.langue === 'fr' ? 'Aucune donnée' : 'No data') + '</div>'
+           + '<div class="prsub">' + APP.t('no_data') + '</div>'
            + '<div class="reptable">' + emptyReps + '</div>'
            + '</div>';
     }
@@ -46,7 +46,7 @@ function renderPR() {
          + '<div class="prname" style="color:' + color + '">' + ex + '</div>'
          + '<div class="pr1rm" style="color:' + color + '">' + rm1
          + ' <span style="font-size:14px;color:var(--text2)">kg</span></div>'
-         + '<div class="prsub">📅 PR ' + (APP.user.langue === 'fr' ? 'du' : 'on') + ' ' + fmtD(best.date)
+         + '<div class="prsub">📅 PR ' + APP.t('pr_on') + ' ' + fmtD(best.date)
          + ' &nbsp;·&nbsp; ' + best.ser + '×' + best.rep + ' @ ' + best.pds + ' kg'
          + diff + '</div>'
          + '<div class="reptable">' + repCells + '</div>'

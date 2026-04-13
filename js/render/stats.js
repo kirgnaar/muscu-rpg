@@ -12,12 +12,16 @@ function initStats() {
   populateExerciseSelect($('stat-ex-sel'), false);
   var emptyOpt = document.createElement('option');
   emptyOpt.value = '';
-  emptyOpt.textContent = '-- ' + (APP.user.langue === 'fr' ? 'Choisir un exercice' : 'Choose an exercise') + ' --';
+  emptyOpt.textContent = '-- ' + APP.t('choose_ex') + ' --';
   $('stat-ex-sel').insertBefore(emptyOpt, $('stat-ex-sel').firstChild);
   $('stat-ex-sel').value = '';
 
   $('stat-ex-sel').addEventListener('change', function() {
     STATS.currentEx = this.value;
+    renderStatsCharts(STATS.currentEx);
+  });
+
+  $('stat-period-sel').addEventListener('change', function() {
     renderStatsCharts(STATS.currentEx);
   });
 
@@ -44,7 +48,11 @@ function renderStats() {
   kpis[2].textContent = APP.t('label_pr_done');
   kpis[3].textContent = APP.t('label_ex_diff');
   
-  $('v-stats').querySelector('.fgroup .flabel').textContent = APP.t('label_ex_analyze');
+  // Update dropdown labels if language changed
+  var firstOpt = $('stat-ex-sel').firstChild;
+  if (firstOpt && firstOpt.value === '') {
+    firstOpt.textContent = '-- ' + APP.t('choose_ex') + ' --';
+  }
   $('chart-empty').querySelector('div').textContent = APP.t('label_chart_empty');
 
   var data = APP.data;
@@ -81,6 +89,7 @@ function renderStatsCharts(exName) {
   var cardVol = $('chart-vol-card');
   var cardPR  = $('chart-pr-card');
   var cardEmp = $('chart-empty');
+  var period  = $('stat-period-sel').value;
 
   if (!exName) {
     cardVol.style.display = 'none';
@@ -90,6 +99,19 @@ function renderStatsCharts(exName) {
   }
 
   var history = exerciseHistory(exName);
+  
+  // Filter by period
+  if (period !== 'all') {
+    var now = new Date();
+    var days = 7;
+    if (period === '30d') days = 30;
+    else if (period === '90d') days = 90;
+    else if (period === '1y')  days = 365;
+    
+    var cutoff = new Date(now.setDate(now.getDate() - days)).toISOString().split('T')[0];
+    history = history.filter(function(h) { return h.date >= cutoff; });
+  }
+
   if (!history.length) {
     cardVol.style.display = 'none';
     cardPR.style.display  = 'none';
@@ -122,7 +144,7 @@ function renderStatsCharts(exName) {
   cardPR.style.display = 'block';
   $('chart-pr-title').textContent = APP.t('label_chart_pr') + ' — ' + exName + (BIG6.indexOf(exName) !== -1 ? ' 🏆' : '');
   // Correction de la légende : Afficher Hybride au lieu d'Epley
-  $('chart-pr-legend').innerHTML  = '<span><span class="ch-dot" style="background:#10b981"></span>' + (APP.user.langue === 'fr' ? '1RM estimé Hybride' : 'Est. Hybrid 1RM') + ' (kg)</span>';
+  $('chart-pr-legend').innerHTML  = '<span><span class="ch-dot" style="background:#10b981"></span>' + APP.t('est_hybrid_1rm') + ' (kg)</span>';
   setTimeout(function() { drawChart('chart-pr', dates, [{ values: rms, color: '#10b981' }]); }, 30);
 }
 
