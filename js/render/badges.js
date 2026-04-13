@@ -163,7 +163,18 @@ function renderMuscleBadges(stats) {
     }[m]||m;
     var translatedM = APP.t(mKey);
 
-    musclesHtml += '<div class="mbdg '+ti.cls+' '+active+'" data-grp="'+m+'"><div class="mbdg-nm">'+translatedM+'</div><div class="mbdg-t" style="color:'+ti.col+'">'+ti.name+'</div><div class="mbdg-pb"><div class="mbdg-pf" style="width:'+pct+'%; background:linear-gradient(90deg, '+ti.col+', #fff)"></div></div></div>';
+    var translatedTierName = {
+      'Inactif': APP.t('tier_inactive'),
+      'Novice': APP.t('tier_novice'),
+      'Initié': APP.t('tier_initiate'),
+      'Athlète': APP.t('tier_athlete'),
+      'Expert': APP.t('tier_expert'),
+      'Maître': APP.t('tier_master'),
+      'Légende': APP.t('tier_legend'),
+      'Divin': APP.t('tier_divine')
+    }[ti.name] || ti.name;
+
+    musclesHtml += '<div class="mbdg '+ti.cls+' '+active+'" data-grp="'+m+'"><div class="mbdg-nm">'+translatedM+'</div><div class="mbdg-t" style="color:'+ti.col+'">'+translatedTierName+'</div><div class="mbdg-pb"><div class="mbdg-pf" style="width:'+pct+'%; background:linear-gradient(90deg, '+ti.col+', #fff)"></div></div></div>';
   }
   row.innerHTML = allHtml + specHtml + musclesHtml;
 }
@@ -324,7 +335,18 @@ function renderBadgeGrid(stats) {
 
     var rateTxt = APP.t('unlocked_by').replace('{{rate}}', ti.rate);
 
-    htmlStr += '<div class="bdg-card '+ti.cls+' '+(earned?'earned':'')+'" data-rarity="'+ti.label+'"><div class="bdg-visual">'+getPremiumVisual(type, ti.col, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+translatedName+'</div><div class="bdg-meta">'+translatedGroup+' <span class="bdg-rarity-pill" style="color:'+ti.col+'">'+ti.label+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+ti.col+'; box-shadow:0 0 10px '+ti.col+'"></div></div>'+(earned?'<div class="bdg-rate">'+rateTxt+'</div>':'')+'</div><div class="bdg-aside" style="text-align:right"><div class="bdg-stat-v">'+(earned ? max1RM + 'kg' : '--')+'</div><div class="bdg-stat-l">' + APP.t('label_1rm_max') + '</div></div></div>';
+    var translatedLabel = {
+      'Bloqué': APP.t('rarity_locked'),
+      'COMMUN': APP.t('rarity_common'),
+      'PEU COMMUN': APP.t('rarity_uncommon'),
+      'RARE': APP.t('rarity_rare'),
+      'ÉPIQUE': APP.t('rarity_epic'),
+      'LÉGENDAIRE': APP.t('rarity_legendary'),
+      'MYTHIQUE': APP.t('rarity_mythic'),
+      'RELIQUE': APP.t('rarity_relic')
+    }[ti.label] || ti.label;
+
+    htmlStr += '<div class="bdg-card '+ti.cls+' '+(earned?'earned':'')+'" data-rarity="'+ti.label+'"><div class="bdg-visual">'+getPremiumVisual(type, ti.col, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+translatedName+'</div><div class="bdg-meta">'+translatedGroup+' <span class="bdg-rarity-pill" style="color:'+ti.col+'">'+translatedLabel+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+ti.col+'; box-shadow:0 0 10px '+ti.col+'"></div></div>'+(earned?'<div class="bdg-rate">'+rateTxt+'</div>':'')+'</div><div class="bdg-aside" style="text-align:right"><div class="bdg-stat-v">'+(earned ? max1RM + 'kg' : '--')+'</div><div class="bdg-stat-l">' + APP.t('label_1rm_max') + '</div></div></div>';
   }
   grid.innerHTML = htmlStr;
   if (window.gsap && allEx.length < 50) {
