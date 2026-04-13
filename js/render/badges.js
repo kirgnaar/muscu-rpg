@@ -49,7 +49,8 @@ function renderBadges() {
     repCount: 0,
     uniqueExCount: 0,
     uniqueExMap: {},
-    muscleSeries: {},
+    muscleTotalWeighted: {},
+    muscleBestExWeighted: {},
     muscleVols: {},
     exCounts: {},
     maxS: 0, maxB: 0, maxD: 0,
@@ -58,9 +59,13 @@ function renderBadges() {
 
   for (var mIdx = 0; mIdx < MUSCLES.length; mIdx++) {
     var mName = MUSCLES[mIdx];
-    stats.muscleSeries[mName] = 0;
+    stats.muscleTotalWeighted[mName] = 0;
+    stats.muscleBestExWeighted[mName] = 0;
     stats.muscleVols[mName] = 0;
   }
+
+  // Intermediate tracking for best exercise per muscle
+  var exWeightedByMuscle = {}; // { Muscle: { ExName: weightedSets } }
 
   for (var i = 0; i < APP.data.length; i++) {
     var d = APP.data[i];
@@ -84,10 +89,28 @@ function renderBadges() {
       var m = MUSCLES[k];
       var influence = getMuscleInfluence(d.ex, m);
       if (influence > 0) {
-        stats.muscleSeries[m] += (d.ser || 0);
+        var weighted = (d.ser || 0) * influence;
+        stats.muscleTotalWeighted[m] += weighted;
         stats.muscleVols[m] += (d.vol * influence);
+        
+        if (!exWeightedByMuscle[m]) exWeightedByMuscle[m] = {};
+        exWeightedByMuscle[m][d.ex] = (exWeightedByMuscle[m][d.ex] || 0) + weighted;
       }
     }
+  }
+
+  // Calculate Hybrid Score for each muscle
+  stats.muscleHybridScores = {};
+  for (var m2 = 0; m2 < MUSCLES.length; m2++) {
+    var mName2 = MUSCLES[m2];
+    var best = 0;
+    if (exWeightedByMuscle[mName2]) {
+      for (var exKey in exWeightedByMuscle[mName2]) {
+        if (exWeightedByMuscle[mName2][exKey] > best) best = exWeightedByMuscle[mName2][exKey];
+      }
+    }
+    stats.muscleBestExWeighted[mName2] = best;
+    stats.muscleHybridScores[mName2] = Math.floor((stats.muscleTotalWeighted[mName2] * 0.4) + (best * 0.6));
   }
 
   renderMuscleBadges(stats);
@@ -126,7 +149,7 @@ function renderMuscleBadges(stats) {
   var musclesHtml = '';
   for (var i = 0; i < MUSCLES.length; i++) {
     var m = MUSCLES[i];
-    var n = stats.muscleSeries[m] || 0;
+    var n = stats.muscleHybridScores[m] || 0;
     var ti = getTier(n);
     var pct = (getTierProgress(n) * 100).toFixed(0);
     var active = BADGES.groupFilter === m ? 'on' : '';
@@ -151,7 +174,7 @@ function renderGlobalAchievements(stats) {
     if (stats.dailyVols.hasOwnProperty(date)) sessions++;
   }
 
-  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + APP.t('career_stats') + '</div><div class="ach-grid"><div class="ach-card"><div class="ach-val">'+fmtV(stats.totalVol)+'</div><div class="ach-lbl">Volume (KG)</div></div><div class="ach-card"><div class="ach-val">'+sessions+'</div><div class="ach-lbl">' + APP.t('sessions') + '</div></div><div class="ach-card"><div class="ach-val">'+stats.prCount+'</div><div class="ach-lbl">' + APP.t('records') + '</div></div></div>';
+  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + APP.t('career_stats') + '</div><div class="ach-grid"><div class="ach-card"><div class="ach-val">'+fmtV(stats.totalVol)+'</div><div class="ach-lbl">'+APP.t('label_vol_total')+'</div></div><div class="ach-card"><div class="ach-val">'+sessions+'</div><div class="ach-lbl">' + APP.t('sessions') + '</div></div><div class="ach-card"><div class="ach-val">'+stats.prCount+'</div><div class="ach-lbl">' + APP.t('records') + '</div></div></div>';
   var target = document.querySelector('#v-badges .clabel[data-i18n="label_muscles"]');
 
   if (target) {
@@ -190,16 +213,16 @@ function renderSpecialAchievements(stats) {
   }
 
   var specs = [
-    {id:'titan', name:isFR?'Le Titan du Volume':'Volume Titan', icon:'trophy', val:stats.totalVol, paliere:[{n:10000,l:isFR?'Poids Plume':'Featherweight',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:100000,l:isFR?'Poids Moyen':'Middleweight',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:500000,l:isFR?'Poids Lourd':'Heavyweight',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:1000000,l:isFR?'Le Titan':'The Titan',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:5000000,l:'Atlas',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
-    {id:'pilier', name:isFR?'Le Pilier du Club':'Club Pillar', icon:'trophy', val:sessions, paliere:[{n:10,l:isFR?'Visiteur':'Visitor',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:50,l:isFR?'Habitué':'Regular',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:100,l:isFR?'Adepte':'Adept',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:250,l:isFR?'Pilier de Fer':'Iron Pillar',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:500,l:isFR?'Légende Vivante':'Living Legend',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
-    {id:'briseur', name:isFR?'Le Briseur de Limites':'Limit Breaker', icon:'trophy', val:stats.prCount, paliere:[{n:10,l:isFR?'Déterminé':'Determined',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:isFR?'Inarrêtable':'Unstoppable',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:100,l:isFR?'Briseur de Plafond':'Ceiling Breaker',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:250,l:isFR?'L\'Anomalie':'The Anomaly',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
-    {id:'acharne', name:isFR?'L\'Acharné':'Hard Worker', icon:'trophy', val:stats.repCount, paliere:[{n:1000,l:isFR?'Cadence I':'Cadence I',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:10000,l:isFR?'Cadence II':'Cadence II',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50000,l:isFR?'Mécanique':'Mechanical',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:100000,l:isFR?'L\'Horloge de Fer':'Iron Clock',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'}]},
-    {id:'chelem', name:isFR?'Le Grand Chelem':'Grand Slam', icon:'trophy', val:big6Done, paliere:[{n:2,l:isFR?'Apprenti':'Apprentice',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:4,l:isFR?'Guerrier Complet':'Complete Warrior',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:6,l:isFR?'Le Grand Chelem':'Grand Slam',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'}]},
-    {id:'monolithe', name:isFR?'Le Monolithe (SBD)':'Monolith (SBD)', icon:'trophy', val:stats.maxS + stats.maxB + stats.maxD, paliere:totalMonoPaliere},
-    {id:'monolithe_s', name:isFR?'Monolithe S (Squat)':'Monolith S (Squat)', icon:'trophy', val:stats.maxS, paliere:monoPaliere},
-    {id:'monolithe_b', name:isFR?'Monolithe B (Couché)':'Monolith B (Bench)', icon:'trophy', val:stats.maxB, paliere:monoPaliere},
-    {id:'monolithe_d', name:isFR?'Monolithe D (Terre)':'Monolith D (Deadlift)', icon:'trophy', val:stats.maxD, paliere:monoPaliere},
-    {id:'cameleon', name:isFR?'Le Caméléon':'Chameleon', icon:'trophy', val:stats.uniqueExCount, paliere:[{n:10,l:isFR?'Curieux':'Curious',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:25,l:isFR?'Polyvalent':'Versatile',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:isFR?'Spécialiste':'Specialist',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:75,l:isFR?'Encyclopédie':'Encyclopedia',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:100,l:isFR?'Maître de la Salle':'Gym Master',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]}
+    {id:'titan', name:APP.t('titan_title'), icon:'trophy', val:stats.totalVol, paliere:[{n:10000,l:APP.t('tier_titan_1'),r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:100000,l:APP.t('tier_titan_2'),r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:500000,l:APP.t('tier_titan_3'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:1000000,l:APP.t('tier_titan_4'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:5000000,l:'Atlas',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
+    {id:'pilier', name:APP.t('pillar_title'), icon:'trophy', val:sessions, paliere:[{n:10,l:APP.t('tier_pillar_1'),r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:50,l:APP.t('tier_pillar_2'),r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:100,l:APP.t('tier_pillar_3'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:250,l:APP.t('tier_pillar_4'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:500,l:APP.t('tier_pillar_5'),r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
+    {id:'briseur', name:APP.t('breaker_title'), icon:'trophy', val:stats.prCount, paliere:[{n:10,l:APP.t('tier_breaker_1'),r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:APP.t('tier_breaker_2'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:100,l:APP.t('tier_breaker_3'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:250,l:APP.t('tier_breaker_4'),r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
+    {id:'acharne', name:APP.t('worker_title'), icon:'trophy', val:stats.repCount, paliere:[{n:1000,l:'Cadence I',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:10000,l:'Cadence II',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50000,l:APP.t('tier_worker_3'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:100000,l:APP.t('tier_worker_4'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'}]},
+    {id:'chelem', name:APP.t('slam_title'), icon:'trophy', val:big6Done, paliere:[{n:2,l:APP.t('tier_slam_1'),r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:4,l:APP.t('tier_slam_2'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:6,l:APP.t('slam_title'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'}]},
+    {id:'monolithe', name:APP.t('mono_title'), icon:'trophy', val:stats.maxS + stats.maxB + stats.maxD, paliere:totalMonoPaliere},
+    {id:'monolithe_s', name:APP.t('mono_s_title'), icon:'trophy', val:stats.maxS, paliere:monoPaliere},
+    {id:'monolithe_b', name:APP.t('mono_b_title'), icon:'trophy', val:stats.maxB, paliere:monoPaliere},
+    {id:'monolithe_d', name:APP.t('mono_d_title'), icon:'trophy', val:stats.maxD, paliere:monoPaliere},
+    {id:'cameleon', name:APP.t('cameleon_title'), icon:'trophy', val:stats.uniqueExCount, paliere:[{n:10,l:APP.t('tier_cam_1'),r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:25,l:APP.t('tier_cam_2'),r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:APP.t('tier_cam_3'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:75,l:APP.t('tier_cam_4'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:100,l:APP.t('tier_cam_5'),r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]}
   ];
 
   var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + APP.t('special_achievements') + '</div><div id="special-ach-grid">';
@@ -280,6 +303,8 @@ function renderBadgeGrid(stats) {
     var pct = (getTierProgress(n) * 100).toFixed(0);
     var earned = n > 0;
     var max1RM = max1RMs[name] || 0;
+    var translatedName = APP.t(name);
+    
     var type = 'generic';
     if (group === 'Pectoraux') type = 'bench';
     else if (group === 'Quadriceps') type = 'squat';
@@ -299,7 +324,7 @@ function renderBadgeGrid(stats) {
 
     var rateTxt = APP.t('unlocked_by').replace('{{rate}}', ti.rate);
 
-    htmlStr += '<div class="bdg-card '+ti.cls+' '+(earned?'earned':'')+'" data-rarity="'+ti.label+'"><div class="bdg-visual">'+getPremiumVisual(type, ti.col, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+name+'</div><div class="bdg-meta">'+translatedGroup+' <span class="bdg-rarity-pill" style="color:'+ti.col+'">'+ti.label+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+ti.col+'; box-shadow:0 0 10px '+ti.col+'"></div></div>'+(earned?'<div class="bdg-rate">'+rateTxt+'</div>':'')+'</div><div class="bdg-aside" style="text-align:right"><div class="bdg-stat-v">'+(earned ? max1RM + 'kg' : '--')+'</div><div class="bdg-stat-l">1RM MAX</div></div></div>';
+    htmlStr += '<div class="bdg-card '+ti.cls+' '+(earned?'earned':'')+'" data-rarity="'+ti.label+'"><div class="bdg-visual">'+getPremiumVisual(type, ti.col, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+translatedName+'</div><div class="bdg-meta">'+translatedGroup+' <span class="bdg-rarity-pill" style="color:'+ti.col+'">'+ti.label+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+ti.col+'; box-shadow:0 0 10px '+ti.col+'"></div></div>'+(earned?'<div class="bdg-rate">'+rateTxt+'</div>':'')+'</div><div class="bdg-aside" style="text-align:right"><div class="bdg-stat-v">'+(earned ? max1RM + 'kg' : '--')+'</div><div class="bdg-stat-l">1RM MAX</div></div></div>';
   }
   grid.innerHTML = htmlStr;
   if (window.gsap && allEx.length < 50) {

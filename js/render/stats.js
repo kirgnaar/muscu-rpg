@@ -137,12 +137,12 @@ function renderStatsCharts(exName) {
   }
 
   cardVol.style.display = 'block';
-  $('chart-vol-title').textContent = APP.t('label_chart_vol') + ' — ' + exName;
+  $('chart-vol-title').textContent = APP.t('label_chart_vol') + ' — ' + APP.t(exName);
   $('chart-vol-legend').innerHTML  = '<span><span class="ch-dot" style="background:' + color + '"></span>Volume (kg)</span>';
   setTimeout(function() { drawChart('chart-vol', dates, [{ values: vols, color: color }]); }, 30);
 
   cardPR.style.display = 'block';
-  $('chart-pr-title').textContent = APP.t('label_chart_pr') + ' — ' + exName + (BIG6.indexOf(exName) !== -1 ? ' 🏆' : '');
+  $('chart-pr-title').textContent = APP.t('label_chart_pr') + ' — ' + APP.t(exName) + (BIG6.indexOf(exName) !== -1 ? ' 🏆' : '');
   // Correction de la légende : Afficher Hybride au lieu d'Epley
   $('chart-pr-legend').innerHTML  = '<span><span class="ch-dot" style="background:#10b981"></span>' + APP.t('est_hybrid_1rm') + ' (kg)</span>';
   setTimeout(function() { drawChart('chart-pr', dates, [{ values: rms, color: '#10b981' }]); }, 30);

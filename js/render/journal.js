@@ -318,7 +318,7 @@ function renderJournal() {
       html += '<div class="sitem" data-id="' + entry.id + '">'
             + '<div class="sdot" style="background:' + c + '"></div>'
             + '<div class="sinfo">'
-            + '<div class="sname">' + entry.ex + pr + '</div>'
+            + '<div class="sname">' + APP.t(entry.ex) + pr + '</div>'
             + '<div class="smeta">' + translatedType + ' \u00b7 ' + entry.ser + '\u00d7' + entry.rep + ' \u00b7 ' + entry.pds + ' kg</div>'
             + '</div>'
             + '<div style="display:flex;align-items:center;gap:2px">'

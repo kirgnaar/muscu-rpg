@@ -294,7 +294,7 @@ function populateExerciseSelect(selectEl, includeEmpty) {
   if (includeEmpty) {
     var opt = document.createElement('option');
     opt.value = '';
-    opt.textContent = '-- Choisir un exercice --';
+    opt.textContent = '-- ' + APP.t('choose_ex') + ' --';
     selectEl.appendChild(opt);
   }
   var groups = {};
@@ -307,13 +307,24 @@ function populateExerciseSelect(selectEl, includeEmpty) {
   for (var j = 0; j < groupNames.length; j++) {
     var g = groupNames[j];
     var og = document.createElement('optgroup');
-    og.label = g;
+    
+    // Translate group labels (chains)
+    var gKey = {
+      'Haut Antérieur': 'chain_upper_ant',
+      'Haut Postérieur': 'chain_upper_post',
+      'Core': 'chain_core',
+      'Bas Antérieur': 'chain_lower_ant',
+      'Bas Postérieur': 'chain_lower_post',
+      'Full body': 'chain_full_body'
+    }[g] || g;
+    og.label = APP.t(gKey);
+
     var groupExs = groups[g];
     for (var k = 0; k < groupExs.length; k++) {
       var ex = groupExs[k];
       var o = document.createElement('option');
-      o.value = ex[0];
-      o.textContent = ex[0];
+      o.value = ex[0]; // Keep technical French name as value
+      o.textContent = APP.t(ex[0]); // Translate display label
       og.appendChild(o);
     }
     selectEl.appendChild(og);
