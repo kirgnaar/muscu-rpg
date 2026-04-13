@@ -121,7 +121,12 @@ var I18N = {
     p_1y: '1 an',
     p_all: 'Tout',
     profile_saved: 'Profil enregistré !',
-    lang_updated_to: 'Langue mise à jour'
+    lang_updated_to: 'Langue mise à jour',
+    new_program: 'Nouveau Programme',
+    untitled: 'Sans nom',
+    confirm_delete: 'Supprimer ?',
+    confirm_session: 'Confirmer la séance ?',
+    no_programs: 'Aucun programme.'
   },
   en: {
     lvl: 'Level',
@@ -240,7 +245,12 @@ var I18N = {
     p_1y: '1 year',
     p_all: 'All',
     profile_saved: 'Profile saved!',
-    lang_updated_to: 'Language updated'
+    lang_updated_to: 'Language updated',
+    new_program: 'New Program',
+    untitled: 'Untitled',
+    confirm_delete: 'Delete?',
+    confirm_session: 'Confirm session?',
+    no_programs: 'No programs.'
   },
   de: {
     lvl: 'Level',
@@ -359,7 +369,12 @@ var I18N = {
     p_1y: '1 Jahr',
     p_all: 'Alle',
     profile_saved: 'Profil gespeichert!',
-    lang_updated_to: 'Sprache aktualisiert'
+    lang_updated_to: 'Sprache aktualisiert',
+    new_program: 'Neues Programm',
+    untitled: 'Ohne Titel',
+    confirm_delete: 'Löschen?',
+    confirm_session: 'Sitzung bestätigen?',
+    no_programs: 'Keine Programme.'
   },
   es: {
     lvl: 'Nivel',
@@ -478,7 +493,12 @@ var I18N = {
     p_1y: '1 año',
     p_all: 'Todo',
     profile_saved: '¡Perfil guardado!',
-    lang_updated_to: 'Idioma actualizado'
+    lang_updated_to: 'Idioma actualizado',
+    new_program: 'Nuevo Programa',
+    untitled: 'Sin título',
+    confirm_delete: '¿Eliminar?',
+    confirm_session: '¿Confirmar sesión?',
+    no_programs: 'Sin programas.'
   },
   ja: {
     lvl: 'レベル',
@@ -597,7 +617,12 @@ var I18N = {
     p_1y: '1年間',
     p_all: 'すべて',
     profile_saved: 'プロフィールを保存しました！',
-    lang_updated_to: '言語を更新しました'
+    lang_updated_to: '言語を更新しました',
+    new_program: '新規プログラム',
+    untitled: '無題',
+    confirm_delete: '削除しますか？',
+    confirm_session: 'セッションを確定しますか？',
+    no_programs: 'プログラムがありません。'
   }
 
 };

@@ -13,14 +13,16 @@ var JOURNAL = {
 function initJournal() {
   // Traduction des labels statiques (non gérés par APP.updateStaticUI)
   $('v-seances').querySelector('.stitle').textContent = APP.t('stitle_new_serie');
-  $$('.flabel', $('v-seances')).forEach(function(l) {
+  var labels = $$('.flabel', $('v-seances'));
+  for (var i = 0; i < labels.length; i++) {
+    var l = labels[i];
     if (l.htmlFor === 'in-date') l.textContent = APP.t('label_date');
     if (l.htmlFor === 'sel-type') l.textContent = APP.t('label_type');
     if (l.htmlFor === 'sel-ex') l.textContent = APP.t('label_ex');
     if (l.htmlFor === 'in-ser') l.textContent = APP.t('label_ser');
     if (l.htmlFor === 'in-rep') l.textContent = APP.t('label_rep');
     if (l.htmlFor === 'in-pds') l.textContent = APP.t('label_pds');
-  });
+  }
   $('btn-save').textContent = '✓ ' + APP.t('btn_save');
   $('timer-card').querySelector('.clabel span').textContent = '⌛ ' + APP.t('label_timer');
   $('timer-start-btn').textContent = '▶ ' + APP.t('timer_start');
@@ -133,7 +135,10 @@ function handleSave() {
   if (!ser || !rep || !pds)    { toast('Remplis tous les champs', 'err'); return; }
   if (ser < 1 || rep < 1 || pds <= 0) { toast('Valeurs incorrectes', 'err'); return; }
 
-  var exData = EX.find(function(e) { return e[0] === ex; });
+  var exData = null;
+  for (var i = 0; i < EX.length; i++) {
+    if (EX[i][0] === ex) { exData = EX[i]; break; }
+  }
   var entry = addEntry({
     date: date,
     type: type,
@@ -212,7 +217,10 @@ function handleJournalClick(ev) {
 function handleFilterPill(ev) {
   var pill = ev.target.closest('.fpill');
   if (!pill) return;
-  $$('.fpill', $('filter-bar')).forEach(function(p) { p.classList.remove('on'); });
+  var pills = $$('.fpill', $('filter-bar'));
+  for (var i = 0; i < pills.length; i++) {
+    pills[i].classList.remove('on');
+  }
   pill.classList.add('on');
   JOURNAL.filterType = pill.dataset.ftype;
   JOURNAL.filterVal  = '';

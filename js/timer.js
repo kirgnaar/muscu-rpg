@@ -27,21 +27,23 @@ var TIMER = {
     });
     
     // Sélection de durée rapide
-    $$('.timer-opt').forEach(function(btn) {
-      btn.addEventListener('click', function() {
+    var timerOpts = $$('.timer-opt');
+    for (var i = 0; i < timerOpts.length; i++) {
+      timerOpts[i].addEventListener('click', function() {
         var d = parseInt(this.dataset.d);
         self.setDuration(d);
       });
-    });
+    }
   },
 
   setDuration: function(seconds) {
     this.duration = seconds;
     this.remaining = seconds;
     this.updateDisplay();
-    $$('.timer-opt').forEach(function(btn) {
-      btn.classList.toggle('active', parseInt(btn.dataset.d) === seconds);
-    });
+    var timerOpts = $$('.timer-opt');
+    for (var i = 0; i < timerOpts.length; i++) {
+      timerOpts[i].classList.toggle('active', parseInt(timerOpts[i].dataset.d) === seconds);
+    }
   },
 
   start: function() {

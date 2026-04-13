@@ -53,8 +53,7 @@ function saveBlocks() {
 }
 
 function handleNewBlock() {
-  var name = APP.user.langue === 'fr' ? "Nouveau Programme" : "New Program";
-  SIM.currentBlock = { id: Date.now(), name: name, type: "Hypertrophie", exercises: [] };
+  SIM.currentBlock = { id: Date.now(), name: APP.t('new_program'), type: "Hypertrophie", exercises: [] };
   openEditor();
 }
 
@@ -90,8 +89,7 @@ function closeEditor() {
 
 function saveCurrentBlock() {
   if (!SIM.currentBlock) return;
-  var defaultName = APP.user.langue === 'fr' ? "Sans nom" : "Untitled";
-  SIM.currentBlock.name = $('sim-block-name').value || defaultName;
+  SIM.currentBlock.name = $('sim-block-name').value || APP.t('untitled');
   SIM.currentBlock.type = $('sim-block-type').value;
   var foundIdx = -1;
   for (var i = 0; i < SIM.blocks.length; i++) {
@@ -108,8 +106,7 @@ function saveCurrentBlock() {
 }
 
 function deleteBlock(id) {
-  var msg = APP.user.langue === 'fr' ? "Supprimer ?" : "Delete?";
-  if (!confirm(msg)) return;
+  if (!confirm(APP.t('confirm_delete'))) return;
   var newBlocks = [];
   for (var i = 0; i < SIM.blocks.length; i++) {
     if (SIM.blocks[i].id !== id) newBlocks.push(SIM.blocks[i]);
@@ -134,7 +131,7 @@ function renderSimulation() {
   $('sim-new-block-btn').textContent = '+ ' + APP.t('btn_new');
 
   var list = $('sim-blocks-list');
-  if (SIM.blocks.length === 0) { list.innerHTML = '<div class="empty"><p>' + (APP.user.langue === 'fr' ? 'Aucun programme.' : 'No programs.') + '</p></div>'; return; }
+  if (SIM.blocks.length === 0) { list.innerHTML = '<div class="empty"><p>' + APP.t('no_programs') + '</p></div>'; return; }
   var html = '';
   for (var i = 0; i < SIM.blocks.length; i++) {
     var b = SIM.blocks[i];
@@ -147,7 +144,7 @@ function renderSimulation() {
       }
       distHtml += '</div>';
     }
-    
+
     var typeKey = {
       'Hypertrophie': 'hypertrophy',
       'Force': 'strength',
@@ -157,10 +154,11 @@ function renderSimulation() {
     }[b.type] || '';
     var translatedType = typeKey ? APP.t(typeKey) : b.type;
 
-    html += '<div class="card" style="margin-bottom:10px"><div class="flex-between"><div><div style="font-weight:800; color:#fff">' + b.name + '</div><div style="font-size:11px; color:var(--accent); font-weight:700">' + translatedType + '</div><div style="font-size:10px; color:var(--text2); margin-top:2px">' + b.exercises.length + ' ' + (APP.user.langue === 'fr' ? 'exercices' : 'exercises') + '</div></div><div style="display:flex; gap:8px"><button class="btn btn-s sim-block-edit" data-id="' + b.id + '">' + (APP.user.langue === 'fr' ? 'Éditer' : 'Edit') + '</button><button class="btn btn-s sim-block-del" data-id="' + b.id + '" style="background:rgba(239,68,68,0.1); color:#ef4444">✕</button></div></div>' + distHtml + '</div>';
+    html += '<div class="card" style="margin-bottom:10px"><div class="flex-between"><div><div style="font-weight:800; color:#fff">' + b.name + '</div><div style="font-size:11px; color:var(--accent); font-weight:700">' + translatedType + '</div><div style="font-size:10px; color:var(--text2); margin-top:2px">' + b.exercises.length + ' ' + APP.t('exercises').toLowerCase() + '</div></div><div style="display:flex; gap:8px"><button class="btn btn-s sim-block-edit" data-id="' + b.id + '">' + APP.t('edit') + '</button><button class="btn btn-s sim-block-del" data-id="' + b.id + '" style="background:rgba(239,68,68,0.1); color:#ef4444">✕</button></div></div>' + distHtml + '</div>';
   }
   list.innerHTML = html;
 }
+
 
 function calculateMuscleDistribution(exercises) {
   if (!exercises.length) return [];
@@ -236,13 +234,16 @@ function calculateSimResults(simList) {
   var newVolTotal = currentVol + simVolGain;
   var currentLvl = getLevel(currentVol);
   var nextLvl = getLevel(newVolTotal);
-  $('sim-xp-gain').textContent = '+ ' + fmtV(simVolGain) + ' XP Global';
-  var lvlHtml = '<div style="font-weight:700">' + (APP.user.langue === 'fr' ? 'Niveau Global' : 'Global Level') + ' : ' + currentLvl + ' → ' + nextLvl + '</div>';
-  if (nextLvl > currentLvl) lvlHtml += '<div style="color:var(--green); font-size:12px; margin-top:4px; font-weight:800">✨ ' + (APP.user.langue === 'fr' ? 'MONTÉE DE NIVEAU GLOBALE !' : 'GLOBAL LEVEL UP!') + '</div>';
-  else {
+  var xpLabel = APP.t('global_level');
+  $('sim-xp-gain').textContent = '+ ' + fmtV(simVolGain) + ' XP';
+  var lvlHtml = '<div style="font-weight:700">' + xpLabel + ' : ' + currentLvl + ' ➔ ' + nextLvl + '</div>';
+  if (nextLvl > currentLvl) {
+    lvlHtml += '<div style="color:var(--green); font-size:12px; margin-top:4px; font-weight:800">✨ ' + APP.t('level_up_global') + '</div>';
+  } else {
     var nextThr = levelThreshold(nextLvl + 1);
     var remaining = nextThr - newVolTotal;
-    lvlHtml += '<div style="color:var(--text2); font-size:11px; margin-top:4px">' + (APP.user.langue === 'fr' ? 'Encore ' + fmtV(remaining) + ' XP pour le niveau ' + (currentLvl + 1) : fmtV(remaining) + ' XP left for level ' + (currentLvl + 1)) + '</div>';
+    var remTxt = APP.t('xp_left_for').replace('{{xp}}', fmtV(remaining)).replace('{{lvl}}', currentLvl + 1);
+    lvlHtml += '<div style="color:var(--text2); font-size:11px; margin-top:4px">' + remTxt + '</div>';
   }
   $('sim-lvl-preview').innerHTML = lvlHtml;
   var muscleGains = {};
@@ -262,7 +263,10 @@ function calculateSimResults(simList) {
     var curL = getLevel(currentVolGrp);
     var nxtL = getLevel(newVolGrp);
     var color = levelColor(nxtL);
-    var subText = nxtL > curL ? '<span style="color:var(--green); font-weight:800">LEVEL UP ! (+' + (nxtL - curL) + ')</span>' : '<span style="opacity:0.6">' + (APP.user.langue === 'fr' ? 'Manque ' + fmtV(levelThreshold(curL + 1) - newVolGrp) + ' XP' : fmtV(levelThreshold(curL + 1) - newVolGrp) + ' XP missing') + '</span>';
+    var missingXP = levelThreshold(curL + 1) - newVolGrp;
+    var subText = nxtL > curL 
+      ? '<span style="color:var(--green); font-weight:800">LEVEL UP ! (+' + (nxtL - curL) + ')</span>' 
+      : '<span style="opacity:0.6">' + APP.t('xp_missing').replace('{{xp}}', fmtV(missingXP)) + '</span>';
     muscleHtml += '<div class="card" style="margin-bottom:8px; border-left: 4px solid ' + color + '; padding: 12px"><div class="flex-between"><div><div style="font-size:14px; font-weight:900; color:#fff">' + grpName + '</div><div style="font-size:12px; color:' + color + '; font-weight:700">' + APP.t('lvl') + ' ' + curL + ' ➔ ' + nxtL + '</div></div><div style="text-align:right"><div style="font-size:11px; font-weight:600">' + subText + '</div><div style="font-size:9px; color:var(--text2); margin-top:2px">+ ' + fmtV(gainVolGrp) + ' XP</div></div></div><div class="bar-bg" style="height:4px; margin-top:8px"><div class="bar-fill" style="width:' + (levelProgress(newVolGrp)*100).toFixed(0) + '%; background:' + color + '"></div></div></div>';
   }
   $('sim-muscle-results').innerHTML = muscleHtml;
@@ -270,8 +274,7 @@ function calculateSimResults(simList) {
 
 function confirmSession() {
   if (!SIM.currentBlock || SIM.currentBlock.exercises.length === 0) return;
-  var msg = APP.user.langue === 'fr' ? "Confirmer la séance ?" : "Confirm session?";
-  if (!confirm(msg)) return;
+  if (!confirm(APP.t('confirm_session'))) return;
   var date = todayISO();
   var type = SIM.currentBlock.type || "Hypertrophie";
   for (var i = 0; i < SIM.currentBlock.exercises.length; i++) {

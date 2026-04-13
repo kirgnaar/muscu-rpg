@@ -31,21 +31,23 @@ function initBadges() {
       for (var i = 0; i < cards.length; i++) {
         cards[i].classList.toggle('on', (cards[i].dataset.grp || '') === BADGES.groupFilter);
       }
-      renderBadgeGrid();
+      renderBadges(); // Re-render everything with the new filter
     });
   }
 }
 
 function renderBadges() {
   $('v-badges').querySelector('.stitle').textContent = APP.t('stitle_badges');
-  $('v-badges').querySelectorAll('.clabel')[1].textContent = APP.t('label_muscles');
+  var clabels = $('v-badges').querySelectorAll('.clabel');
+  if (clabels.length > 1) clabels[1].textContent = APP.t('label_muscles');
 
   // One pass over data for all badge calculations
   var stats = {
     totalVol: 0,
     prCount: 0,
     repCount: 0,
-    uniqueEx: new Set(),
+    uniqueExCount: 0,
+    uniqueExMap: {},
     muscleSeries: {},
     muscleVols: {},
     exCounts: {},
@@ -53,14 +55,23 @@ function renderBadges() {
     dailyVols: {}
   };
 
-  MUSCLES.forEach(function(m) { stats.muscleSeries[m] = 0; stats.muscleVols[m] = 0; });
+  for (var mIdx = 0; mIdx < MUSCLES.length; mIdx++) {
+    var mName = MUSCLES[mIdx];
+    stats.muscleSeries[mName] = 0;
+    stats.muscleVols[mName] = 0;
+  }
 
   for (var i = 0; i < APP.data.length; i++) {
     var d = APP.data[i];
     stats.totalVol += d.vol;
     if (d.isPR) stats.prCount++;
     stats.repCount += (d.rep * d.ser);
-    stats.uniqueEx.add(d.ex);
+
+    if (!stats.uniqueExMap[d.ex]) {
+      stats.uniqueExMap[d.ex] = true;
+      stats.uniqueExCount++;
+    }
+
     stats.exCounts[d.ex] = (stats.exCounts[d.ex] || 0) + d.ser;
     stats.dailyVols[d.date] = (stats.dailyVols[d.date] || 0) + d.vol;
 
@@ -70,9 +81,10 @@ function renderBadges() {
 
     for (var k = 0; k < MUSCLES.length; k++) {
       var m = MUSCLES[k];
-      if (getMuscleInfluence(d.ex, m) > 0) {
+      var influence = getMuscleInfluence(d.ex, m);
+      if (influence > 0) {
         stats.muscleSeries[m] += d.ser;
-        stats.muscleVols[m] += d.vol;
+        stats.muscleVols[m] += (d.vol * influence);
       }
     }
   }
@@ -82,7 +94,6 @@ function renderBadges() {
   renderBadgeGrid(stats);
 
   if (typeof BODY3D !== 'undefined' && BODY3D.isInitialized) {
-    // We can pass pre-calculated muscleVols to avoid re-calculation in BODY3D
     BODY3D.updateColors(stats.muscleVols);
   }
 }
@@ -91,10 +102,12 @@ function renderMuscleBadges(stats) {
   var row = document.getElementById('muscle-badges-row');
   if (!row) return;
 
-  var sessions = allDates().length;
+  var sessions = 0;
+  for (var date in stats.dailyVols) sessions++;
+
   var vPct = Math.min(100, (stats.totalVol / 1000000) * 100);
   var sPct = Math.min(100, (sessions / 100) * 100);
-  var ePct = Math.min(100, (stats.uniqueEx.size / 50) * 100);
+  var ePct = Math.min(100, (stats.uniqueExCount / 50) * 100);
   var pPct = Math.min(100, (stats.prCount / 100) * 100);
   var rPct = Math.min(100, (stats.repCount / 10000) * 100);
   var specialProgress = ((vPct + sPct + ePct + pPct + rPct) / 5).toFixed(0);
@@ -123,40 +136,16 @@ function renderMuscleBadges(stats) {
   row.innerHTML = allHtml + specHtml + musclesHtml;
 }
 
-
-function calculateSpecialAchievementsProgress() {
-  var allData = APP.data;
-  var totalVol = 0;
-  var prCount = 0;
-  var repCount = 0;
-  var uniqueEx = new Set();
-  var sessions = allDates().length;
-
-  for (var i = 0; i < allData.length; i++) {
-    var d = allData[i];
-    totalVol += d.vol;
-    if (d.isPR) prCount++;
-    repCount += (d.rep * d.set);
-    uniqueEx.add(d.ex);
-  }
-
-  var vPct = Math.min(100, (totalVol / 1000000) * 100);
-  var sPct = Math.min(100, (sessions / 100) * 100);
-  var ePct = Math.min(100, (uniqueEx.size / 50) * 100);
-  var pPct = Math.min(100, (prCount / 100) * 100);
-  var rPct = Math.min(100, (repCount / 10000) * 100);
-
-  return ((vPct + sPct + ePct + pPct + rPct) / 5).toFixed(0);
-}
-
 function renderGlobalAchievements(stats) {
-  var totalSes = allDates().length;
-  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + APP.t('career_stats') + '</div><div class="ach-grid"><div class="ach-card"><div class="ach-val">'+fmtV(stats.totalVol)+'</div><div class="ach-lbl">Volume (KG)</div></div><div class="ach-card"><div class="ach-val">'+totalSes+'</div><div class="ach-lbl">' + APP.t('sessions') + '</div></div><div class="ach-card"><div class="ach-val">'+stats.prCount+'</div><div class="ach-lbl">' + APP.t('records') + '</div></div></div>';
-  var target = document.querySelector('#v-badges .clabel[style*="Groupes Musculaires"]');
+  var sessions = 0;
+  for (var date in stats.dailyVols) sessions++;
+
+  var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + APP.t('career_stats') + '</div><div class="ach-grid"><div class="ach-card"><div class="ach-val">'+fmtV(stats.totalVol)+'</div><div class="ach-lbl">Volume (KG)</div></div><div class="ach-card"><div class="ach-val">'+sessions+'</div><div class="ach-lbl">' + APP.t('sessions') + '</div></div><div class="ach-card"><div class="ach-val">'+stats.prCount+'</div><div class="ach-lbl">' + APP.t('records') + '</div></div></div>';
+  var target = document.querySelector('#v-badges .clabel[data-i18n="label_muscles"]');
 
   if (target) {
     var old = document.getElementById('global-ach-box');
-    if (old) old.remove();
+    if (old) old.parentNode.removeChild(old);
     var box = document.createElement('div');
     box.id = 'global-ach-box';
     box.innerHTML = html;
@@ -171,7 +160,6 @@ function renderSpecialAchievements(stats) {
   }
 
   var isFR = APP.user.langue === 'fr';
-
   var monoPaliere = [
     {n:100,l:isFR?'Acier':'Steel',r:isFR?'RARE':'RARE',c:'#3b82f6'},
     {n:150,l:isFR?'Béton':'Concrete',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},
@@ -185,9 +173,12 @@ function renderSpecialAchievements(stats) {
     {n:900,l:isFR?'Le Colosse':'The Colossus',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}
   ];
 
+  var sessions = 0;
+  for (var date in stats.dailyVols) sessions++;
+
   var specs = [
     {id:'titan', name:isFR?'Le Titan du Volume':'Volume Titan', icon:'trophy', val:stats.totalVol, paliere:[{n:10000,l:isFR?'Poids Plume':'Featherweight',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:100000,l:isFR?'Poids Moyen':'Middleweight',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:500000,l:isFR?'Poids Lourd':'Heavyweight',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:1000000,l:isFR?'Le Titan':'The Titan',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:5000000,l:'Atlas',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
-    {id:'pilier', name:isFR?'Le Pilier du Club':'Club Pillar', icon:'trophy', val:allDates().length, paliere:[{n:10,l:isFR?'Visiteur':'Visitor',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:50,l:isFR?'Habitué':'Regular',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:100,l:isFR?'Adepte':'Adept',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:250,l:isFR?'Pilier de Fer':'Iron Pillar',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:500,l:isFR?'Légende Vivante':'Living Legend',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
+    {id:'pilier', name:isFR?'Le Pilier du Club':'Club Pillar', icon:'trophy', val:sessions, paliere:[{n:10,l:isFR?'Visiteur':'Visitor',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:50,l:isFR?'Habitué':'Regular',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:100,l:isFR?'Adepte':'Adept',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:250,l:isFR?'Pilier de Fer':'Iron Pillar',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:500,l:isFR?'Légende Vivante':'Living Legend',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
     {id:'briseur', name:isFR?'Le Briseur de Limites':'Limit Breaker', icon:'trophy', val:stats.prCount, paliere:[{n:10,l:isFR?'Déterminé':'Determined',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:isFR?'Inarrêtable':'Unstoppable',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:100,l:isFR?'Briseur de Plafond':'Ceiling Breaker',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:250,l:isFR?'L\'Anomalie':'The Anomaly',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
     {id:'acharne', name:isFR?'L\'Acharné':'Hard Worker', icon:'trophy', val:stats.repCount, paliere:[{n:1000,l:isFR?'Cadence I':'Cadence I',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:10000,l:isFR?'Cadence II':'Cadence II',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50000,l:isFR?'Mécanique':'Mechanical',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:100000,l:isFR?'L\'Horloge de Fer':'Iron Clock',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'}]},
     {id:'chelem', name:isFR?'Le Grand Chelem':'Grand Slam', icon:'trophy', val:big6Done, paliere:[{n:2,l:isFR?'Apprenti':'Apprentice',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:4,l:isFR?'Guerrier Complet':'Complete Warrior',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:6,l:isFR?'Le Grand Chelem':'Grand Slam',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'}]},
@@ -195,8 +186,9 @@ function renderSpecialAchievements(stats) {
     {id:'monolithe_s', name:isFR?'Monolithe S (Squat)':'Monolith S (Squat)', icon:'trophy', val:stats.maxS, paliere:monoPaliere},
     {id:'monolithe_b', name:isFR?'Monolithe B (Couché)':'Monolith B (Bench)', icon:'trophy', val:stats.maxB, paliere:monoPaliere},
     {id:'monolithe_d', name:isFR?'Monolithe D (Terre)':'Monolith D (Deadlift)', icon:'trophy', val:stats.maxD, paliere:monoPaliere},
-    {id:'cameleon', name:isFR?'Le Caméléon':'Chameleon', icon:'trophy', val:stats.uniqueEx.size, paliere:[{n:10,l:isFR?'Curieux':'Curious',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:25,l:isFR?'Polyvalent':'Versatile',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:isFR?'Spécialiste':'Specialist',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:75,l:isFR?'Encyclopédie':'Encyclopedia',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:100,l:isFR?'Maître de la Salle':'Gym Master',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]}
+    {id:'cameleon', name:isFR?'Le Caméléon':'Chameleon', icon:'trophy', val:stats.uniqueExCount, paliere:[{n:10,l:isFR?'Curieux':'Curious',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:25,l:isFR?'Polyvalent':'Versatile',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:isFR?'Spécialiste':'Specialist',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:75,l:isFR?'Encyclopédie':'Encyclopedia',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:100,l:isFR?'Maître de la Salle':'Gym Master',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]}
   ];
+
   var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + APP.t('special_achievements') + '</div><div id="special-ach-grid">';
   for (var q = 0; q < specs.length; q++) {
     var s = specs[q];
@@ -222,7 +214,7 @@ function renderSpecialAchievements(stats) {
   var grid = document.getElementById('badge-grid');
   if (grid) {
     var old = document.getElementById('special-ach-box');
-    if (old) old.remove();
+    if (old) old.parentNode.removeChild(old);
     var box = document.createElement('div');
     box.id = 'special-ach-box';
     box.innerHTML = html;
@@ -234,8 +226,6 @@ function renderBadgeGrid(stats) {
   var grid = document.getElementById('badge-grid');
   if (!grid) return;
   if (BADGES.groupFilter === 'special') {
-    var oldBox = document.getElementById('special-ach-box');
-    if (oldBox) oldBox.remove();
     renderSpecialAchievements(stats);
     grid.style.display = 'none';
     var specBox = document.getElementById('special-ach-box');

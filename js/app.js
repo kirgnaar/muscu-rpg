@@ -92,19 +92,23 @@ var APP = {
         continue;
       }
 
-      // Generic: if element has an icon as first child span or emoji prefix
-      var hasIcon = els[i].querySelector('span');
-      if (hasIcon) {
-        // Assume the first span is the icon
-        var labels = els[i].childNodes;
-        for(var n=0; n<labels.length; n++) {
-          if (labels[n].nodeType === 3 && labels[n].textContent.trim().length > 1) {
-             labels[n].textContent = ' ' + txt;
+      // Preserve icons if any (hacky but fast for simple cases)
+      // Check for leading emoji or special char followed by space
+      var content = els[i].innerHTML.trim();
+      var iconMatch = content.match(/^([^\w\s\d]+|[\uD800-\uDBFF][\uDC00-\uDFFF])\s/);
+      var icon = iconMatch ? iconMatch[0] : '';
+
+      // Generic: if element has an icon as first child span
+      var hasIconSpan = els[i].querySelector('span');
+      if (hasIconSpan) {
+        var nodes = els[i].childNodes;
+        for(var n=0; n<nodes.length; n++) {
+          if (nodes[n].nodeType === 3 && nodes[n].textContent.trim().length > 1) {
+             nodes[n].textContent = ' ' + txt;
           }
         }
       } else {
-        // Direct text replacement
-        els[i].textContent = txt;
+        els[i].textContent = icon + txt;
       }
     }
 
@@ -127,6 +131,11 @@ var APP = {
     });
   },
 
+  render: function() {
+    APP.renderView(APP.view);
+  },
+};
+
 function renderHeader() {
   var total = 0;
   for (var i = 0; i < APP.data.length; i++) total += APP.data[i].vol;
@@ -146,7 +155,7 @@ function renderHeader() {
 
   var d = new Date();
   var langCode = APP.user ? APP.user.langue : 'fr';
-  var dayStr = d.toLocaleDateString(langCode + '-' + langCode.toUpperCase(), { weekday: 'long', day: 'numeric', month: 'long' });
+  var dayStr = d.toLocaleDateString(langCode, { weekday: 'long', day: 'numeric', month: 'long' });
   var hdrDate = document.getElementById('hdr-date');
   if (hdrDate) hdrDate.textContent = dayStr.charAt(0).toUpperCase() + dayStr.slice(1);
 
