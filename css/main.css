@@ -51,6 +51,8 @@ body.theme-light {
   --card:     #ffffff;
   --card2:    #f1f5f9;
   --border:   rgba(0,0,0,0.08);
+  --tabs-bg:  rgba(248, 250, 252, 0.95);
+  --rpg-card: linear-gradient(135deg, #eff6ff, #dbeafe);
 }
 
 body.theme-amber {
@@ -65,6 +67,13 @@ body.theme-amber {
   --card:     #241f16;
   --card2:    #2d271c;
   --border:   rgba(245,158,11,0.15);
+  --tabs-bg:  rgba(26, 22, 16, 0.95);
+  --rpg-card: linear-gradient(135deg, #2d2312, #1a1610);
+}
+
+:root {
+  --tabs-bg: rgba(10, 15, 30, 0.95);
+  --rpg-card: linear-gradient(135deg, #131929, #1a2235);
 }
 
 /* ── Reset ──────────────────────────────────────────────────────────────── */
@@ -288,12 +297,12 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 .tabs {
   flex-shrink: 0;
   display: flex;
-  background: var(--navy);
+  background: var(--tabs-bg);
   border-top: 1px solid var(--border);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   padding-bottom: var(--safe-b);
-  transition: opacity 0.2s, transform 0.2s;
+  transition: opacity 0.2s, transform 0.2s, background 0.3s;
 }
 
 #app.full-page .tabs {

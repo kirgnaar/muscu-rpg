@@ -18,7 +18,7 @@
 }
 
 .card-rpg-score {
-  background: linear-gradient(135deg, var(--navy2), var(--navy3));
+  background: var(--rpg-card);
   border-color: var(--accent);
   border-width: 1px;
 }
