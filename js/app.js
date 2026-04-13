@@ -120,7 +120,20 @@ function changeLang(val) {
   saveUser(APP.user);
   APP.updateStaticUI();
   APP.render();
-  if (typeof toast === 'function') toast('Langue : ' + val.toUpperCase());
+  
+  var msg = '';
+  if (val === 'fr') msg = 'Langue : Français';
+  else if (val === 'en') msg = 'Language: English';
+  else if (val === 'de') msg = 'Sprache: Deutsch';
+  else if (val === 'es') msg = 'Idioma: Español';
+  else if (val === 'ja') msg = '言語: 日本語';
+  
+  if (typeof toast === 'function') toast(msg);
+}
+
+function confirmLang() {
+  var val = document.getElementById('set-lang').value;
+  changeLang(val);
 }
 
 APP.updateStaticUI = function() {
@@ -146,8 +159,81 @@ APP.updateStaticUI = function() {
   var menuSettings = document.querySelector('.menu-item[data-v="settings"]');
   if (menuSettings) menuSettings.innerHTML = '<span>⚙️</span> ' + APP.t('menu_settings');
 
-  // Other UI elements that are always present or re-rendered
-  // We'll call re-renderers for specific views
+  var btnConfirm = document.getElementById('btn-confirm-lang');
+  if (btnConfirm) btnConfirm.textContent = 'OK';
+
+  // Journal View Labels
+  var vSeances = $('v-seances');
+  if (vSeances) {
+    vSeances.querySelector('.stitle').textContent = APP.t('stitle_new_serie');
+    var labels = $$('.flabel', vSeances);
+    labels.forEach(function(l) {
+      if (l.htmlFor === 'in-date') l.textContent = APP.t('label_date');
+      if (l.htmlFor === 'sel-type') l.textContent = APP.t('label_type');
+      if (l.htmlFor === 'sel-ex') l.textContent = APP.t('label_ex');
+      if (l.htmlFor === 'in-ser') l.textContent = APP.t('label_ser');
+      if (l.htmlFor === 'in-rep') l.textContent = APP.t('label_rep');
+      if (l.htmlFor === 'in-pds') l.textContent = APP.t('label_pds');
+    });
+    $('btn-save').textContent = '✓ ' + APP.t('btn_save');
+    var timerTitle = $('timer-card') ? $('timer-card').querySelector('.clabel span') : null;
+    if (timerTitle) timerTitle.textContent = '⌛ ' + APP.t('label_timer');
+    if ($('timer-start-btn')) $('timer-start-btn').textContent = '▶ ' + APP.t('timer_start');
+    if ($('timer-stop-btn')) $('timer-stop-btn').textContent = '⏹ ' + APP.t('timer_stop');
+    if ($('timer-reset-btn')) $('timer-reset-btn').textContent = '🔄 ' + APP.t('timer_reset');
+    var journalTitle = vSeances.querySelector('.stitle.flex-between span');
+    if (journalTitle) journalTitle.textContent = APP.t('stitle_journal');
+
+    var pills = $$('.fpill', $('filter-bar'));
+    if (pills.length >= 4) {
+      pills[0].textContent = APP.t('filter_all');
+      pills[1].textContent = APP.t('filter_ex');
+      pills[2].textContent = APP.t('filter_type');
+      pills[3].textContent = APP.t('filter_date');
+    }
+
+    var typeSel = $('sel-type');
+    if (typeSel) {
+      var curVal = typeSel.value;
+      typeSel.innerHTML = '';
+      ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'].forEach(function(k) {
+        var o = document.createElement('option');
+        o.value = I18N['fr'][k];
+        o.textContent = APP.t(k);
+        typeSel.appendChild(o);
+      });
+      typeSel.value = curVal;
+    }
+  }
+
+  // Profil View Labels
+  var vProfil = $('v-profil');
+  if (vProfil) {
+    vProfil.querySelector('.clabel').textContent = APP.t('menu_profil');
+    var profLabels = $$('.flabel', vProfil);
+    if (profLabels.length >= 5) {
+      profLabels[0].textContent = APP.t('label_prenom');
+      profLabels[1].textContent = APP.t('label_nom');
+      profLabels[2].textContent = APP.t('label_age');
+      profLabels[3].textContent = APP.t('label_poids');
+      profLabels[4].textContent = APP.t('label_taille');
+    }
+    vProfil.querySelector('button').textContent = APP.t('btn_save_profile');
+  }
+
+  // Settings View Labels
+  var vSettings = $('v-settings');
+  if (vSettings) {
+    vSettings.querySelectorAll('.clabel')[0].textContent = APP.t('menu_settings');
+    vSettings.querySelector('.flabel').textContent = APP.t('label_lang');
+    vSettings.querySelectorAll('.clabel')[1].textContent = APP.t('label_theme');
+    var themeLabels = $$('.theme-opt div:last-child', vSettings);
+    if (themeLabels.length >= 3) {
+      themeLabels[0].textContent = APP.t('theme_dark');
+      themeLabels[1].textContent = APP.t('theme_light');
+      themeLabels[2].textContent = APP.t('theme_amber');
+    }
+  }
 };
 
 function renderProfil() {
@@ -180,16 +266,8 @@ function saveProfile() {
 }
 
 function renderSettings() {
-  $('v-settings').querySelectorAll('.clabel')[0].textContent = APP.t('menu_settings');
-  $('v-settings').querySelector('.flabel').textContent = APP.t('label_lang');
-  $('v-settings').querySelectorAll('.clabel')[1].textContent = APP.t('label_theme');
-  
-  var themeLabels = $$('.theme-opt div:last-child', $('v-settings'));
-  themeLabels[0].textContent = APP.t('theme_dark');
-  themeLabels[1].textContent = APP.t('theme_light');
-  themeLabels[2].textContent = APP.t('theme_amber');
-
   if (!APP.user) return;
+  APP.updateStaticUI();
   document.getElementById('set-lang').value = APP.user.langue;
   
   var opts = document.querySelectorAll('.theme-opt');
@@ -198,6 +276,7 @@ function renderSettings() {
     opts[i].style.borderColor = opts[i].dataset.theme === APP.user.theme ? 'var(--accent)' : 'transparent';
   }
 }
+
 
 
 function setTheme(theme) {

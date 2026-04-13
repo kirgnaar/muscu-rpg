@@ -495,13 +495,16 @@
       <div class="clabel">Paramètres</div>
       <div class="card">
         <label class="flabel">Langue</label>
-        <select id="set-lang" onchange="changeLang(this.value)">
-          <option value="fr">Français 🇫🇷</option>
-          <option value="en">English 🇬🇧</option>
-          <option value="de">Deutsch 🇩🇪</option>
-          <option value="es">Español 🇪🇸</option>
-          <option value="ja">日本語 🇯🇵</option>
-        </select>
+        <div style="display:flex; gap:8px">
+          <select id="set-lang" style="flex:1">
+            <option value="fr">Français 🇫🇷</option>
+            <option value="en">English 🇬🇧</option>
+            <option value="de">Deutsch 🇩🇪</option>
+            <option value="es">Español 🇪🇸</option>
+            <option value="ja">日本語 🇯🇵</option>
+          </select>
+          <button class="btn btn-p btn-sm" id="btn-confirm-lang" onclick="confirmLang()" style="margin:0; width:auto">OK</button>
+        </div>
       </div>
 
       <div class="clabel" style="margin-top:20px">Thème Visuel</div>
