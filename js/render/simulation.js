@@ -206,12 +206,14 @@ function renderEditor() {
   var typeSel = $('sim-block-type');
   var currentType = SIM.currentBlock.type || "Hypertrophie";
   typeSel.innerHTML = '';
-  ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'].forEach(function(k) {
+  var typeKeys = ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'];
+  for (var i = 0; i < typeKeys.length; i++) {
+    var k = typeKeys[i];
     var o = document.createElement('option');
     o.value = I18N['fr'][k];
     o.textContent = APP.t(k);
     typeSel.appendChild(o);
-  });
+  }
   typeSel.value = currentType;
 
   var list = $('sim-ex-list');

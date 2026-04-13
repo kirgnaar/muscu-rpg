@@ -298,21 +298,26 @@ function populateExerciseSelect(selectEl, includeEmpty) {
     selectEl.appendChild(opt);
   }
   var groups = {};
-  EX.forEach(function(e) {
+  for (var i = 0; i < EX.length; i++) {
+    var e = EX[i];
     if (!groups[e[1]]) groups[e[1]] = [];
     groups[e[1]].push(e);
-  });
-  Object.keys(groups).forEach(function(g) {
+  }
+  var groupNames = Object.keys(groups);
+  for (var j = 0; j < groupNames.length; j++) {
+    var g = groupNames[j];
     var og = document.createElement('optgroup');
     og.label = g;
-    groups[g].forEach(function(e) {
+    var groupExs = groups[g];
+    for (var k = 0; k < groupExs.length; k++) {
+      var ex = groupExs[k];
       var o = document.createElement('option');
-      o.value = e[0];
-      o.textContent = e[0];
+      o.value = ex[0];
+      o.textContent = ex[0];
       og.appendChild(o);
-    });
+    }
     selectEl.appendChild(og);
-  });
+  }
 }
 
 /**

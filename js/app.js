@@ -116,20 +116,23 @@ var APP = {
     var typeSelects = [$('sel-type'), $('f-type-sel'), $('sim-block-type')];
     var typeKeys = ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'];
 
-    typeSelects.forEach(function(sel) {
-      if (!sel) return;
+    for (var j = 0; j < typeSelects.length; j++) {
+      var sel = typeSelects[j];
+      if (!sel) continue;
       var curVal = sel.value;
       var isFilter = sel.id === 'f-type-sel';
       sel.innerHTML = isFilter ? '<option value="">' + APP.t('filter_all_types') + '</option>' : '';
-      typeKeys.forEach(function(key) {
+      for (var k = 0; k < typeKeys.length; k++) {
+        var key = typeKeys[k];
         var o = document.createElement('option');
-        o.value = I18N['fr'][key]; 
+        o.value = I18N['fr'][key];
         o.textContent = APP.t(key);
         sel.appendChild(o);
-      });
+      }
       sel.value = curVal;
-    });
+    }
   },
+
 
   render: function() {
     APP.renderView(APP.view);
@@ -155,7 +158,12 @@ function renderHeader() {
 
   var d = new Date();
   var langCode = APP.user ? APP.user.langue : 'fr';
-  var dayStr = d.toLocaleDateString(langCode, { weekday: 'long', day: 'numeric', month: 'long' });
+  var dayStr = '';
+  try {
+    dayStr = d.toLocaleDateString(langCode, { weekday: 'long', day: 'numeric', month: 'long' });
+  } catch (e) {
+    dayStr = d.toDateString();
+  }
   var hdrDate = document.getElementById('hdr-date');
   if (hdrDate) hdrDate.textContent = dayStr.charAt(0).toUpperCase() + dayStr.slice(1);
 

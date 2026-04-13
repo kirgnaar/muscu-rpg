@@ -28,15 +28,18 @@ function _bodyHighlighterAvailable() {
 
 function _buildHighlighterSVG(side, muscleMap) {
   var data = [];
-  Object.keys(muscleMap).forEach(function(grp) {
+  var muscleNames = Object.keys(muscleMap);
+  for (var i = 0; i < muscleNames.length; i++) {
+    var grp = muscleNames[i];
     var n = seriesCountByGroup(grp);
-    if (n === 0) return;
+    if (n === 0) continue;
     var ti  = getTier(n);
     var pct = getTierProgress(n);
-    muscleMap[grp].forEach(function(slug) {
-      data.push({ slug: slug, color: ti.col, intensity: Math.min(1, 0.35 + pct * 0.65) });
-    });
-  });
+    var slugs = muscleMap[grp];
+    for (var j = 0; j < slugs.length; j++) {
+      data.push({ slug: slugs[j], color: ti.col, intensity: Math.min(1, 0.35 + pct * 0.65) });
+    }
+  }
 
   var wrap = document.createElement('div');
   try {

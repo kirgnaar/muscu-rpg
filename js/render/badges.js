@@ -31,17 +31,18 @@ function initBadges() {
       for (var i = 0; i < cards.length; i++) {
         cards[i].classList.toggle('on', (cards[i].dataset.grp || '') === BADGES.groupFilter);
       }
-      renderBadges(); // Re-render everything with the new filter
+      renderBadges();
     });
   }
 }
 
 function renderBadges() {
-  $('v-badges').querySelector('.stitle').textContent = APP.t('stitle_badges');
-  var clabels = $('v-badges').querySelectorAll('.clabel');
+  var view = $('v-badges');
+  if (!view) return;
+  view.querySelector('.stitle').textContent = APP.t('stitle_badges');
+  var clabels = view.querySelectorAll('.clabel');
   if (clabels.length > 1) clabels[1].textContent = APP.t('label_muscles');
 
-  // One pass over data for all badge calculations
   var stats = {
     totalVol: 0,
     prCount: 0,
@@ -65,14 +66,14 @@ function renderBadges() {
     var d = APP.data[i];
     stats.totalVol += d.vol;
     if (d.isPR) stats.prCount++;
-    stats.repCount += (d.rep * d.ser);
+    stats.repCount += ((d.rep || 0) * (d.ser || 0));
 
     if (!stats.uniqueExMap[d.ex]) {
       stats.uniqueExMap[d.ex] = true;
       stats.uniqueExCount++;
     }
 
-    stats.exCounts[d.ex] = (stats.exCounts[d.ex] || 0) + d.ser;
+    stats.exCounts[d.ex] = (stats.exCounts[d.ex] || 0) + (d.ser || 0);
     stats.dailyVols[d.date] = (stats.dailyVols[d.date] || 0) + d.vol;
 
     if (d.ex === "Squat barre" && d.pds > stats.maxS) stats.maxS = d.pds;
@@ -83,7 +84,7 @@ function renderBadges() {
       var m = MUSCLES[k];
       var influence = getMuscleInfluence(d.ex, m);
       if (influence > 0) {
-        stats.muscleSeries[m] += d.ser;
+        stats.muscleSeries[m] += (d.ser || 0);
         stats.muscleVols[m] += (d.vol * influence);
       }
     }
@@ -103,7 +104,9 @@ function renderMuscleBadges(stats) {
   if (!row) return;
 
   var sessions = 0;
-  for (var date in stats.dailyVols) sessions++;
+  for (var date in stats.dailyVols) {
+    if (stats.dailyVols.hasOwnProperty(date)) sessions++;
+  }
 
   var vPct = Math.min(100, (stats.totalVol / 1000000) * 100);
   var sPct = Math.min(100, (sessions / 100) * 100);
@@ -128,7 +131,13 @@ function renderMuscleBadges(stats) {
     var pct = (getTierProgress(n) * 100).toFixed(0);
     var active = BADGES.groupFilter === m ? 'on' : '';
     
-    var mKey = {'Pectoraux':'pecs','Dorsaux':'back','Épaules':'shoulders','Biceps':'biceps','Triceps':'triceps','Quadriceps':'quads','Ischios':'hams','Fessiers':'glutes','Mollets':'calves','Abdos':'abs'}[m]||m;
+    var mKey = {
+      'Pectoraux':'pecs','Dorsaux':'back','Dorsal':'back','Épaules':'shoulders',
+      'Biceps':'biceps','Triceps':'triceps','Quadriceps':'quads',
+      'Ischios':'hams','Ischio-jambiers':'hams','Fessiers':'glutes',
+      'Mollets':'calves','Abdos':'abs','Abdominaux':'abs',
+      'Lombaires':'lumbars','Trapèzes':'traps','Full body':'fullbody'
+    }[m]||m;
     var translatedM = APP.t(mKey);
 
     musclesHtml += '<div class="mbdg '+ti.cls+' '+active+'" data-grp="'+m+'"><div class="mbdg-nm">'+translatedM+'</div><div class="mbdg-t" style="color:'+ti.col+'">'+ti.name+'</div><div class="mbdg-pb"><div class="mbdg-pf" style="width:'+pct+'%; background:linear-gradient(90deg, '+ti.col+', #fff)"></div></div></div>';
@@ -138,7 +147,9 @@ function renderMuscleBadges(stats) {
 
 function renderGlobalAchievements(stats) {
   var sessions = 0;
-  for (var date in stats.dailyVols) sessions++;
+  for (var date in stats.dailyVols) {
+    if (stats.dailyVols.hasOwnProperty(date)) sessions++;
+  }
 
   var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + APP.t('career_stats') + '</div><div class="ach-grid"><div class="ach-card"><div class="ach-val">'+fmtV(stats.totalVol)+'</div><div class="ach-lbl">Volume (KG)</div></div><div class="ach-card"><div class="ach-val">'+sessions+'</div><div class="ach-lbl">' + APP.t('sessions') + '</div></div><div class="ach-card"><div class="ach-val">'+stats.prCount+'</div><div class="ach-lbl">' + APP.t('records') + '</div></div></div>';
   var target = document.querySelector('#v-badges .clabel[data-i18n="label_muscles"]');
@@ -174,7 +185,9 @@ function renderSpecialAchievements(stats) {
   ];
 
   var sessions = 0;
-  for (var date in stats.dailyVols) sessions++;
+  for (var date in stats.dailyVols) {
+    if (stats.dailyVols.hasOwnProperty(date)) sessions++;
+  }
 
   var specs = [
     {id:'titan', name:isFR?'Le Titan du Volume':'Volume Titan', icon:'trophy', val:stats.totalVol, paliere:[{n:10000,l:isFR?'Poids Plume':'Featherweight',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:100000,l:isFR?'Poids Moyen':'Middleweight',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:500000,l:isFR?'Poids Lourd':'Heavyweight',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:1000000,l:isFR?'Le Titan':'The Titan',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:5000000,l:'Atlas',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
@@ -250,7 +263,7 @@ function renderBadgeGrid(stats) {
   var unlocked = [];
   var locked = [];
   for (var l = 0; l < exList.length; l++) {
-    if (stats.exCounts[exList[l][0]] > 0) unlocked.push(exList[l]);
+    if ((stats.exCounts[exList[l][0]] || 0) > 0) unlocked.push(exList[l]);
     else locked.push(exList[l]);
   }
   unlocked.sort(function(a, b) {
@@ -275,7 +288,13 @@ function renderBadgeGrid(stats) {
     else if (name.indexOf('Soulevé') !== -1) type = 'deadlift';
     if (ICON_MAP[name]) type = ICON_MAP[name];
     
-    var mKey = {'Pectoraux':'pecs','Dorsaux':'back','Épaules':'shoulders','Biceps':'biceps','Triceps':'triceps','Quadriceps':'quads','Ischios':'hams','Fessiers':'glutes','Mollets':'calves','Abdos':'abs'}[group]||group;
+    var mKey = {
+      'Pectoraux':'pecs','Dorsaux':'back','Dorsal':'back','Épaules':'shoulders',
+      'Biceps':'biceps','Triceps':'triceps','Quadriceps':'quads',
+      'Ischios':'hams','Ischio-jambiers':'hams','Fessiers':'glutes',
+      'Mollets':'calves','Abdos':'abs','Abdominaux':'abs',
+      'Lombaires':'lumbars','Trapèzes':'traps','Full body':'fullbody'
+    }[group]||group;
     var translatedGroup = APP.t(mKey);
 
     var rateTxt = APP.t('unlocked_by').replace('{{rate}}', ti.rate);

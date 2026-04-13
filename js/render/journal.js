@@ -39,21 +39,24 @@ function initJournal() {
   // Peupler les types de séances traduits
   var typeSel = $('sel-type');
   typeSel.innerHTML = '';
-  ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'].forEach(function(k) {
+  var typeKeys = ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'];
+  for (var i = 0; i < typeKeys.length; i++) {
+    var k = typeKeys[i];
     var o = document.createElement('option');
     o.value = I18N['fr'][k]; // On garde les valeurs FR en DB pour la compatibilité
     o.textContent = APP.t(k);
     typeSel.appendChild(o);
-  });
+  }
 
   var fTypeSel = $('f-type-sel');
   fTypeSel.innerHTML = '<option value="">' + APP.t('filter_all_types') + '</option>';
-  ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'].forEach(function(k) {
-    var o = document.createElement('option');
-    o.value = I18N['fr'][k];
-    o.textContent = APP.t(k);
-    fTypeSel.appendChild(o);
-  });
+  for (var j = 0; j < typeKeys.length; j++) {
+    var key = typeKeys[j];
+    var o2 = document.createElement('option');
+    o2.value = I18N['fr'][key];
+    o2.textContent = APP.t(key);
+    fTypeSel.appendChild(o2);
+  }
 
   // Peupler le select exercice principal
   populateExerciseSelect($('sel-ex'), true);
@@ -224,9 +227,10 @@ function handleFilterPill(ev) {
   pill.classList.add('on');
   JOURNAL.filterType = pill.dataset.ftype;
   JOURNAL.filterVal  = '';
-  ['f-ex-sel','f-type-sel','f-date-sel'].forEach(function(id) {
-    $(id).style.display = 'none';
-  });
+  var filterSelects = ['f-ex-sel','f-type-sel','f-date-sel'];
+  for (var j = 0; j < filterSelects.length; j++) {
+    $(filterSelects[j]).style.display = 'none';
+  }
   if (JOURNAL.filterType === 'ex')   $('f-ex-sel').style.display   = 'block';
   if (JOURNAL.filterType === 'type') $('f-type-sel').style.display  = 'block';
   if (JOURNAL.filterType === 'date') $('f-date-sel').style.display  = 'block';
@@ -248,12 +252,14 @@ function renderJournal() {
   // Mettre à jour la liste des dates dans le select filtre
   var dateSel = $('f-date-sel');
   while (dateSel.options.length > 1) dateSel.remove(1);
-  allDates().forEach(function(d) {
+  var dates = allDates();
+  for (var i = 0; i < dates.length; i++) {
+    var d = dates[i];
     var o = document.createElement('option');
     o.value = d;
     o.textContent = fmtDLong(d);
     dateSel.appendChild(o);
-  });
+  }
   if (JOURNAL.filterType === 'date') dateSel.value = JOURNAL.filterVal;
 
   var filtered = applyFilter(APP.data.slice());
@@ -275,23 +281,30 @@ function renderJournal() {
 
   // Grouper par date
   var groups = {};
-  sorted.forEach(function(e) {
+  for (var k = 0; k < sorted.length; k++) {
+    var e = sorted[k];
     if (!groups[e.date]) groups[e.date] = [];
     groups[e.date].push(e);
-  });
+  }
 
   var html = '';
-  Object.keys(groups).sort().reverse().forEach(function(date) {
+  var groupDates = Object.keys(groups).sort().reverse();
+  for (var l = 0; l < groupDates.length; l++) {
+    var date = groupDates[l];
     var items  = groups[date];
-    var dayVol = items.reduce(function(s, e) { return s + e.vol; }, 0);
+    var dayVol = 0;
+    for (var m = 0; m < items.length; m++) {
+      dayVol += items[m].vol;
+    }
     html += '<div class="date-group-hdr">'
           + '<span class="date-group-label">' + fmtDLong(date) + '</span>'
           + '<span class="date-group-vol">' + fmtV(dayVol) + '</span>'
           + '</div>';
-    items.forEach(function(e) {
-      var c  = TCOL[e.type] || '#94a3b8';
-      var pr = e.isPR ? ' <span style="font-size:14px" title="Record Personnel !">🏆</span>' : '';
-      
+    for (var n = 0; n < items.length; n++) {
+      var entry = items[n];
+      var c  = TCOL[entry.type] || '#94a3b8';
+      var pr = entry.isPR ? ' <span style="font-size:14px" title="Record Personnel !">🏆</span>' : '';
+
       // Get translated type name
       var typeKey = {
         'Hypertrophie': 'hypertrophy',
@@ -299,22 +312,23 @@ function renderJournal() {
         'Hyperforce (PR)': 'hyperstrength',
         'Endurance musculaire': 'endurance',
         'Décharge': 'deload'
-      }[e.type] || '';
-      var translatedType = typeKey ? APP.t(typeKey) : e.type;
+      }[entry.type] || '';
+      var translatedType = typeKey ? APP.t(typeKey) : entry.type;
 
-      html += '<div class="sitem" data-id="' + e.id + '">'
+      html += '<div class="sitem" data-id="' + entry.id + '">'
             + '<div class="sdot" style="background:' + c + '"></div>'
             + '<div class="sinfo">'
-            + '<div class="sname">' + e.ex + pr + '</div>'
-            + '<div class="smeta">' + translatedType + ' \u00b7 ' + e.ser + '\u00d7' + e.rep + ' \u00b7 ' + e.pds + ' kg</div>'
+            + '<div class="sname">' + entry.ex + pr + '</div>'
+            + '<div class="smeta">' + translatedType + ' \u00b7 ' + entry.ser + '\u00d7' + entry.rep + ' \u00b7 ' + entry.pds + ' kg</div>'
             + '</div>'
             + '<div style="display:flex;align-items:center;gap:2px">'
-            + '<div class="svol">' + fmtV(e.vol) + '</div>'
+            + '<div class="svol">' + fmtV(entry.vol) + '</div>'
             + '<button class="del-btn">\uD83D\uDDD1</button>'
             + '</div>'
             + '</div>';
-    });
-  });
+    }
+  }
+
 
   list.innerHTML = html;
 }
