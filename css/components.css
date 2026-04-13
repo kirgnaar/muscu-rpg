@@ -17,6 +17,12 @@
   border-color: rgba(139,92,246,0.2);
 }
 
+.card-rpg-score {
+  background: linear-gradient(135deg, var(--navy2), var(--navy3));
+  border-color: var(--accent);
+  border-width: 1px;
+}
+
 .clabel {
   font-size: 10px;
   font-weight: 700;
@@ -25,6 +31,10 @@
   color: var(--text2);
   margin-bottom: 10px;
   display: block;
+}
+
+.clabel-accent {
+  color: var(--accent) !important;
 }
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */

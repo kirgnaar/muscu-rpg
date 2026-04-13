@@ -37,11 +37,11 @@ var APP = {
       views[j].classList.toggle('on', views[j].id === 'v-' + name);
     }
 
-    // Masquer la barre d'onglets pour le profil et les paramètres
-    var tabsBar = document.querySelector('.tabs');
-    if (tabsBar) {
+    // Gérer l'affichage plein écran (masquer les onglets) via CSS
+    var appEl = document.getElementById('app');
+    if (appEl) {
       var isFullPage = (name === 'profil' || name === 'settings');
-      tabsBar.style.display = isFullPage ? 'none' : 'flex';
+      appEl.classList.toggle('full-page', isFullPage);
     }
 
     APP.renderView(name);

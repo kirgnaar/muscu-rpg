@@ -288,11 +288,16 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
 .tabs {
   flex-shrink: 0;
   display: flex;
-  background: rgba(10,15,30,0.97);
+  background: var(--navy);
   border-top: 1px solid var(--border);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   padding-bottom: var(--safe-b);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+#app.full-page .tabs {
+  display: none !important;
 }
 
 .tab {
@@ -323,7 +328,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   letter-spacing: 0.2px;
 }
 
-.tab.on span:last-child { color: var(--blue); }
+.tab.on span:last-child { color: var(--accent); }
 
 /* Active indicator */
 .tab.on::after {
@@ -333,7 +338,7 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; }
   left: 25%;
   right: 25%;
   height: 2px;
-  background: var(--blue);
+  background: var(--accent);
   border-radius: 0 0 2px 2px;
 }
 
