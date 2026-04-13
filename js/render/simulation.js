@@ -101,7 +101,7 @@ function saveCurrentBlock() {
   if (foundIdx !== -1) SIM.blocks[foundIdx] = JSON.parse(JSON.stringify(SIM.currentBlock));
   else SIM.blocks.push(JSON.parse(JSON.stringify(SIM.currentBlock)));
   saveBlocks();
-  toast('Sauvegardé');
+  toast(APP.t('saved'));
   closeEditor();
 }
 
@@ -121,9 +121,20 @@ function handleAddExToBlock() {
   var ser = parseInt($('sim-ser').value);
   var rep = parseInt($('sim-rep').value);
   var pds = parseFloat($('sim-pds').value);
-  if (!exName || !ser || !rep || isNaN(pds)) { toast('Champs invalides', 'err'); return; }
+  if (!exName || !ser || !rep || isNaN(pds)) { toast(APP.t('invalid_fields'), 'err'); return; }
   SIM.currentBlock.exercises.push({ ex: exName, ser: ser, rep: rep, pds: pds, grp: getPrimaryGroup(exName) });
   renderEditor();
+}
+
+function getTranslatedMuscle(m) {
+  var mKey = {
+    'Pectoraux':'pecs','Dorsaux':'back','Dorsal':'back','Épaules':'shoulders',
+    'Biceps':'biceps','Triceps':'triceps','Quadriceps':'quads',
+    'Ischios':'hams','Ischio-jambiers':'hams','Fessiers':'glutes',
+    'Mollets':'calves','Abdos':'abs','Abdominaux':'abs',
+    'Lombaires':'lumbars','Trapèzes':'traps','Full body':'fullbody'
+  }[m]||m;
+  return APP.t(mKey);
 }
 
 function renderSimulation() {
@@ -140,7 +151,7 @@ function renderSimulation() {
     if (dist.length > 0) {
       distHtml = '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px">';
       for (var j = 0; j < dist.length; j++) {
-        distHtml += '<span style="font-size:9px; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px; color:var(--text2)">' + dist[j].grp + ' ' + dist[j].pct + '%</span>';
+        distHtml += '<span style="font-size:9px; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px; color:var(--text2)">' + getTranslatedMuscle(dist[j].grp) + ' ' + dist[j].pct + '%</span>';
       }
       distHtml += '</div>';
     }
@@ -240,11 +251,11 @@ function calculateSimResults(simList) {
   $('sim-xp-gain').textContent = '+ ' + fmtV(simVolGain) + ' XP';
   var lvlHtml = '<div style="font-weight:700">' + xpLabel + ' : ' + currentLvl + ' ➔ ' + nextLvl + '</div>';
   if (nextLvl > currentLvl) {
-    lvlHtml += '<div style="color:var(--green); font-size:12px; margin-top:4px; font-weight:800">✨ ' + APP.t('level_up_global') + '</div>';
+    lvlHtml += '<div style="color:var(--green); font-size:12px; margin-top:4px; font-weight:800">✨ ' + APP.t('lvl_up_global') + '</div>';
   } else {
     var nextThr = levelThreshold(nextLvl + 1);
     var remaining = nextThr - newVolTotal;
-    var remTxt = APP.t('xp_left_for').replace('{{xp}}', fmtV(remaining)).replace('{{lvl}}', currentLvl + 1);
+    var remTxt = APP.t('xp_left_for').replace('{{xp}}', fmtV(remaining)).replace('{{lvl}}', nextLvl + 1);
     lvlHtml += '<div style="color:var(--text2); font-size:11px; margin-top:4px">' + remTxt + '</div>';
   }
   $('sim-lvl-preview').innerHTML = lvlHtml;
@@ -257,7 +268,7 @@ function calculateSimResults(simList) {
       if (influence > 0) muscleGains[grp] = (muscleGains[grp] || 0) + (item.ser * item.rep * item.pds * influence);
     }
   }
-  var muscleHtml = '<div class="clabel" style="margin-bottom:8px">Progression par Muscle (RPG)</div>';
+  var muscleHtml = '<div class="clabel" style="margin-bottom:8px">' + APP.t('prog_by_muscle') + '</div>';
   for (var grpName in muscleGains) {
     var currentVolGrp = volByGroup(grpName);
     var gainVolGrp = muscleGains[grpName];
@@ -266,11 +277,12 @@ function calculateSimResults(simList) {
     var nxtL = getLevel(newVolGrp);
     var color = levelColor(nxtL);
     var missingXP = levelThreshold(curL + 1) - newVolGrp;
-    var subText = nxtL > curL 
-      ? '<span style="color:var(--green); font-weight:800">LEVEL UP ! (+' + (nxtL - curL) + ')</span>' 
+    var subText = nxtL > curL
+      ? '<span style="color:var(--green); font-weight:800">LEVEL UP ! (+' + (nxtL - curL) + ')</span>'
       : '<span style="opacity:0.6">' + APP.t('xp_missing').replace('{{xp}}', fmtV(missingXP)) + '</span>';
-    muscleHtml += '<div class="card" style="margin-bottom:8px; border-left: 4px solid ' + color + '; padding: 12px"><div class="flex-between"><div><div style="font-size:14px; font-weight:900; color:#fff">' + grpName + '</div><div style="font-size:12px; color:' + color + '; font-weight:700">' + APP.t('lvl') + ' ' + curL + ' ➔ ' + nxtL + '</div></div><div style="text-align:right"><div style="font-size:11px; font-weight:600">' + subText + '</div><div style="font-size:9px; color:var(--text2); margin-top:2px">+ ' + fmtV(gainVolGrp) + ' XP</div></div></div><div class="bar-bg" style="height:4px; margin-top:8px"><div class="bar-fill" style="width:' + (levelProgress(newVolGrp)*100).toFixed(0) + '%; background:' + color + '"></div></div></div>';
+    muscleHtml += '<div class="card" style="margin-bottom:8px; border-left: 4px solid ' + color + '; padding: 12px"><div class="flex-between"><div><div style="font-size:14px; font-weight:900; color:#fff">' + getTranslatedMuscle(grpName) + '</div><div style="font-size:12px; color:' + color + '; font-weight:700">' + APP.t('lvl') + ' ' + curL + ' ➔ ' + nxtL + '</div></div><div style="text-align:right"><div style="font-size:11px; font-weight:600">' + subText + '</div><div style="font-size:9px; color:var(--text2); margin-top:2px">+ ' + fmtV(gainVolGrp) + ' XP</div></div></div><div class="bar-bg" style="height:4px; margin-top:8px"><div class="bar-fill" style="width:' + (levelProgress(newVolGrp)*100).toFixed(0) + '%; background:' + color + '"></div></div></div>';
   }
+
   $('sim-muscle-results').innerHTML = muscleHtml;
 }
 
@@ -284,7 +296,7 @@ function confirmSession() {
     addEntry({ date: date, type: type, ex: item.ex, grp: item.grp, ser: item.ser, rep: item.rep, pds: item.pds });
   }
   APP.render();
-  toast('Séance enregistrée !');
+  toast(APP.t('session_saved'));
   closeEditor();
   APP.switchView('seances');
 }

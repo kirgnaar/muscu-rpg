@@ -195,16 +195,16 @@ function renderSpecialAchievements(stats) {
 
   var isFR = APP.user.langue === 'fr';
   var monoPaliere = [
-    {n:100,l:isFR?'Acier':'Steel',r:isFR?'RARE':'RARE',c:'#3b82f6'},
-    {n:150,l:isFR?'Béton':'Concrete',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},
-    {n:200,l:isFR?'Monolithe':'Monolith',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},
-    {n:300,l:isFR?'La Montagne':'The Mountain',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}
+    {n:100,l:isFR?'Acier':'Steel',r:APP.t('rarity_rare'),c:'#3b82f6'},
+    {n:150,l:isFR?'Béton':'Concrete',r:APP.t('rarity_epic'),c:'#a855f7'},
+    {n:200,l:isFR?'Monolithe':'Monolith',r:APP.t('rarity_legendary'),c:'#fbbf24'},
+    {n:300,l:isFR?'La Montagne':'The Mountain',r:APP.t('rarity_mythic'),c:'#22d3ee'}
   ];
   var totalMonoPaliere = [
-    {n:300,l:isFR?'Fondation':'Foundation',r:isFR?'RARE':'RARE',c:'#3b82f6'},
-    {n:450,l:isFR?'Structure':'Structure',r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},
-    {n:600,l:isFR?'Monolithe Total':'Total Monolith',r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},
-    {n:900,l:isFR?'Le Colosse':'The Colossus',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}
+    {n:300,l:isFR?'Fondation':'Foundation',r:APP.t('rarity_rare'),c:'#3b82f6'},
+    {n:450,l:isFR?'Structure':'Structure',r:APP.t('rarity_epic'),c:'#a855f7'},
+    {n:600,l:isFR?'Monolithe Total':'Total Monolith',r:APP.t('rarity_legendary'),c:'#fbbf24'},
+    {n:900,l:isFR?'Le Colosse':'The Colossus',r:APP.t('rarity_mythic'),c:'#22d3ee'}
   ];
 
   var sessions = 0;
@@ -213,16 +213,16 @@ function renderSpecialAchievements(stats) {
   }
 
   var specs = [
-    {id:'titan', name:APP.t('titan_title'), icon:'trophy', val:stats.totalVol, paliere:[{n:10000,l:APP.t('tier_titan_1'),r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:100000,l:APP.t('tier_titan_2'),r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:500000,l:APP.t('tier_titan_3'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:1000000,l:APP.t('tier_titan_4'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:5000000,l:'Atlas',r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
-    {id:'pilier', name:APP.t('pillar_title'), icon:'trophy', val:sessions, paliere:[{n:10,l:APP.t('tier_pillar_1'),r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:50,l:APP.t('tier_pillar_2'),r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:100,l:APP.t('tier_pillar_3'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:250,l:APP.t('tier_pillar_4'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:500,l:APP.t('tier_pillar_5'),r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
-    {id:'briseur', name:APP.t('breaker_title'), icon:'trophy', val:stats.prCount, paliere:[{n:10,l:APP.t('tier_breaker_1'),r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:APP.t('tier_breaker_2'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:100,l:APP.t('tier_breaker_3'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:250,l:APP.t('tier_breaker_4'),r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]},
-    {id:'acharne', name:APP.t('worker_title'), icon:'trophy', val:stats.repCount, paliere:[{n:1000,l:'Cadence I',r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:10000,l:'Cadence II',r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50000,l:APP.t('tier_worker_3'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:100000,l:APP.t('tier_worker_4'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'}]},
-    {id:'chelem', name:APP.t('slam_title'), icon:'trophy', val:big6Done, paliere:[{n:2,l:APP.t('tier_slam_1'),r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:4,l:APP.t('tier_slam_2'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:6,l:APP.t('slam_title'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'}]},
+    {id:'titan', name:APP.t('titan_title'), icon:'trophy', val:stats.totalVol, paliere:[{n:10000,l:isFR?'Poussière':'Dust',r:APP.t('rarity_common'),c:'#94a3b8'},{n:100000,l:isFR?'Gravier':'Gravel',r:APP.t('rarity_rare'),c:'#3b82f6'},{n:500000,l:isFR?'Rocher':'Rock',r:APP.t('rarity_epic'),c:'#a855f7'},{n:1000000,l:isFR?'Montagne':'Mountain',r:APP.t('rarity_legendary'),c:'#fbbf24'},{n:5000000,l:'Atlas',r:APP.t('rarity_mythic'),c:'#22d3ee'}]},
+    {id:'pilier', name:APP.t('pillar_title'), icon:'trophy', val:sessions, paliere:[{n:10,l:isFR?'Recrue':'Recruit',r:APP.t('rarity_common'),c:'#94a3b8'},{n:50,l:isFR?'Régulier':'Regular',r:APP.t('rarity_rare'),c:'#3b82f6'},{n:100,l:isFR?'Habitué':'Old-timer',r:APP.t('rarity_epic'),c:'#a855f7'},{n:250,l:isFR?'Vétéran':'Veteran',r:APP.t('rarity_legendary'),c:'#fbbf24'},{n:500,l:isFR?'Légende':'Legend',r:APP.t('rarity_mythic'),c:'#22d3ee'}]},
+    {id:'briseur', name:APP.t('breaker_title'), icon:'trophy', val:stats.prCount, paliere:[{n:10,l:isFR?'Ambition':'Ambition',r:APP.t('rarity_rare'),c:'#3b82f6'},{n:50,l:isFR?'Domination':'Domination',r:APP.t('rarity_epic'),c:'#a855f7'},{n:100,l:isFR?'Suprématie':'Supremacy',r:APP.t('rarity_legendary'),c:'#fbbf24'},{n:250,l:isFR?'Divinité':'Divinity',r:APP.t('rarity_mythic'),c:'#22d3ee'}]},
+    {id:'acharne', name:APP.t('worker_title'), icon:'trophy', val:stats.repCount, paliere:[{n:1000,l:'Cadence I',r:APP.t('rarity_common'),c:'#94a3b8'},{n:10000,l:'Cadence II',r:APP.t('rarity_rare'),c:'#3b82f6'},{n:50000,l:isFR?'Métronome':'Metronome',r:APP.t('rarity_epic'),c:'#a855f7'},{n:100000,l:isFR?'Automate':'Automaton',r:APP.t('rarity_legendary'),c:'#fbbf24'}]},
+    {id:'chelem', name:APP.t('slam_title'), icon:'trophy', val:big6Done, paliere:[{n:2,l:isFR?'Duo':'Duo',r:APP.t('rarity_rare'),c:'#3b82f6'},{n:4,l:isFR?'Quatuor':'Quartet',r:APP.t('rarity_epic'),c:'#a855f7'},{n:6,l:APP.t('slam_title'),r:APP.t('rarity_legendary'),c:'#fbbf24'}]},
     {id:'monolithe', name:APP.t('mono_title'), icon:'trophy', val:stats.maxS + stats.maxB + stats.maxD, paliere:totalMonoPaliere},
     {id:'monolithe_s', name:APP.t('mono_s_title'), icon:'trophy', val:stats.maxS, paliere:monoPaliere},
     {id:'monolithe_b', name:APP.t('mono_b_title'), icon:'trophy', val:stats.maxB, paliere:monoPaliere},
     {id:'monolithe_d', name:APP.t('mono_d_title'), icon:'trophy', val:stats.maxD, paliere:monoPaliere},
-    {id:'cameleon', name:APP.t('cameleon_title'), icon:'trophy', val:stats.uniqueExCount, paliere:[{n:10,l:APP.t('tier_cam_1'),r:isFR?'COMMUN':'COMMON',c:'#94a3b8'},{n:25,l:APP.t('tier_cam_2'),r:isFR?'RARE':'RARE',c:'#3b82f6'},{n:50,l:APP.t('tier_cam_3'),r:isFR?'ÉPIQUE':'EPIC',c:'#a855f7'},{n:75,l:APP.t('tier_cam_4'),r:isFR?'LÉGENDAIRE':'LEGENDARY',c:'#fbbf24'},{n:100,l:APP.t('tier_cam_5'),r:isFR?'MYTHIQUE':'MYTHIC',c:'#22d3ee'}]}
+    {id:'cameleon', name:APP.t('cameleon_title'), icon:'trophy', val:stats.uniqueExCount, paliere:[{n:10,l:isFR?'Curiosité':'Curiosity',r:APP.t('rarity_common'),c:'#94a3b8'},{n:25,l:isFR?'Adaptation':'Adaptation',r:APP.t('rarity_rare'),c:'#3b82f6'},{n:50,l:isFR?'Exploration':'Exploration',r:APP.t('rarity_epic'),c:'#a855f7'},{n:75,l:isFR?'Versatilité':'Versatility',r:APP.t('rarity_legendary'),c:'#fbbf24'},{n:100,l:isFR?'Maîtrise Totale':'Total Mastery',r:APP.t('rarity_mythic'),c:'#22d3ee'}]}
   ];
 
   var html = '<div class="clabel" style="margin:25px 0 12px; color:var(--accent)">' + APP.t('special_achievements') + '</div><div id="special-ach-grid">';
@@ -239,10 +239,10 @@ function renderSpecialAchievements(stats) {
     }
     var pct = next ? (s.val / next.n * 100).toFixed(0) : 100;
     var unit = 'kg';
-    if (s.id === 'pilier') unit = APP.t('sessions');
-    else if (s.id === 'cameleon') unit = APP.t('diff_exercises');
+    if (s.id === 'pilier') unit = APP.t('unit_sessions');
+    else if (s.id === 'cameleon') unit = APP.t('unit_exercises');
     else if (s.id === 'briseur') unit = 'PR';
-    else if (s.id === 'acharne') unit = 'reps';
+    else if (s.id === 'acharne') unit = APP.t('unit_reps');
     else if (s.id === 'chelem') unit = '/ 6 ex';
     html += '<div class="bdg-card special-ach '+(earned?'earned':'')+'" style="border-left: 4px solid '+current.c+'"><div class="bdg-visual">'+getPremiumVisual(s.icon, current.c, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+(earned?current.l:s.name)+'</div><div class="bdg-meta">'+s.name+' <span class="bdg-rarity-pill" style="color:'+current.c+'">'+current.r+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+current.c+'"></div></div><div class="bdg-rate" style="color:#fff; opacity:1">'+APP.t('progress')+' : '+s.val.toLocaleString()+' '+unit+'</div></div></div>';
   }
@@ -324,7 +324,7 @@ function renderBadgeGrid(stats) {
 
     var rateTxt = APP.t('unlocked_by').replace('{{rate}}', ti.rate);
 
-    htmlStr += '<div class="bdg-card '+ti.cls+' '+(earned?'earned':'')+'" data-rarity="'+ti.label+'"><div class="bdg-visual">'+getPremiumVisual(type, ti.col, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+translatedName+'</div><div class="bdg-meta">'+translatedGroup+' <span class="bdg-rarity-pill" style="color:'+ti.col+'">'+ti.label+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+ti.col+'; box-shadow:0 0 10px '+ti.col+'"></div></div>'+(earned?'<div class="bdg-rate">'+rateTxt+'</div>':'')+'</div><div class="bdg-aside" style="text-align:right"><div class="bdg-stat-v">'+(earned ? max1RM + 'kg' : '--')+'</div><div class="bdg-stat-l">1RM MAX</div></div></div>';
+    htmlStr += '<div class="bdg-card '+ti.cls+' '+(earned?'earned':'')+'" data-rarity="'+ti.label+'"><div class="bdg-visual">'+getPremiumVisual(type, ti.col, earned)+'</div><div class="bdg-info" style="flex:1"><div class="bdg-title">'+translatedName+'</div><div class="bdg-meta">'+translatedGroup+' <span class="bdg-rarity-pill" style="color:'+ti.col+'">'+ti.label+'</span></div><div class="bdg-progress-bg"><div class="bdg-progress-fill" style="width:'+pct+'%; background:'+ti.col+'; box-shadow:0 0 10px '+ti.col+'"></div></div>'+(earned?'<div class="bdg-rate">'+rateTxt+'</div>':'')+'</div><div class="bdg-aside" style="text-align:right"><div class="bdg-stat-v">'+(earned ? max1RM + 'kg' : '--')+'</div><div class="bdg-stat-l">' + APP.t('label_1rm_max') + '</div></div></div>';
   }
   grid.innerHTML = htmlStr;
   if (window.gsap && allEx.length < 50) {

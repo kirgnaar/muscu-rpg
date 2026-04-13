@@ -27,10 +27,12 @@ function renderRPG() {
     
     // Translate muscle group names
     var mKey = {
-      'Pectoraux': 'pecs', 'Dorsaux': 'back', 'Épaules': 'shoulders', 
-      'Biceps': 'biceps', 'Triceps': 'triceps', 'Quadriceps': 'quads', 
-      'Ischios': 'hams', 'Fessiers': 'glutes', 'Mollets': 'calves', 'Abdos': 'abs'
-    }[m] || m;
+      'Pectoraux':'pecs','Dorsaux':'back','Dorsal':'back','Épaules':'shoulders',
+      'Biceps':'biceps','Triceps':'triceps','Quadriceps':'quads',
+      'Ischios':'hams','Ischio-jambiers':'hams','Fessiers':'glutes',
+      'Mollets':'calves','Abdos':'abs','Abdominaux':'abs',
+      'Lombaires':'lumbars','Trapèzes':'traps','Full body':'fullbody'
+    }[m]||m;
     var translatedM = APP.t(mKey);
 
     return '<div class="rpgcard">'
@@ -42,8 +44,9 @@ function renderRPG() {
          + (pct * 100).toFixed(1) + '%;background:' + lc + '"></div></div>'
          + '<div class="rpginfo">'
          + '<span>' + fmtV(vol) + ' ' + APP.t('accumulated') + '</span>'
-         + '<span>' + (lvl < 100 ? fmtV(xp) + ' → Niv. ' + (lvl + 1) : '🏆 MAX') + '</span>'
+         + '<span>' + (lvl < 100 ? fmtV(xp) + ' → ' + APP.t('lvl') + ' ' + (lvl + 1) : '🏆 MAX') + '</span>'
          + '</div>'
          + '</div>';
+
   }).join('');
 }
