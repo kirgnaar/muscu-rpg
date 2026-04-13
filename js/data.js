@@ -4,6 +4,38 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 var DB_KEY = 'mrpg_v2';
+var USER_KEY = 'mrpg_user';
+
+var DEFAULT_USER = {
+  nom: 'Muscu',
+  prenom: 'Guerrier',
+  age: 25,
+  poids: 75,
+  taille: 180,
+  langue: 'fr',
+  theme: 'dark'
+};
+
+/**
+ * Charger le profil utilisateur
+ */
+function loadUser() {
+  try {
+    var raw = localStorage.getItem(USER_KEY);
+    return raw ? JSON.parse(raw) : DEFAULT_USER;
+  } catch(e) {
+    return DEFAULT_USER;
+  }
+}
+
+/**
+ * Sauvegarder le profil utilisateur
+ */
+function saveUser(user) {
+  try {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  } catch(e) {}
+}
 
 /**
  * Charger les données depuis localStorage

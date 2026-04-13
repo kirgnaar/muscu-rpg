@@ -91,6 +91,11 @@
 
   <!-- ── Header ────────────────────────────────────────────────────────── -->
   <div class="hdr">
+    <div class="hdr-burger" id="burger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
     <div style="flex: 1">
       <div class="hdr-title">Muscu RPG</div>
       <div class="hdr-lvl" id="hdr-lvl-name">Niveau 0</div>
@@ -428,6 +433,90 @@
     <div class="tab" data-v="simulation"><span>🧪</span><span>Simu</span></div>
     <div class="tab" data-v="stats"><span>📊</span><span>Stats</span></div>
     <div class="tab" data-v="badges"><span>🏅</span><span>Badges</span></div>
+  </div>
+
+  <!-- ── Menu Latéral ────────────────────────────────────────────────────── -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+  <nav class="side-menu" id="side-menu">
+    <div class="menu-hdr">
+      <div class="menu-hdr-name" id="menu-user-name">Guerrier Muscu</div>
+      <div class="menu-hdr-sub" id="menu-user-stats">25 ans • 75 kg</div>
+    </div>
+    <div class="menu-items">
+      <div class="menu-item active" data-v="rpg" onclick="APP.closeMenu(); APP.switchView('rpg')">
+        <span>🏠</span> RPG (Accueil)
+      </div>
+      <div class="menu-item" data-v="profil" onclick="APP.closeMenu(); APP.switchView('profil')">
+        <span>👤</span> Profil
+      </div>
+      <div class="menu-item" data-v="settings" onclick="APP.closeMenu(); APP.switchView('settings')">
+        <span>⚙️</span> Paramètres
+      </div>
+    </div>
+    <div class="menu-footer">
+      Muscu RPG v1.0 — 2026
+    </div>
+  </nav>
+
+  <!-- ── Vues Additionnelles ─────────────────────────────────────────────── -->
+  <div class="view" id="v-profil">
+    <div class="content">
+      <div class="clabel">Mon Profil</div>
+      <div class="card">
+        <div class="fgroup">
+          <label class="flabel">Prénom</label>
+          <input type="text" id="prof-prenom" placeholder="Prénom">
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Nom</label>
+          <input type="text" id="prof-nom" placeholder="Nom">
+        </div>
+        <div class="kpi-row">
+          <div class="fgroup">
+            <label class="flabel">Âge</label>
+            <input type="number" id="prof-age" placeholder="25">
+          </div>
+          <div class="fgroup">
+            <label class="flabel">Poids (kg)</label>
+            <input type="number" id="prof-poids" placeholder="75">
+          </div>
+        </div>
+        <div class="fgroup">
+          <label class="flabel">Taille (cm)</label>
+          <input type="number" id="prof-taille" placeholder="180">
+        </div>
+        <button class="btn btn-p" onclick="saveProfile()">Enregistrer le Profil</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="view" id="v-settings">
+    <div class="content">
+      <div class="clabel">Paramètres</div>
+      <div class="card">
+        <label class="flabel">Langue</label>
+        <select id="set-lang">
+          <option value="fr">Français 🇫🇷</option>
+          <option value="en">English 🇬🇧</option>
+        </select>
+      </div>
+
+      <div class="clabel" style="margin-top:20px">Thème Visuel</div>
+      <div class="theme-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
+        <div class="theme-opt active" data-theme="dark" onclick="setTheme('dark')" style="background:#0a0f1e; border:2px solid var(--accent); height:80px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:5px; cursor:pointer;">
+          <div style="font-size:20px">🌑</div>
+          <div style="font-size:10px; font-weight:700">SOMBRE</div>
+        </div>
+        <div class="theme-opt" data-theme="light" onclick="setTheme('light')" style="background:#f8fafc; border:2px solid transparent; height:80px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:5px; cursor:pointer; color:#0f172a;">
+          <div style="font-size:20px">☀️</div>
+          <div style="font-size:10px; font-weight:700">CLAIR</div>
+        </div>
+        <div class="theme-opt" data-theme="amber" onclick="setTheme('amber')" style="background:#1a1610; border:2px solid transparent; height:80px; border-radius:12px; display:flex; align-items:center; justify-content:center; flex-direction:column; gap:5px; cursor:pointer; color:#f59e0b;">
+          <div style="font-size:20px">✨</div>
+          <div style="font-size:10px; font-weight:700">AMBRE</div>
+        </div>
+      </div>
+    </div>
   </div>
 
 </div><!-- /app -->

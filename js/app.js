@@ -5,10 +5,23 @@
 
 var APP = {
   data:    [],
+  user:    null,
   view:    'seances',
 
   save: function() {
     saveData(APP.data);
+  },
+
+  toggleMenu: function() {
+    document.getElementById('side-menu').classList.toggle('open');
+    document.getElementById('menu-overlay').classList.toggle('open');
+    document.getElementById('burger').classList.toggle('open');
+  },
+
+  closeMenu: function() {
+    document.getElementById('side-menu').classList.remove('open');
+    document.getElementById('menu-overlay').classList.remove('open');
+    document.getElementById('burger').classList.remove('open');
   },
 
   switchView: function(name) {
@@ -45,6 +58,8 @@ var APP = {
       case 'simulation': renderSimulation(); break;
       case 'stats':   renderStats();    break;
       case 'badges':  renderBadges();   break;
+      case 'profil':  renderProfil();   break;
+      case 'settings': renderSettings(); break;
     }
     renderHeader();
   },
@@ -75,10 +90,64 @@ function renderHeader() {
   var dayStr = d.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
   var hdrDate = document.getElementById('hdr-date');
   if (hdrDate) hdrDate.textContent = dayStr.charAt(0).toUpperCase() + dayStr.slice(1);
+
+  if (APP.user) {
+    var menuName = document.getElementById('menu-user-name');
+    if (menuName) menuName.textContent = APP.user.prenom + ' ' + APP.user.nom;
+    var menuStats = document.getElementById('menu-user-stats');
+    if (menuStats) menuStats.textContent = APP.user.age + ' ans • ' + APP.user.poids + ' kg';
+  }
+}
+
+function renderProfil() {
+  if (!APP.user) return;
+  document.getElementById('prof-prenom').value = APP.user.prenom;
+  document.getElementById('prof-nom').value = APP.user.nom;
+  document.getElementById('prof-age').value = APP.user.age;
+  document.getElementById('prof-poids').value = APP.user.poids;
+  document.getElementById('prof-taille').value = APP.user.taille;
+}
+
+function saveProfile() {
+  APP.user.prenom = document.getElementById('prof-prenom').value;
+  APP.user.nom = document.getElementById('prof-nom').value;
+  APP.user.age = parseInt(document.getElementById('prof-age').value) || 0;
+  APP.user.poids = parseFloat(document.getElementById('prof-poids').value) || 0;
+  APP.user.taille = parseInt(document.getElementById('prof-taille').value) || 0;
+  saveUser(APP.user);
+  renderHeader();
+  if (typeof toast === 'function') toast('Profil enregistré !');
+}
+
+function renderSettings() {
+  if (!APP.user) return;
+  document.getElementById('set-lang').value = APP.user.langue;
+  
+  var opts = document.querySelectorAll('.theme-opt');
+  for (var i = 0; i < opts.length; i++) {
+    opts[i].classList.toggle('active', opts[i].dataset.theme === APP.user.theme);
+    opts[i].style.borderColor = opts[i].dataset.theme === APP.user.theme ? 'var(--accent)' : 'transparent';
+  }
+}
+
+function setTheme(theme) {
+  APP.user.theme = theme;
+  saveUser(APP.user);
+  applyTheme(theme);
+  renderSettings();
+}
+
+function applyTheme(theme) {
+  document.body.classList.remove('theme-light', 'theme-amber');
+  if (theme !== 'dark') {
+    document.body.classList.add('theme-' + theme);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
   APP.data = loadData();
+  APP.user = loadUser();
+  applyTheme(APP.user.theme);
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(function(err) {
@@ -100,6 +169,12 @@ document.addEventListener('DOMContentLoaded', function() {
       APP.switchView(tab.dataset.v);
     });
   }
+
+  var burger = document.getElementById('burger');
+  if (burger) burger.addEventListener('click', APP.toggleMenu);
+
+  var overlay = document.getElementById('menu-overlay');
+  if (overlay) overlay.addEventListener('click', APP.closeMenu);
 
   APP.render();
 });
