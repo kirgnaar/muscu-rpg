@@ -30,6 +30,7 @@ export const Auth = {
       }
     }).catch(function(error) {
       console.error("Erreur redirection:", error);
+      alert("Erreur Firebase (" + error.code + ") : " + error.message);
     });
   },
 
@@ -39,7 +40,7 @@ export const Auth = {
       await signInWithRedirect(auth, googleProvider);
     } catch (error) {
       console.error("Erreur de connexion Google:", error);
-      if (window.toast) window.toast("Erreur de connexion", "err");
+      alert("Erreur Login : " + error.code + "\n" + error.message);
     }
   },
 
