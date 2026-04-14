@@ -1,9 +1,11 @@
 import { auth } from './firebase-config.js';
 import { 
   GoogleAuthProvider, 
-  signInWithPopup, 
-  signOut, 
-  onAuthStateChanged 
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { syncData } from './sync.js';
 
@@ -20,11 +22,21 @@ export const Auth = {
         syncData(user.uid);
       }
     });
+
+    // Gérer le retour de redirection
+    getRedirectResult(auth).then(function(result) {
+      if (result && result.user) {
+        console.log("Connecté après redirection:", result.user);
+      }
+    }).catch(function(error) {
+      console.error("Erreur redirection:", error);
+    });
   },
 
   login: async function() {
     try {
-      await signInWithPopup(auth, googleProvider);
+      // Sur mobile, la redirection est plus stable que le popup
+      await signInWithRedirect(auth, googleProvider);
     } catch (error) {
       console.error("Erreur de connexion Google:", error);
       if (window.toast) window.toast("Erreur de connexion", "err");
