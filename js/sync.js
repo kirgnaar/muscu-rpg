@@ -13,10 +13,12 @@ export async function syncData(uid) {
   };
 
   if (!cloudSnap.exists()) {
-    // CAS A : Premier login, Cloud vide -> On envoie le local
+    // CAS A : Premier login, Cloud vide -> On propose la migration
     if (localData.sessions.length > 0 || localData.user) {
-      await pushToCloud(uid, localData);
-      if (window.toast) window.toast("Données migrées sur le cloud");
+      if (confirm("Compte Cloud créé ! Voulez-vous synchroniser vos données locales (" + localData.sessions.length + " séances) vers votre compte Google ?")) {
+        await pushToCloud(uid, localData);
+        alert("Félicitations ! Vos données sont maintenant sauvegardées sur le Cloud.");
+      }
     }
   } else {
     const cloudData = cloudSnap.data();
