@@ -592,8 +592,13 @@
   const loginBtn = document.getElementById('auth-login-btn');
   const logoutBtn = document.getElementById('auth-logout-btn');
   
-  if (loginBtn) loginBtn.addEventListener('click', function() { Auth.login(); });
-  if (logoutBtn) logoutBtn.addEventListener('click', function() { Auth.logout(); });
+  if (loginBtn) loginBtn.addEventListener('click', function() { 
+    if (window.Auth) window.Auth.login(); 
+    else alert("Erreur : Le module Auth n'est pas prêt.");
+  });
+  if (logoutBtn) logoutBtn.addEventListener('click', function() { 
+    if (window.Auth) window.Auth.logout(); 
+  });
 </script>
 
 </body>
