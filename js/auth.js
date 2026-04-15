@@ -1,12 +1,9 @@
 import { auth } from './firebase-config.js';
 import {
   GoogleAuthProvider,
-  signInWithRedirect,
-  getRedirectResult,
+  signInWithPopup,
   signOut,
-  onAuthStateChanged,
-  setPersistence,
-  browserLocalPersistence
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { syncData } from './sync.js';
 
@@ -18,7 +15,7 @@ export var Auth = {
   init: function() {
     var self = this;
     var statusEl = document.getElementById('sync-status');
-    
+
     // 1. Affichage immédiat depuis le cache
     var cachedUser = JSON.parse(localStorage.getItem('mrpg_auth_cache') || 'null');
     if (cachedUser) {
@@ -45,31 +42,21 @@ export var Auth = {
         // On ne vide pas le cache ici pour éviter le clignotement
       }
     });
-
-    // 3. Récupérer le résultat de la redirection
-    getRedirectResult(auth).catch(function(error) {
-      // Sur iPhone, on ignore l'erreur d'état initial manquant qui est un bug d'Apple
-      if (error.code === 'auth/missing-initial-state') {
-        console.warn("iOS State Bug détecté — On attend l'écouteur...");
-      } else if (error.code !== 'auth/no-current-user') {
-        console.error("Auth error:", error.code);
-      }
-    });
   },
 
   login: function() {
-    var self = this;
     var loginBtn = document.getElementById('auth-login-btn');
     if (loginBtn) {
       loginBtn.disabled = true;
       loginBtn.innerHTML = "🔄 Connexion...";
     }
 
-    // On s'assure que la persistance est bien sur LOCAL pour l'iPhone
-    setPersistence(auth, browserLocalPersistence).then(function() {
-      return signInWithRedirect(auth, googleProvider);
-    }).catch(function(error) {
-      alert("Erreur Login : " + error.code);
+    // signInWithPopup évite l'erreur "missing-initial-state" de signInWithRedirect
+    // (iOS Safari efface le sessionStorage entre la redirection et le retour)
+    signInWithPopup(auth, googleProvider).catch(function(error) {
+      if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+        alert("Erreur Login : " + error.code);
+      }
       if (loginBtn) {
         loginBtn.disabled = false;
         loginBtn.innerHTML = "Connexion Google";
