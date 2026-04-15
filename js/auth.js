@@ -28,12 +28,13 @@ export const Auth = {
     setPersistence(auth, browserLocalPersistence);
 
     onAuthStateChanged(auth, function(user) {
+      console.log("État Auth changé :", user ? "Connecté" : "Déconnecté");
       if (user) {
         // Sauvegarder en cache pour le prochain démarrage
         const userData = {
           uid: user.uid,
-          displayName: user.displayName,
-          photoURL: user.photoURL
+          displayName: user.displayName || "Utilisateur",
+          photoURL: user.photoURL || ""
         };
         localStorage.setItem('mrpg_auth_cache', JSON.stringify(userData));
         
@@ -41,21 +42,21 @@ export const Auth = {
         Auth.updateUI(user);
         syncData(user.uid);
       } else {
-        localStorage.removeItem('mrpg_auth_cache');
-        Auth.user = null;
-        Auth.updateUI(null);
+        // On ne supprime le cache que si on est sûr d'être déconnecté
+        // (parfois user est null temporairement au chargement)
       }
     });
 
     // Gérer le retour de redirection
+    console.log("Vérification du résultat de redirection...");
     getRedirectResult(auth).then(function(result) {
       if (result && result.user) {
-        alert("Connexion réussie : " + result.user.displayName);
+        alert("Succès ! Connecté en tant que : " + (result.user.displayName || "Guerrier"));
+        Auth.user = result.user;
+        Auth.updateUI(result.user);
       }
     }).catch(function(error) {
-      if (error.code !== 'auth/no-current-user') {
-        alert("Erreur Firebase (" + error.code + ") : " + error.message);
-      }
+      alert("Erreur retour Google : " + error.code);
     });
   },
 
@@ -85,9 +86,12 @@ export const Auth = {
       if (userProfile) {
         userProfile.style.display = 'flex';
         const nameEl = document.getElementById('auth-user-name');
-        if (nameEl) nameEl.textContent = user.displayName.split(' ')[0];
+        if (nameEl) {
+          const fullName = user.displayName || "Guerrier";
+          nameEl.textContent = fullName.split(' ')[0];
+        }
         const photoEl = document.getElementById('auth-user-photo');
-        if (photoEl) photoEl.src = user.photoURL;
+        if (photoEl && user.photoURL) photoEl.src = user.photoURL;
       }
     } else {
       if (loginBtn) loginBtn.style.display = 'block';
