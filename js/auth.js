@@ -17,16 +17,33 @@ export const Auth = {
   user: null,
 
   init: function() {
-    alert("Auth Module Initialisé (v79)");
+    // Vérifier si on a un utilisateur en cache pour un affichage instantané
+    const cachedUser = JSON.parse(localStorage.getItem('mrpg_auth_cache') || 'null');
+    if (cachedUser) {
+      Auth.user = cachedUser;
+      Auth.updateUI(cachedUser);
+    }
+
     // Forcer la persistance locale
     setPersistence(auth, browserLocalPersistence);
 
     onAuthStateChanged(auth, function(user) {
-      console.log("État Auth changé :", user ? "Connecté" : "Déconnecté");
-      Auth.user = user;
-      Auth.updateUI(user);
       if (user) {
+        // Sauvegarder en cache pour le prochain démarrage
+        const userData = {
+          uid: user.uid,
+          displayName: user.displayName,
+          photoURL: user.photoURL
+        };
+        localStorage.setItem('mrpg_auth_cache', JSON.stringify(userData));
+        
+        Auth.user = user;
+        Auth.updateUI(user);
         syncData(user.uid);
+      } else {
+        localStorage.removeItem('mrpg_auth_cache');
+        Auth.user = null;
+        Auth.updateUI(null);
       }
     });
 
