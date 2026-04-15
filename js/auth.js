@@ -1,11 +1,12 @@
 import { auth } from './firebase-config.js';
 import {
   GoogleAuthProvider,
-  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { syncData } from './sync.js';
 
@@ -18,14 +19,15 @@ export var Auth = {
     var self = this;
     var statusEl = document.getElementById('sync-status');
     
-    // 1. Charger le cache immédiatement
+    // 1. Affichage immédiat depuis le cache
     var cachedUser = JSON.parse(localStorage.getItem('mrpg_auth_cache') || 'null');
     if (cachedUser) {
       this.user = cachedUser;
       this.updateUI(cachedUser);
+      if (statusEl) statusEl.textContent = "⏳ Vérification...";
     }
 
-    // 2. Écouteur global
+    // 2. Écouteur global (Source de vérité)
     onAuthStateChanged(auth, function(user) {
       if (user) {
         if (statusEl) statusEl.textContent = "✅ Connecté";
@@ -40,14 +42,17 @@ export var Auth = {
         syncData(user.uid);
       } else {
         if (statusEl) statusEl.textContent = "🌐 Hors ligne";
+        // On ne vide pas le cache ici pour éviter le clignotement
       }
     });
 
-    // 3. Tenter de récupérer un résultat de redirection (si existant)
+    // 3. Récupérer le résultat de la redirection
     getRedirectResult(auth).catch(function(error) {
-      // On ignore l'erreur "missing initial state" qui est buggée sur iOS
-      if (error.code !== 'auth/missing-initial-state' && error.code !== 'auth/no-current-user') {
-        console.error("Redirect error:", error.code);
+      // Sur iPhone, on ignore l'erreur d'état initial manquant qui est un bug d'Apple
+      if (error.code === 'auth/missing-initial-state') {
+        console.warn("iOS State Bug détecté — On attend l'écouteur...");
+      } else if (error.code !== 'auth/no-current-user') {
+        console.error("Auth error:", error.code);
       }
     });
   },
@@ -55,43 +60,21 @@ export var Auth = {
   login: function() {
     var self = this;
     var loginBtn = document.getElementById('auth-login-btn');
-    var statusEl = document.getElementById('sync-status');
-
-    // Détection iPhone Standalone (PWA)
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    var isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-
     if (loginBtn) {
       loginBtn.disabled = true;
       loginBtn.innerHTML = "🔄 Connexion...";
     }
 
-    if (isIOS && isStandalone) {
-      // SOLUTION IPHONE PWA : Utiliser Popup au lieu de Redirect
-      if (statusEl) statusEl.textContent = "📱 Mode iPhone PWA...";
-      signInWithPopup(auth, googleProvider).then(function(result) {
-        if (result.user) {
-          if (statusEl) statusEl.textContent = "✨ Connecté !";
-          self.user = result.user;
-          self.updateUI(result.user);
-        }
-      }).catch(function(error) {
-        alert("Erreur Connexion iPhone : " + error.code + "\n\nAstuce : Si rien ne se passe, essayez d'ouvrir le site dans Safari normal (pas en mode App) pour la première connexion.");
-        if (loginBtn) {
-          loginBtn.disabled = false;
-          loginBtn.innerHTML = "Connexion Google";
-        }
-      });
-    } else {
-      // Mode normal (Android ou Safari classique)
-      signInWithRedirect(auth, googleProvider).catch(function(error) {
-        alert("Erreur Login : " + error.code);
-        if (loginBtn) {
-          loginBtn.disabled = false;
-          loginBtn.innerHTML = "Connexion Google";
-        }
-      });
-    }
+    // On s'assure que la persistance est bien sur LOCAL pour l'iPhone
+    setPersistence(auth, browserLocalPersistence).then(function() {
+      return signInWithRedirect(auth, googleProvider);
+    }).catch(function(error) {
+      alert("Erreur Login : " + error.code);
+      if (loginBtn) {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = "Connexion Google";
+      }
+    });
   },
 
   logout: function() {
