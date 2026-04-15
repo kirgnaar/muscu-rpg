@@ -1,5 +1,5 @@
 // ── Service Worker — Muscu RPG ─────────────────────────────────────────────
-var CACHE_NAME = 'muscu-rpg-v82';
+var CACHE_NAME = 'muscu-rpg-v83';
 var ASSETS = [
   '/',
   '/index.html',
@@ -58,6 +58,12 @@ self.addEventListener('activate', function(e) {
 
 self.addEventListener('fetch', function(e) {
   if (e.request.method !== 'GET') return;
+  
+  // IGNORER les requêtes Firebase Auth pour éviter les blocages PWA sur iOS
+  if (e.request.url.indexOf('/__/auth/') !== -1 || e.request.url.indexOf('googleapis.com') !== -1) {
+    return;
+  }
+
   e.respondWith(
     fetch(e.request).then(function(response) {
       if (response && response.status === 200 && response.type === 'basic') {

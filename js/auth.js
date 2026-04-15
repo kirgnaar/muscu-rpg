@@ -59,10 +59,22 @@ export var Auth = {
   },
 
   login: function() {
-    // Alerte pour vérifier que le clic fonctionne
-    // alert("Tentative de connexion...");
+    var self = this;
+    var loginBtn = document.getElementById('auth-login-btn');
+    if (loginBtn) {
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = "🔄 Connexion...";
+    }
+
+    // Sur iPhone Standalone, signInWithRedirect est plus fiable que Popup, 
+    // mais Google peut bloquer la redirection cross-domain. 
+    // On essaie Redirect par défaut pour les PWA.
     signInWithRedirect(auth, googleProvider).catch(function(error) {
-      alert("Erreur Login : " + error.code);
+      alert("Erreur Login : " + error.code + " - " + error.message);
+      if (loginBtn) {
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = "Connexion Google";
+      }
     });
   },
 
