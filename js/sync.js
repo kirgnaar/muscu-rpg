@@ -15,28 +15,67 @@ export async function syncData(uid) {
   if (!cloudSnap.exists()) {
     // CAS A : Premier login, Cloud vide -> On propose la migration
     if (localData.sessions.length > 0 || localData.user) {
-      if (confirm("Compte Cloud créé ! Voulez-vous synchroniser vos données locales (" + localData.sessions.length + " séances) vers votre compte Google ?")) {
+      if (confirm("Voulez-vous sauvegarder vos données locales sur votre nouveau compte Cloud ?")) {
         await pushToCloud(uid, localData);
-        alert("Félicitations ! Vos données sont maintenant sauvegardées sur le Cloud.");
       }
     }
   } else {
     const cloudData = cloudSnap.data();
-    
-    // CAS B & C : Comparaison des dates de mise à jour
-    if (cloudData.updatedAt > localData.updatedAt) {
-      // Cloud plus récent -> On met à jour le local
-      applyCloudToLocal(cloudData);
-      if (localData.updatedAt > 0 && window.toast) {
-        window.toast("Données fusionnées depuis le cloud");
+
+    // S'il y a des données des deux côtés, on propose le choix
+    if (localData.sessions.length > 0 && cloudData.sessions && cloudData.sessions.length > 0) {
+      const choice = prompt(
+        "Conflit de synchronisation détecté !\n\n" +
+        "1: IMPORTER (Garder les données du Cloud)\n" +
+        "2: EXPORTER (Garder les données de ce téléphone)\n" +
+        "3: FUSIONNER (Mélanger les deux et supprimer les doublons)\n\n" +
+        "Tapez 1, 2 ou 3 :"
+      );
+
+      if (choice === "1") {
+        applyCloudToLocal(cloudData);
+        alert("Importation réussie !");
+      } else if (choice === "2") {
+        await pushToCloud(uid, localData);
+        alert("Exportation réussie !");
+      } else if (choice === "3") {
+        const merged = mergeData(localData, cloudData);
+        applyCloudToLocal(merged);
+        await pushToCloud(uid, merged);
+        alert("Fusion réussie (" + merged.sessions.length + " séances au total) !");
       }
-    } else if (localData.updatedAt > cloudData.updatedAt) {
-      // Local plus récent -> On pousse vers le cloud
-      await pushToCloud(uid, localData);
+    } else {
+      // Sinon, synchronisation automatique classique par date
+      if (cloudData.updatedAt > localData.updatedAt) {
+        applyCloudToLocal(cloudData);
+      } else if (localData.updatedAt > cloudData.updatedAt) {
+        await pushToCloud(uid, localData);
+      }
     }
   }
   updateSyncIndicator('synced');
 }
+
+function mergeData(local, cloud) {
+  const allSessions = [...local.sessions, ...(cloud.sessions || [])];
+  const uniqueSessions = [];
+  const ids = new Set();
+
+  allSessions.forEach(s => {
+    if (!ids.has(s.id)) {
+      uniqueSessions.push(s);
+      ids.add(s.id);
+    }
+  });
+
+  return {
+    sessions: uniqueSessions,
+    user: cloud.user || local.user,
+    blocks: cloud.blocks || local.blocks,
+    updatedAt: Date.now()
+  };
+}
+
 
 export async function pushToCloud(uid, data) {
   updateSyncIndicator('syncing');
