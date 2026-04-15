@@ -1,11 +1,13 @@
 import { auth } from './firebase-config.js';
 import { 
-  GoogleAuthProvider, 
+  GoogleAuthProvider,
   signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { syncData } from './sync.js';
 
@@ -15,7 +17,11 @@ export const Auth = {
   user: null,
 
   init: function() {
+    // Forcer la persistance locale
+    setPersistence(auth, browserLocalPersistence);
+
     onAuthStateChanged(auth, function(user) {
+      console.log("État Auth changé :", user ? "Connecté" : "Déconnecté");
       Auth.user = user;
       Auth.updateUI(user);
       if (user) {
@@ -26,11 +32,12 @@ export const Auth = {
     // Gérer le retour de redirection
     getRedirectResult(auth).then(function(result) {
       if (result && result.user) {
-        console.log("Connecté après redirection:", result.user);
+        alert("Connexion réussie : " + result.user.displayName);
       }
     }).catch(function(error) {
-      console.error("Erreur redirection:", error);
-      alert("Erreur Firebase (" + error.code + ") : " + error.message);
+      if (error.code !== 'auth/no-current-user') {
+        alert("Erreur Firebase (" + error.code + ") : " + error.message);
+      }
     });
   },
 
