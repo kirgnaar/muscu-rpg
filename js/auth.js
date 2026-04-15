@@ -18,44 +18,48 @@ export var Auth = {
   init: function() {
     var self = this;
     
-    // Alerte de debug pour vérifier que le fichier est chargé
-    // alert("DEBUG: Auth.init lancé");
+    // 1. Vérification immédiate du cache pour l'UI
+    var cachedUser = JSON.parse(localStorage.getItem('mrpg_auth_cache') || 'null');
+    if (cachedUser) {
+      this.user = cachedUser;
+      this.updateUI(cachedUser);
+    }
 
-    // Persistance locale
+    // 2. Configuration de la persistance
     setPersistence(auth, browserLocalPersistence).then(function() {
-      // Observer l'état de connexion
+      
+      // 3. Écouteur d'état (la source de vérité)
       onAuthStateChanged(auth, function(user) {
         if (user) {
           var userData = {
             uid: user.uid,
-            displayName: user.displayName || "Utilisateur",
+            displayName: user.displayName || "Guerrier",
             photoURL: user.photoURL || ""
           };
           localStorage.setItem('mrpg_auth_cache', JSON.stringify(userData));
           self.user = user;
           self.updateUI(user);
           syncData(user.uid);
-        } else {
-          // On ne vide le cache que si on est déconnecté manuellement
-          // localStorage.removeItem('mrpg_auth_cache');
         }
       });
-    }).catch(function(err) {
-      console.error("Persistence error:", err);
+
     });
 
-    // Gérer le retour de redirection
-    getRedirectResult(auth).then(function(result) {
-      if (result && result.user) {
-        alert("Succès ! Connecté : " + (result.user.displayName || "Guerrier"));
-        self.user = result.user;
-        self.updateUI(result.user);
-      }
-    }).catch(function(error) {
-      if (error.code !== 'auth/no-current-user') {
-        alert("Erreur retour Google : " + error.code + " - " + error.message);
-      }
-    });
+    // 4. Gestion du retour de Google (le moment critique sur iPhone)
+    // On attend un tout petit peu que l'app "reprenne ses esprits"
+    setTimeout(function() {
+      getRedirectResult(auth).then(function(result) {
+        if (result && result.user) {
+          alert("Gagné ! Bienvenue " + (result.user.displayName || ""));
+          self.user = result.user;
+          self.updateUI(result.user);
+        }
+      }).catch(function(error) {
+        if (error.code !== 'auth/no-current-user') {
+          alert("Erreur retour : " + error.code);
+        }
+      });
+    }, 1500);
   },
 
   login: function() {
