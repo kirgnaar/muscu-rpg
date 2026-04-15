@@ -1,6 +1,7 @@
 import { auth } from './firebase-config.js';
 import {
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut,
@@ -16,9 +17,15 @@ export var Auth = {
   init: function() {
     var self = this;
     var statusEl = document.getElementById('sync-status');
-    if (statusEl) statusEl.textContent = "⏳ Initialisation...";
+    
+    // 1. Charger le cache immédiatement
+    var cachedUser = JSON.parse(localStorage.getItem('mrpg_auth_cache') || 'null');
+    if (cachedUser) {
+      this.user = cachedUser;
+      this.updateUI(cachedUser);
+    }
 
-    // 1. Écouteur global IMMÉDIAT
+    // 2. Écouteur global
     onAuthStateChanged(auth, function(user) {
       if (user) {
         if (statusEl) statusEl.textContent = "✅ Connecté";
@@ -33,38 +40,58 @@ export var Auth = {
         syncData(user.uid);
       } else {
         if (statusEl) statusEl.textContent = "🌐 Hors ligne";
-        // On ne vide pas le cache ici pour garder l'UI si le réseau est lent
       }
     });
 
-    // 2. Vérification du retour de Google (sans délai)
-    getRedirectResult(auth).then(function(result) {
-      if (result && result.user) {
-        if (statusEl) statusEl.textContent = "✨ Bienvenue !";
-        self.user = result.user;
-        self.updateUI(result.user);
-      }
-    }).catch(function(error) {
-      if (error.code !== 'auth/no-current-user') {
-        if (statusEl) statusEl.textContent = "❌ Erreur Auth";
-        alert("Erreur retour : " + error.code);
+    // 3. Tenter de récupérer un résultat de redirection (si existant)
+    getRedirectResult(auth).catch(function(error) {
+      // On ignore l'erreur "missing initial state" qui est buggée sur iOS
+      if (error.code !== 'auth/missing-initial-state' && error.code !== 'auth/no-current-user') {
+        console.error("Redirect error:", error.code);
       }
     });
   },
 
   login: function() {
+    var self = this;
     var loginBtn = document.getElementById('auth-login-btn');
+    var statusEl = document.getElementById('sync-status');
+
+    // Détection iPhone Standalone (PWA)
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    var isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+
     if (loginBtn) {
       loginBtn.disabled = true;
-      loginBtn.innerHTML = "🔄 Direction Google...";
+      loginBtn.innerHTML = "🔄 Connexion...";
     }
-    signInWithRedirect(auth, googleProvider).catch(function(error) {
-      alert("Erreur Login : " + error.code);
-      if (loginBtn) {
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = "Connexion Google";
-      }
-    });
+
+    if (isIOS && isStandalone) {
+      // SOLUTION IPHONE PWA : Utiliser Popup au lieu de Redirect
+      if (statusEl) statusEl.textContent = "📱 Mode iPhone PWA...";
+      signInWithPopup(auth, googleProvider).then(function(result) {
+        if (result.user) {
+          if (statusEl) statusEl.textContent = "✨ Connecté !";
+          self.user = result.user;
+          self.updateUI(result.user);
+        }
+      }).catch(function(error) {
+        alert("Erreur Connexion iPhone : " + error.code + "\n\nAstuce : Si rien ne se passe, essayez d'ouvrir le site dans Safari normal (pas en mode App) pour la première connexion.");
+        if (loginBtn) {
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = "Connexion Google";
+        }
+      });
+    } else {
+      // Mode normal (Android ou Safari classique)
+      signInWithRedirect(auth, googleProvider).catch(function(error) {
+        alert("Erreur Login : " + error.code);
+        if (loginBtn) {
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = "Connexion Google";
+        }
+      });
+    }
   },
 
   logout: function() {
