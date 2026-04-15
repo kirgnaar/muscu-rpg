@@ -43,6 +43,14 @@ export var Auth = {
         self.user = user;
         self.updateUI(user);
         syncData(user.uid);
+
+        // Si on vient du flux ?login=1 (Safari ouvert depuis standalone),
+        // indiquer à l'utilisateur de revenir sur l'app
+        if (self._fromStandalone) {
+          self._fromStandalone = false;
+          var msg = document.getElementById('auth-safari-msg');
+          if (msg) msg.style.display = 'block';
+        }
       } else {
         if (statusEl) statusEl.textContent = "🌐 Hors ligne";
       }
@@ -51,10 +59,19 @@ export var Auth = {
     // 3. Auto-login si ouvert depuis l'app standalone (paramètre ?login=1)
     var params = new URLSearchParams(window.location.search);
     if (params.get('login') === '1' && !isIOSStandalone()) {
-      // Nettoyer l'URL sans recharger
       history.replaceState(null, '', window.location.pathname);
-      // Lancer le popup automatiquement
+      self._fromStandalone = true;
       self.login();
+    }
+
+    // 4. Quand l'app standalone reprend le focus, forcer Firebase à re-vérifier
+    //    l'état auth (la session a pu être créée dans Safari entre-temps)
+    if (isIOSStandalone()) {
+      document.addEventListener('visibilitychange', function() {
+        if (document.visibilityState === 'visible') {
+          auth.currentUser; // accès suffit à déclencher la réévaluation interne
+        }
+      });
     }
   },
 
