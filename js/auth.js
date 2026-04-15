@@ -17,6 +17,7 @@ export const Auth = {
   user: null,
 
   init: function() {
+    alert("Auth Module Initialisé (v79)");
     // Forcer la persistance locale
     setPersistence(auth, browserLocalPersistence);
 

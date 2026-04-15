@@ -264,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
   APP.updateStaticUI();
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' }).catch(function(err) {
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(function(err) {
       console.warn('[SW] Registration failed:', err);
     });
   }
