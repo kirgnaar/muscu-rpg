@@ -37,13 +37,11 @@ function saveUser(user) {
     var timestamp = Date.now();
     localStorage.setItem('mrpg_last_sync', timestamp.toString());
 
-    if (window.Auth && window.Auth.user) {
-      import('./sync.js').then(function(m) {
-        m.pushToCloud(window.Auth.user.uid, {
-          sessions: APP.data,
-          user: APP.user,
-          blocks: (window.SIM && SIM.blocks) ? SIM.blocks : []
-        });
+    if (window.Auth && window.Auth.user && window.pushToCloud) {
+      window.pushToCloud(window.Auth.user.uid, {
+        sessions: APP.data,
+        user: APP.user,
+        blocks: (window.SIM && SIM.blocks) ? SIM.blocks : []
       });
     }
   } catch(e) {}
@@ -73,13 +71,11 @@ function saveData(data) {
 
     // Déclencher la sync Cloud si l'utilisateur est connecté
     // On utilise dynamic import pour rester compatible ES5 et éviter les erreurs de chargement
-    if (window.Auth && window.Auth.user) {
-      import('./sync.js').then(function(m) {
-        m.pushToCloud(window.Auth.user.uid, {
-          sessions: APP.data,
-          user: APP.user,
-          blocks: (window.SIM && SIM.blocks) ? SIM.blocks : []
-        });
+    if (window.Auth && window.Auth.user && window.pushToCloud) {
+      window.pushToCloud(window.Auth.user.uid, {
+        sessions: APP.data,
+        user: APP.user,
+        blocks: (window.SIM && SIM.blocks) ? SIM.blocks : []
       });
     }
   } catch(e) {

@@ -588,8 +588,10 @@
 <!-- 6. Firebase & Auth (Modules ESM) -->
 <script type="module">
   import { Auth } from './js/auth.js';
-  // Rendre global pour les boutons si nécessaire (ou attacher les listeners ici)
+  import { pushToCloud } from './js/sync.js';
+
   window.Auth = Auth;
+  window.pushToCloud = pushToCloud; // accessible depuis data.js (script classique)
   Auth.init();
   
   const loginBtn = document.getElementById('auth-login-btn');

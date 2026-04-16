@@ -79,17 +79,24 @@ export var Auth = {
     var loginBtn = document.getElementById('auth-login-btn');
 
     if (isIOSStandalone()) {
-      // iOS standalone : popup et redirect sont tous les deux cassés dans ce contexte.
-      // Solution : ouvrir l'app dans Safari régulier avec ?login=1
-      // Safari fait la connexion Google normalement, puis Firebase propage
-      // la session via localStorage partagé → onAuthStateChanged se déclenche
-      // automatiquement dans l'app standalone quand l'utilisateur revient.
+      // iOS standalone : SFSafariViewController (window.open) a un stockage isolé.
+      // navigator.share() ouvre la feuille de partage iOS → l'utilisateur peut
+      // choisir "Ouvrir dans Safari" → vrai Safari, stockage partagé avec standalone.
       var loginUrl = window.location.origin + window.location.pathname + '?login=1';
-      window.open(loginUrl, '_blank');
 
-      // Informer l'utilisateur
+      if (navigator.share) {
+        navigator.share({ title: 'Muscu RPG — Connexion', url: loginUrl })
+          .catch(function() {});
+      } else {
+        // Fallback : copier dans le presse-papier
+        navigator.clipboard.writeText(loginUrl).then(function() {
+          toast("Lien copié ! Collez-le dans Safari pour vous connecter", "info");
+        }).catch(function() {
+          toast("Ouvrez ce lien dans Safari : " + loginUrl, "info");
+        });
+      }
+
       if (loginBtn) loginBtn.innerHTML = "Revenez après connexion";
-      toast("Connectez-vous dans Safari puis revenez ici", "info");
       return;
     }
 
