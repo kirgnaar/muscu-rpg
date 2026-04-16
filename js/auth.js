@@ -56,12 +56,15 @@ export var Auth = {
       }
     });
 
-    // 3. Auto-login si ouvert depuis l'app standalone (paramètre ?login=1)
+    // 3. Ouvert depuis l'app standalone (paramètre ?login=1)
+    // NE PAS auto-déclencher signInWithPopup : Safari bloque les popups
+    // qui ne viennent pas d'un geste utilisateur direct (clic).
+    // On affiche à la place un écran de connexion dédié.
     var params = new URLSearchParams(window.location.search);
     if (params.get('login') === '1' && !isIOSStandalone()) {
       history.replaceState(null, '', window.location.pathname);
       self._fromStandalone = true;
-      self.login();
+      self._showLoginScreen();
     }
 
     // 4. Quand l'app standalone reprend le focus, forcer Firebase à re-vérifier
@@ -113,6 +116,44 @@ export var Auth = {
         loginBtn.disabled = false;
         loginBtn.innerHTML = "Connexion Google";
       }
+    });
+  },
+
+  // Affiche un écran plein écran de connexion (utilisé depuis Safari via ?login=1)
+  // Le clic utilisateur sur le bouton garantit que Safari autorise le popup Google
+  _showLoginScreen: function() {
+    var self = this;
+    var overlay = document.createElement('div');
+    overlay.id = 'ios-login-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;background:#0a0f1e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;z-index:9999;padding:32px';
+    overlay.innerHTML =
+      '<div style="font-size:48px">⚔️</div>' +
+      '<div style="font-size:22px;font-weight:800;color:#fff;text-align:center">Muscu RPG</div>' +
+      '<div style="font-size:14px;color:rgba(255,255,255,0.6);text-align:center">Connectez-vous pour synchroniser vos données</div>' +
+      '<button id="ios-login-btn" style="display:flex;align-items:center;gap:10px;background:#fff;color:#000;border:none;border-radius:10px;padding:14px 24px;font-size:16px;font-weight:700;cursor:pointer;width:100%;max-width:300px;justify-content:center">' +
+        '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:20px">' +
+        'Se connecter avec Google' +
+      '</button>';
+    document.body.appendChild(overlay);
+
+    document.getElementById('ios-login-btn').addEventListener('click', function() {
+      this.disabled = true;
+      this.textContent = '🔄 Connexion...';
+      signInWithPopup(auth, googleProvider)
+        .then(function() {
+          // Auth réussie : remplacer le bouton par le message de retour
+          overlay.innerHTML =
+            '<div style="font-size:48px">✅</div>' +
+            '<div style="font-size:20px;font-weight:800;color:#fff;text-align:center">Connecté !</div>' +
+            '<div style="font-size:15px;color:rgba(255,255,255,0.7);text-align:center">Fermez cet onglet et revenez sur votre app.</div>';
+        })
+        .catch(function(error) {
+          if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
+            alert("Erreur : " + error.code);
+          }
+          var btn = document.getElementById('ios-login-btn');
+          if (btn) { btn.disabled = false; btn.textContent = 'Se connecter avec Google'; }
+        });
     });
   },
 
