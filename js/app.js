@@ -270,6 +270,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   initJournal();
+  initPR();
   initStats();
   initBadges();
   initSimulation();

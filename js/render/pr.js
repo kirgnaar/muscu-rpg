@@ -3,26 +3,38 @@
    Onglet PR Big 6: meilleur 1RM, tableau de charges 1-10 reps
    ══════════════════════════════════════════════════════════════════════════ */
 
+/**
+ * Initialisation unique au démarrage
+ */
+function initPR() {
+  var bonusSel = $('pr-bonus-ex-sel');
+  if (!bonusSel) return;
+
+  // Remplir la liste une seule fois
+  populateExerciseSelect(bonusSel, true);
+
+  // Écouter les changements de sélection
+  bonusSel.addEventListener('change', function() {
+    renderPRBonus();
+  });
+}
+
+/**
+ * Rendu de la vue PR (appelé à chaque clic sur l'onglet)
+ */
 function renderPR() {
   $('v-pr').querySelector('[data-i18n="stitle_pr"]').textContent = APP.t('stitle_pr');
   $('v-pr').querySelector('[data-i18n="stitle_pr_bonus"]').textContent = APP.t('stitle_pr_bonus');
   
-  // Rendu Big 6
+  // 1. Rendu du Big 6
   var list = $('pr-list');
   list.innerHTML = BIG6.map(function(ex, i) {
     return _generatePRCard(ex, BIG6_COLORS[i]);
   }).join('');
 
-  // Initialisation du sélecteur bonus si vide
+  // 2. Sélection par défaut si rien n'est choisi
   var bonusSel = $('pr-bonus-ex-sel');
-  if (bonusSel.options.length === 0) {
-    populateExerciseSelect(bonusSel, true);
-    
-    bonusSel.addEventListener('change', function() {
-      renderPRBonus();
-    });
-    
-    // Valeur par défaut (premier exercice avec des données qui n'est pas dans le Big 6)
+  if (bonusSel && !bonusSel.value) {
     var exWithData = allExercisesWithData().filter(function(ex) {
       return BIG6.indexOf(ex) === -1;
     });
@@ -31,19 +43,29 @@ function renderPR() {
     }
   }
 
+  // 3. Rendu de la partie Bonus
   renderPRBonus();
 }
 
+/**
+ * Rendu spécifique de l'exercice bonus sélectionné
+ */
 function renderPRBonus() {
   var ex = $('pr-bonus-ex-sel').value;
   var container = $('pr-bonus-container');
+  if (!container) return;
+
   if (!ex) {
     container.innerHTML = '<div class="card" style="text-align:center; padding:20px; color:var(--text2)">' + APP.t('label_chart_empty') + '</div>';
     return;
   }
+  
   container.innerHTML = _generatePRCard(ex, 'var(--accent)');
 }
 
+/**
+ * Générateur de carte PR (réutilisable)
+ */
 function _generatePRCard(ex, color) {
   var entries = APP.data.filter(function(e) { return e.ex === ex && e.pds >= 1; });
 
@@ -65,14 +87,14 @@ function _generatePRCard(ex, color) {
   var best   = bestRM1Entry(ex);
   var rm1    = epley(best.pds, best.rep);
   
-  // Calcul de la progression (diff avec la séance précédente)
+  // Calcul de la progression
   var exDates = allDates().filter(function(d) {
     return APP.data.some(function(e) { return e.ex === ex && e.date === d; });
   });
   
   var diffStr = '';
   if (exDates.length > 1) {
-    var prevDate = exDates[1]; // exDates est trié du plus récent au plus ancien
+    var prevDate = exDates[1];
     var prevRM = bestRM1ForDate(ex, prevDate);
     if (prevRM && prevRM !== rm1) {
       var diff = (rm1 - prevRM).toFixed(1);
