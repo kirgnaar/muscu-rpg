@@ -251,3 +251,26 @@ function allDates() {
   }
   return dates.sort().reverse();
 }
+
+/**
+ * Liste de tous les noms d'exercices existants (statique)
+ */
+function getAllExercises() {
+  var list = [];
+  for (var i = 0; i < EX.length; i++) {
+    list.push(EX[i][0]);
+  }
+  return list;
+}
+
+/**
+ * Liste des exercices ayant au moins une série enregistrée
+ */
+function allExercisesWithData() {
+  var list = [];
+  for (var i = 0; i < APP.data.length; i++) {
+    var ex = APP.data[i].ex;
+    if (list.indexOf(ex) === -1) list.push(ex);
+  }
+  return list.sort();
+}
