@@ -5,16 +5,13 @@ import {
   signInWithRedirect,
   getRedirectResult,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { syncData } from './sync.js';
 
 var googleProvider = new GoogleAuthProvider();
-
-// iOS PWA ajouté à l'écran d'accueil
-function isIOSStandalone() {
-  return window.navigator.standalone === true;
-}
 
 export var Auth = {
   user: null,
@@ -22,30 +19,18 @@ export var Auth = {
   init: function() {
     var self = this;
     var statusEl = document.getElementById('sync-status');
+    
+    // 1. Persistance forcée en LOCAL pour iOS
+    setPersistence(auth, browserLocalPersistence);
 
-    // 1. Affichage immédiat depuis le cache local (évite le flash de déconnexion)
+    // 2. Charger le cache immédiatement pour l'UI
     var cachedUser = JSON.parse(localStorage.getItem('mrpg_auth_cache') || 'null');
     if (cachedUser) {
       this.user = cachedUser;
       this.updateUI(cachedUser);
-      if (statusEl) statusEl.textContent = "⏳ Vérification...";
     }
 
-    // 2. Résultat du redirect OAuth (iOS standalone uniquement)
-    // Avec indexedDBLocalPersistence, l'état survive aux navigations cross-origin.
-    getRedirectResult(auth).then(function(result) {
-      if (result && result.user) {
-        // La connexion via redirect vient de réussir — onAuthStateChanged s'en charge
-        console.log('[Auth] Redirect réussi:', result.user.uid);
-      }
-    }).catch(function(error) {
-      // missing-initial-state ne peut plus arriver avec IndexedDB
-      if (error.code !== 'auth/no-current-user') {
-        console.warn('[Auth] Redirect error:', error.code);
-      }
-    });
-
-    // 3. Écouteur d'état (source de vérité)
+    // 3. Écouteur global (Source de vérité)
     onAuthStateChanged(auth, function(user) {
       if (user) {
         if (statusEl) statusEl.textContent = "✅ Connecté";
@@ -62,34 +47,47 @@ export var Auth = {
         if (statusEl) statusEl.textContent = "🌐 Hors ligne";
       }
     });
+
+    // 4. Gestion du retour (Spécifique iOS PWA)
+    getRedirectResult(auth).then(function(result) {
+      if (result && result.user) {
+        self.user = result.user;
+        self.updateUI(result.user);
+      }
+    }).catch(function(error) {
+      // Si l'erreur de "state" arrive, on ne bloque pas, l'écouteur onAuthStateChanged prendra le relais
+      console.log("Info redirection:", error.code);
+    });
   },
 
   login: function() {
+    var self = this;
     var loginBtn = document.getElementById('auth-login-btn');
+    
+    // Détection iPhone Standalone
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    var isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+
     if (loginBtn) {
       loginBtn.disabled = true;
       loginBtn.innerHTML = "🔄 Connexion...";
     }
 
-    if (isIOSStandalone()) {
-      // iOS standalone : signInWithPopup échoue (réseau bloqué dans le WebView).
-      // signInWithRedirect navigue vers Google dans le même WebView.
-      // Avec indexedDBLocalPersistence, l'état OAuth survit à la navigation
-      // cross-origin → plus d'erreur missing-initial-state.
+    if (isIOS && isStandalone) {
+      // Sur iPhone PWA, le Popup est paradoxalement plus stable car il ne quitte pas l'app
+      signInWithPopup(auth, googleProvider).then(function(result) {
+        if (result.user) {
+          self.user = result.user;
+          self.updateUI(result.user);
+        }
+      }).catch(function(error) {
+        // Si le popup est bloqué, on tente quand même la redirection en dernier recours
+        console.warn("Popup bloqué, tentative redirection...");
+        signInWithRedirect(auth, googleProvider);
+      });
+    } else {
       signInWithRedirect(auth, googleProvider);
-      return;
     }
-
-    // Safari normal, Chrome, desktop : popup directe
-    signInWithPopup(auth, googleProvider).catch(function(error) {
-      if (error.code !== 'auth/popup-closed-by-user' && error.code !== 'auth/cancelled-popup-request') {
-        alert("Erreur Login : " + error.code);
-      }
-      if (loginBtn) {
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = "Connexion Google";
-      }
-    });
   },
 
   logout: function() {
@@ -110,15 +108,18 @@ export var Auth = {
       if (userProfile) {
         userProfile.style.display = 'flex';
         var nameEl = document.getElementById('auth-user-name');
-        if (nameEl) nameEl.textContent = (user.displayName || "Guerrier").split(' ')[0];
+        if (nameEl) {
+          var fullName = user.displayName || "Guerrier";
+          nameEl.textContent = fullName.split(' ')[0];
+        }
         var photoEl = document.getElementById('auth-user-photo');
         if (photoEl && user.photoURL) photoEl.src = user.photoURL;
       }
     } else {
+      if (loginBtn) loginBtn.style.display = 'block';
       if (loginBtn) {
-        loginBtn.style.display = 'block';
         loginBtn.disabled = false;
-        loginBtn.innerHTML = "Connexion Google";
+        loginBtn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:16px"> Connexion Google';
       }
       if (userProfile) userProfile.style.display = 'none';
     }
