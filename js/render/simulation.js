@@ -468,14 +468,16 @@ function renderCycleGrid() {
   var totalDays = _cycleDays(CYCLE_EDIT.duration);
   var grid = $('cycle-grid');
 
+  // En-tête J1 → J7 (indépendant du jour de la semaine réel)
   var html = '<div class="plan-grid-header">';
-  for (var j = 0; j < 7; j++) html += '<div class="plan-grid-hcell">' + _SHORT_DAY[j] + '</div>';
+  for (var j = 1; j <= 7; j++) html += '<div class="plan-grid-hcell">J' + j + '</div>';
   html += '</div><div class="plan-grid-body">';
 
   for (var i = 0; i < totalDays; i++) {
-    var dow     = i % 7;
+    var dow     = i % 7;           // 0-6 dans la semaine
     var weekNum = Math.floor(i / 7) + 1;
-    var label   = (totalDays > 7) ? 'S' + weekNum + ' · ' + _SHORT_DAY[dow] : _SHORT_DAY[dow];
+    var jNum    = dow + 1;         // J1 … J7
+    var label   = (totalDays > 7) ? 'S' + weekNum + '·J' + jNum : 'J' + jNum;
 
     var slots = [];
     for (var k = 0; k < CYCLE_EDIT.sessions.length; k++) {
