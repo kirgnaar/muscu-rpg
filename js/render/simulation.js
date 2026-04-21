@@ -463,31 +463,27 @@ function deleteCycle(cycleId) {
   renderCycleList();
 }
 
-// ── Grille d'édition — colonnes = Semaines, lignes = Jours ───────────────
+// ── Grille d'édition — lignes = Semaines, colonnes = J1…J7 ──────────────
 function renderCycleGrid() {
   var totalDays = _cycleDays(CYCLE_EDIT.duration);
-  var numWeeks  = totalDays / 7; // toujours entier (7, 14, 35, 28, 84)
+  var numWeeks  = totalDays / 7;
   var grid      = $('cycle-grid');
 
-  // Conteneur scrollable si beaucoup de semaines
-  var cols = '28px repeat(' + numWeeks + ', 1fr)';
-  var html = '<div style="display:grid;grid-template-columns:' + cols + ';gap:3px;overflow-x:auto">';
-
-  // ── Ligne d'en-tête : coin vide + S1…Sn ─────────────────────────────
+  // En-tête : coin vide + J1…J7
+  var html = '<div style="display:grid;grid-template-columns:28px repeat(7,1fr);gap:3px">';
   html += '<div></div>';
-  for (var s = 1; s <= numWeeks; s++) {
-    html += '<div style="text-align:center;font-size:11px;font-weight:800;color:var(--accent);padding:4px 2px;border-bottom:1px solid var(--border)">S' + s + '</div>';
+  for (var j = 1; j <= 7; j++) {
+    html += '<div style="text-align:center;font-size:11px;font-weight:800;color:var(--accent);padding:4px 2px;border-bottom:1px solid var(--border)">J' + j + '</div>';
   }
 
-  // ── Lignes J1…J7 ─────────────────────────────────────────────────────
-  for (var j = 1; j <= 7; j++) {
-    // Label du jour
-    html += '<div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text2);border-right:1px solid var(--border);padding-right:3px">J' + j + '</div>';
+  // Une ligne par semaine
+  for (var s = 1; s <= numWeeks; s++) {
+    // Label Sn
+    html += '<div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text2);border-right:1px solid var(--border)">S' + s + '</div>';
 
-    for (var si = 1; si <= numWeeks; si++) {
-      var dayOffset = (si - 1) * 7 + (j - 1);
+    for (var j = 1; j <= 7; j++) {
+      var dayOffset = (s - 1) * 7 + (j - 1);
 
-      // Séances posées sur ce jour
       var slots = [];
       for (var k = 0; k < CYCLE_EDIT.sessions.length; k++) {
         if (CYCLE_EDIT.sessions[k].dayOffset === dayOffset) slots.push({ idx: k, s: CYCLE_EDIT.sessions[k] });
