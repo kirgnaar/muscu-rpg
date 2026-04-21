@@ -28,7 +28,220 @@ var SIM = {
   dbKey: 'mrpg_blocks'
 };
 
+// ── Séances par défaut — Programme PP Judo ────────────────────────────────
+var DEFAULT_BLOCKS = [
+  // ── JAMBES (Lundi — hors cycle) ─────────────────────────────────────────
+  {
+    id: 1000, name: '🦵 Jambes (Lundi)', type: 'Force',
+    exercises: [
+      { ex: 'Squat barre',                  ser: 4, rep: 6,  pds: 80,  grp: 'Quadriceps' },
+      { ex: 'Soulevé de terre roumain',      ser: 4, rep: 6,  pds: 70,  grp: 'Ischio-jambiers' },
+      { ex: 'Fentes arrière haltères',       ser: 4, rep: 10, pds: 20,  grp: 'Fessiers' },
+      { ex: 'Leg extension machine',         ser: 2, rep: 12, pds: 50,  grp: 'Quadriceps' },
+      { ex: 'Leg curl couché machine',       ser: 2, rep: 12, pds: 40,  grp: 'Ischio-jambiers' }
+    ]
+  },
+  // ── MUSCU A (Mercredi S1 — 8 reps) ──────────────────────────────────────
+  {
+    id: 1001, name: '💪 Muscu A — Haut (Mer. S1)', type: 'Hypertrophie',
+    exercises: [
+      { ex: 'Développé machine',             ser: 4, rep: 8,  pds: 60,  grp: 'Pectoraux' },
+      { ex: 'Presse épaule machine',         ser: 4, rep: 8,  pds: 40,  grp: 'Épaules' },
+      { ex: 'Dips',                          ser: 4, rep: 10, pds: 0,   grp: 'Triceps' },
+      { ex: 'Développé couché haltères',     ser: 4, rep: 8,  pds: 25,  grp: 'Pectoraux' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 8,  pds: 10,  grp: 'Triceps' },
+      { ex: 'Pompes',                        ser: 4, rep: 12, pds: 0,   grp: 'Pectoraux' },
+      { ex: 'Traction haute kimono isométrique', ser: 1, rep: 30, pds: 0, grp: 'Abdominaux' }
+    ]
+  },
+  // ── MUSCU B (Mercredi S2 — 9 reps) ──────────────────────────────────────
+  {
+    id: 1002, name: '💪 Muscu B — Haut (Mer. S2)', type: 'Hypertrophie',
+    exercises: [
+      { ex: 'Développé machine',             ser: 4, rep: 9,  pds: 60,  grp: 'Pectoraux' },
+      { ex: 'Presse épaule machine',         ser: 4, rep: 9,  pds: 40,  grp: 'Épaules' },
+      { ex: 'Dips',                          ser: 4, rep: 12, pds: 0,   grp: 'Triceps' },
+      { ex: 'Développé couché haltères',     ser: 4, rep: 9,  pds: 25,  grp: 'Pectoraux' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 9,  pds: 10,  grp: 'Triceps' },
+      { ex: 'Pompes',                        ser: 4, rep: 14, pds: 0,   grp: 'Pectoraux' },
+      { ex: 'Traction haute kimono isométrique', ser: 1, rep: 30, pds: 0, grp: 'Abdominaux' }
+    ]
+  },
+  // ── MUSCU C (Mercredi S3 — 10 reps) ─────────────────────────────────────
+  {
+    id: 1003, name: '💪 Muscu C — Haut (Mer. S3)', type: 'Hypertrophie',
+    exercises: [
+      { ex: 'Développé machine',             ser: 4, rep: 10, pds: 60,  grp: 'Pectoraux' },
+      { ex: 'Presse épaule machine',         ser: 4, rep: 10, pds: 40,  grp: 'Épaules' },
+      { ex: 'Dips',                          ser: 4, rep: 14, pds: 0,   grp: 'Triceps' },
+      { ex: 'Développé couché haltères',     ser: 4, rep: 10, pds: 25,  grp: 'Pectoraux' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 10, pds: 10,  grp: 'Triceps' },
+      { ex: 'Pompes',                        ser: 4, rep: 16, pds: 0,   grp: 'Pectoraux' },
+      { ex: 'Traction haute kimono isométrique', ser: 1, rep: 30, pds: 0, grp: 'Abdominaux' }
+    ]
+  },
+  // ── MUSCU D (Mercredi S4 — 11 reps) ─────────────────────────────────────
+  {
+    id: 1004, name: '💪 Muscu D — Haut (Mer. S4)', type: 'Hypertrophie',
+    exercises: [
+      { ex: 'Développé machine',             ser: 4, rep: 11, pds: 60,  grp: 'Pectoraux' },
+      { ex: 'Presse épaule machine',         ser: 4, rep: 11, pds: 40,  grp: 'Épaules' },
+      { ex: 'Dips',                          ser: 4, rep: 16, pds: 0,   grp: 'Triceps' },
+      { ex: 'Développé couché haltères',     ser: 4, rep: 11, pds: 25,  grp: 'Pectoraux' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 11, pds: 10,  grp: 'Triceps' },
+      { ex: 'Pompes',                        ser: 4, rep: 18, pds: 0,   grp: 'Pectoraux' },
+      { ex: 'Traction haute kimono isométrique', ser: 1, rep: 30, pds: 0, grp: 'Abdominaux' }
+    ]
+  },
+  // ── MUSCU E (Mercredi S5 — 12 reps) ─────────────────────────────────────
+  {
+    id: 1005, name: '💪 Muscu E — Haut (Mer. S5)', type: 'Hypertrophie',
+    exercises: [
+      { ex: 'Développé machine',             ser: 4, rep: 12, pds: 60,  grp: 'Pectoraux' },
+      { ex: 'Presse épaule machine',         ser: 4, rep: 12, pds: 40,  grp: 'Épaules' },
+      { ex: 'Dips',                          ser: 4, rep: 16, pds: 0,   grp: 'Triceps' },
+      { ex: 'Développé couché haltères',     ser: 4, rep: 12, pds: 25,  grp: 'Pectoraux' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 12, pds: 10,  grp: 'Triceps' },
+      { ex: 'Pompes',                        ser: 4, rep: 18, pds: 0,   grp: 'Pectoraux' },
+      { ex: 'Traction haute kimono isométrique', ser: 1, rep: 30, pds: 0, grp: 'Abdominaux' }
+    ]
+  },
+  // ── MUSCU 1 (Dimanche S1 — Blocs Pousser + Tirer) ───────────────────────
+  {
+    id: 1006, name: '🏋️ Muscu 1 — Blocs (Dim. S1)', type: 'Hypertrophie',
+    exercises: [
+      // Bloc Pousser
+      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 70,  grp: 'Pectoraux' },
+      { ex: 'Développé militaire barre',     ser: 4, rep: 10, pds: 40,  grp: 'Épaules' },
+      { ex: 'Dips',                          ser: 4, rep: 10, pds: 0,   grp: 'Triceps' },
+      // Bloc Tirer
+      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
+      { ex: 'Rowing barre',                  ser: 4, rep: 10, pds: 60,  grp: 'Dorsal' },
+      { ex: 'Tractions pronation',           ser: 4, rep: 8,  pds: 0,   grp: 'Dorsal' },
+      // Finisher gainage
+      { ex: 'Traction haute kimono isométrique', ser: 3, rep: 30, pds: 0, grp: 'Abdominaux' },
+      { ex: 'Gainage face (planche)',        ser: 3, rep: 60, pds: 0,   grp: 'Abdominaux' },
+      { ex: 'Extensions lombaires banc romain', ser: 3, rep: 60, pds: 0, grp: 'Lombaires' },
+      { ex: 'Gainage latéral',               ser: 3, rep: 60, pds: 0,   grp: 'Abdominaux' }
+    ]
+  },
+  // ── MUSCU 2 (Dimanche S2) ────────────────────────────────────────────────
+  {
+    id: 1007, name: '🏋️ Muscu 2 — Blocs (Dim. S2)', type: 'Hypertrophie',
+    exercises: [
+      // Bloc Pousser
+      { ex: 'Développé machine',             ser: 4, rep: 10, pds: 60,  grp: 'Pectoraux' },
+      { ex: 'Pull over haltère',             ser: 4, rep: 10, pds: 20,  grp: 'Dorsal' },
+      { ex: 'Barre explosive (power clean)', ser: 4, rep: 10, pds: 40,  grp: 'Full body' },
+      // Bloc Tirer
+      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
+      { ex: 'Tirage allongé poulie basse',   ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
+      { ex: 'Traction haute kimono isométrique', ser: 4, rep: 6, pds: 0, grp: 'Dorsal' },
+      // Finisher
+      { ex: 'Traction haute kimono isométrique', ser: 3, rep: 30, pds: 0, grp: 'Abdominaux' },
+      { ex: 'Gainage face (planche)',        ser: 3, rep: 60, pds: 0,   grp: 'Abdominaux' },
+      { ex: 'Extensions lombaires banc romain', ser: 3, rep: 60, pds: 0, grp: 'Lombaires' },
+      { ex: 'Gainage latéral',               ser: 3, rep: 60, pds: 0,   grp: 'Abdominaux' }
+    ]
+  },
+  // ── MUSCU 3 (Dimanche S3) ────────────────────────────────────────────────
+  {
+    id: 1008, name: '🏋️ Muscu 3 — Blocs (Dim. S3)', type: 'Hypertrophie',
+    exercises: [
+      // Bloc Pousser
+      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 70,  grp: 'Pectoraux' },
+      { ex: 'Développé militaire barre',     ser: 4, rep: 10, pds: 40,  grp: 'Épaules' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 10, pds: 10,  grp: 'Triceps' },
+      { ex: 'Dips',                          ser: 4, rep: 10, pds: 0,   grp: 'Triceps' },
+      // Bloc Tirer
+      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
+      { ex: 'Rowing barre',                  ser: 4, rep: 10, pds: 60,  grp: 'Dorsal' },
+      { ex: 'Biceps poulie 1 bras',          ser: 4, rep: 10, pds: 10,  grp: 'Biceps' },
+      { ex: 'Tractions pronation',           ser: 4, rep: 8,  pds: 0,   grp: 'Dorsal' },
+      // Finisher (35s)
+      { ex: 'Traction haute kimono isométrique', ser: 3, rep: 35, pds: 0, grp: 'Abdominaux' },
+      { ex: 'Gainage face (planche)',        ser: 3, rep: 60, pds: 0,   grp: 'Abdominaux' },
+      { ex: 'Extensions lombaires banc romain', ser: 3, rep: 60, pds: 0, grp: 'Lombaires' },
+      { ex: 'Gainage latéral',               ser: 3, rep: 60, pds: 0,   grp: 'Abdominaux' }
+    ]
+  },
+  // ── MUSCU 4 (Dimanche S4) ────────────────────────────────────────────────
+  {
+    id: 1009, name: '🏋️ Muscu 4 — Blocs (Dim. S4)', type: 'Hypertrophie',
+    exercises: [
+      // Bloc Pousser
+      { ex: 'Développé machine',             ser: 4, rep: 10, pds: 60,  grp: 'Pectoraux' },
+      { ex: 'Barre explosive (power clean)', ser: 4, rep: 10, pds: 40,  grp: 'Full body' },
+      { ex: 'Pompes',                        ser: 4, rep: 20, pds: 0,   grp: 'Pectoraux' },
+      // Bloc Tirer
+      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
+      { ex: 'Tirage allongé poulie basse',   ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
+      { ex: 'Traction haute kimono isométrique', ser: 4, rep: 6, pds: 0, grp: 'Dorsal' },
+      // Finisher (35s)
+      { ex: 'Traction haute kimono isométrique', ser: 3, rep: 35, pds: 0, grp: 'Abdominaux' },
+      { ex: 'Gainage face (planche)',        ser: 3, rep: 60, pds: 0,   grp: 'Abdominaux' },
+      { ex: 'Extensions lombaires banc romain', ser: 3, rep: 60, pds: 0, grp: 'Lombaires' },
+      { ex: 'Gainage latéral',               ser: 3, rep: 60, pds: 0,   grp: 'Abdominaux' }
+    ]
+  },
+  // ── MUSCU 5 (Dimanche S5) ────────────────────────────────────────────────
+  {
+    id: 1010, name: '🏋️ Muscu 5 — Blocs (Dim. S5)', type: 'Hypertrophie',
+    exercises: [
+      // Bloc Pousser
+      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 70,  grp: 'Pectoraux' },
+      { ex: 'Développé militaire barre',     ser: 4, rep: 10, pds: 40,  grp: 'Épaules' },
+      { ex: 'Dips',                          ser: 4, rep: 10, pds: 0,   grp: 'Triceps' },
+      // Bloc Tirer
+      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
+      { ex: 'Rowing barre',                  ser: 4, rep: 10, pds: 60,  grp: 'Dorsal' },
+      { ex: 'Tractions pronation',           ser: 4, rep: 8,  pds: 0,   grp: 'Dorsal' },
+      // Finisher (40s)
+      { ex: 'Traction haute kimono isométrique', ser: 3, rep: 40, pds: 0, grp: 'Abdominaux' },
+      { ex: 'Gainage face (planche)',        ser: 3, rep: 60, pds: 0,   grp: 'Abdominaux' },
+      { ex: 'Extensions lombaires banc romain', ser: 3, rep: 60, pds: 0, grp: 'Lombaires' },
+      { ex: 'Gainage latéral',               ser: 3, rep: 60, pds: 0,   grp: 'Abdominaux' }
+    ]
+  },
+  // ── FULL BODY (Vendredi — hors cycle) ────────────────────────────────────
+  {
+    id: 1011, name: '⚡ Full Body (Vendredi)', type: 'Hypertrophie',
+    exercises: [
+      // Principaux 4×10
+      { ex: 'Squat barre',                   ser: 4, rep: 10, pds: 70,  grp: 'Quadriceps' },
+      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 70,  grp: 'Pectoraux' },
+      { ex: 'Soulevé de terre conventionnel',ser: 4, rep: 10, pds: 80,  grp: 'Ischio-jambiers' },
+      // Secondaires 3×12
+      { ex: 'Développé militaire barre',     ser: 3, rep: 12, pds: 40,  grp: 'Épaules' },
+      { ex: 'Rowing barre',                  ser: 3, rep: 12, pds: 60,  grp: 'Dorsal' },
+      { ex: 'Leg press 45°',                 ser: 3, rep: 12, pds: 100, grp: 'Quadriceps' },
+      // Isolation 2×16
+      { ex: 'Extensions triceps poulie haute', ser: 2, rep: 16, pds: 15, grp: 'Triceps' },
+      { ex: 'Rowing vertical / Upright row', ser: 2, rep: 16, pds: 20,  grp: 'Épaules' },
+      { ex: 'Leg extension machine',         ser: 2, rep: 16, pds: 40,  grp: 'Quadriceps' },
+      { ex: 'Leg curl couché machine',       ser: 2, rep: 16, pds: 35,  grp: 'Ischio-jambiers' }
+    ]
+  }
+];
+
 // ── Init ──────────────────────────────────────────────────────────────────
+function loadBlocks() {
+  try {
+    var raw = localStorage.getItem(SIM.dbKey);
+    var blocks = raw ? JSON.parse(raw) : [];
+    // Si la bibliothèque est vide, on charge les séances par défaut du programme PP Judo
+    if (!blocks || blocks.length === 0) {
+      blocks = JSON.parse(JSON.stringify(DEFAULT_BLOCKS)); // deep copy
+      localStorage.setItem(SIM.dbKey, JSON.stringify(blocks));
+    }
+    return blocks;
+  } catch(e) { return JSON.parse(JSON.stringify(DEFAULT_BLOCKS)); }
+}
+
+function saveBlocks() {
+  localStorage.setItem(SIM.dbKey, JSON.stringify(SIM.blocks));
+}
+
 function initSimulation() {
   PLAN.load();
   SIM.blocks = loadBlocks();
@@ -348,12 +561,10 @@ function _logPlanEntry(entryId) {
 }
 
 // ── Bibliothèque ──────────────────────────────────────────────────────────
-function loadBlocks() {
-  var raw = localStorage.getItem(SIM.dbKey);
-  return raw ? JSON.parse(raw) : [];
-}
-
-function saveBlocks() {
+// (loadBlocks et saveBlocks définis plus haut — saveBlocks enrichi avec sync cloud)
+// On surcharge saveBlocks pour ajouter la sync cloud
+var _saveBlocksBase = saveBlocks;
+saveBlocks = function() {
   localStorage.setItem(SIM.dbKey, JSON.stringify(SIM.blocks));
   if (window.Auth && window.Auth.user && window.pushToCloud) {
     window.pushToCloud(window.Auth.user.uid, {
@@ -362,7 +573,7 @@ function saveBlocks() {
       blocks: SIM.blocks
     });
   }
-}
+};
 
 function handleNewBlock() {
   SIM.currentBlock = { id: Date.now(), name: 'Nouveau programme', type: 'Hypertrophie', exercises: [] };
