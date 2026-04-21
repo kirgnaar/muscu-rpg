@@ -463,46 +463,57 @@ function deleteCycle(cycleId) {
   renderCycleList();
 }
 
-// ── Grille d'édition ─────────────────────────────────────────────────────
+// ── Grille d'édition — colonnes = Semaines, lignes = Jours ───────────────
 function renderCycleGrid() {
   var totalDays = _cycleDays(CYCLE_EDIT.duration);
-  var grid = $('cycle-grid');
+  var numWeeks  = totalDays / 7; // toujours entier (7, 14, 35, 28, 84)
+  var grid      = $('cycle-grid');
 
-  // En-tête J1 → J7 (indépendant du jour de la semaine réel)
-  var html = '<div class="plan-grid-header">';
-  for (var j = 1; j <= 7; j++) html += '<div class="plan-grid-hcell">J' + j + '</div>';
-  html += '</div><div class="plan-grid-body">';
+  // Conteneur scrollable si beaucoup de semaines
+  var cols = '28px repeat(' + numWeeks + ', 1fr)';
+  var html = '<div style="display:grid;grid-template-columns:' + cols + ';gap:3px;overflow-x:auto">';
 
-  for (var i = 0; i < totalDays; i++) {
-    var dow     = i % 7;           // 0-6 dans la semaine
-    var weekNum = Math.floor(i / 7) + 1;
-    var jNum    = dow + 1;         // J1 … J7
-    var label   = (totalDays > 7) ? 'S' + weekNum + '·J' + jNum : 'J' + jNum;
-
-    var slots = [];
-    for (var k = 0; k < CYCLE_EDIT.sessions.length; k++) {
-      if (CYCLE_EDIT.sessions[k].dayOffset === i) slots.push({ idx: k, s: CYCLE_EDIT.sessions[k] });
-    }
-
-    var badgesHtml = '';
-    for (var s = 0; s < slots.length; s++) {
-      var block = _getBlockById(slots[s].s.blockId);
-      var bname = block ? block.name : '?';
-      var short = bname.length > 12 ? bname.substring(0, 11) + '…' : bname;
-      badgesHtml += '<div class="plan-session-badge" style="font-size:9px;padding:2px 5px;margin-top:2px;display:flex;justify-content:space-between;align-items:center">' +
-        '<span>' + short + '</span>' +
-        '<span class="cycle-slot-del" data-idx="' + slots[s].idx + '" style="color:#ef4444;cursor:pointer;margin-left:4px;font-size:11px">✕</span>' +
-        '</div>';
-    }
-
-    html += '<div class="plan-day-cell" data-dayoffset="' + i + '">' +
-      '<div class="plan-day-header"><span class="plan-day-num" style="font-size:10px">' + label + '</span>' +
-      '<button class="cycle-add-btn plan-add-btn" data-dayoffset="' + i + '">+</button></div>' +
-      badgesHtml + '</div>';
+  // ── Ligne d'en-tête : coin vide + S1…Sn ─────────────────────────────
+  html += '<div></div>';
+  for (var s = 1; s <= numWeeks; s++) {
+    html += '<div style="text-align:center;font-size:11px;font-weight:800;color:var(--accent);padding:4px 2px;border-bottom:1px solid var(--border)">S' + s + '</div>';
   }
 
-  var rem = totalDays % 7;
-  if (rem !== 0) for (var t = 0; t < (7 - rem); t++) html += '<div class="plan-day-cell plan-day-empty"></div>';
+  // ── Lignes J1…J7 ─────────────────────────────────────────────────────
+  for (var j = 1; j <= 7; j++) {
+    // Label du jour
+    html += '<div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text2);border-right:1px solid var(--border);padding-right:3px">J' + j + '</div>';
+
+    for (var si = 1; si <= numWeeks; si++) {
+      var dayOffset = (si - 1) * 7 + (j - 1);
+
+      // Séances posées sur ce jour
+      var slots = [];
+      for (var k = 0; k < CYCLE_EDIT.sessions.length; k++) {
+        if (CYCLE_EDIT.sessions[k].dayOffset === dayOffset) slots.push({ idx: k, s: CYCLE_EDIT.sessions[k] });
+      }
+
+      var badgesHtml = '';
+      for (var b = 0; b < slots.length; b++) {
+        var block = _getBlockById(slots[b].s.blockId);
+        var bname = block ? block.name : '?';
+        var short = bname.length > 9 ? bname.substring(0, 8) + '…' : bname;
+        badgesHtml +=
+          '<div class="plan-session-badge" style="font-size:8px;padding:1px 3px;margin-top:2px;display:flex;justify-content:space-between;align-items:center;gap:2px">' +
+            '<span style="overflow:hidden;white-space:nowrap">' + short + '</span>' +
+            '<span class="cycle-slot-del" data-idx="' + slots[b].idx + '" style="color:#ef4444;cursor:pointer;flex-shrink:0;font-size:10px;line-height:1">✕</span>' +
+          '</div>';
+      }
+
+      html +=
+        '<div class="plan-day-cell" data-dayoffset="' + dayOffset + '" style="min-height:38px;padding:3px 3px 2px">' +
+          '<div style="display:flex;justify-content:flex-end;margin-bottom:1px">' +
+            '<button class="cycle-add-btn plan-add-btn" data-dayoffset="' + dayOffset + '" style="font-size:10px;padding:0 4px;min-width:16px;height:16px;line-height:16px">+</button>' +
+          '</div>' +
+          badgesHtml +
+        '</div>';
+    }
+  }
 
   html += '</div>';
   grid.innerHTML = html;
