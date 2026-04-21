@@ -87,7 +87,7 @@ var SIM = {
 var DEFAULT_BLOCKS = [
   // ── JAMBES (Lundi — hors cycle) ─────────────────────────────────────────
   {
-    id: 1000, name: '🦵 Jambes (Lundi)', type: 'Force',
+    id: 1000, name: '🦵 Jambes', type: 'Force',
     exercises: [
       { ex: 'Squat barre',                  ser: 4, rep: 6,  pds: 80,  grp: 'Quadriceps' },
       { ex: 'Soulevé de terre roumain',      ser: 4, rep: 6,  pds: 70,  grp: 'Ischio-jambiers' },
@@ -98,7 +98,7 @@ var DEFAULT_BLOCKS = [
   },
   // ── MUSCU A (Mercredi S1 — 8 reps) ──────────────────────────────────────
   {
-    id: 1001, name: '💪 Muscu A — Haut (Mer. S1)', type: 'Hypertrophie',
+    id: 1001, name: '💪 Muscu A — Haut du corps', type: 'Hypertrophie',
     exercises: [
       { ex: 'Développé machine',             ser: 4, rep: 8,  pds: 60,  grp: 'Pectoraux' },
       { ex: 'Presse épaule machine',         ser: 4, rep: 8,  pds: 40,  grp: 'Épaules' },
@@ -111,7 +111,7 @@ var DEFAULT_BLOCKS = [
   },
   // ── MUSCU B (Mercredi S2 — 9 reps) ──────────────────────────────────────
   {
-    id: 1002, name: '💪 Muscu B — Haut (Mer. S2)', type: 'Hypertrophie',
+    id: 1002, name: '💪 Muscu B — Haut du corps', type: 'Hypertrophie',
     exercises: [
       { ex: 'Développé machine',             ser: 4, rep: 9,  pds: 60,  grp: 'Pectoraux' },
       { ex: 'Presse épaule machine',         ser: 4, rep: 9,  pds: 40,  grp: 'Épaules' },
@@ -124,7 +124,7 @@ var DEFAULT_BLOCKS = [
   },
   // ── MUSCU C (Mercredi S3 — 10 reps) ─────────────────────────────────────
   {
-    id: 1003, name: '💪 Muscu C — Haut (Mer. S3)', type: 'Hypertrophie',
+    id: 1003, name: '💪 Muscu C — Haut du corps', type: 'Hypertrophie',
     exercises: [
       { ex: 'Développé machine',             ser: 4, rep: 10, pds: 60,  grp: 'Pectoraux' },
       { ex: 'Presse épaule machine',         ser: 4, rep: 10, pds: 40,  grp: 'Épaules' },
@@ -137,7 +137,7 @@ var DEFAULT_BLOCKS = [
   },
   // ── MUSCU D (Mercredi S4 — 11 reps) ─────────────────────────────────────
   {
-    id: 1004, name: '💪 Muscu D — Haut (Mer. S4)', type: 'Hypertrophie',
+    id: 1004, name: '💪 Muscu D — Haut du corps', type: 'Hypertrophie',
     exercises: [
       { ex: 'Développé machine',             ser: 4, rep: 11, pds: 60,  grp: 'Pectoraux' },
       { ex: 'Presse épaule machine',         ser: 4, rep: 11, pds: 40,  grp: 'Épaules' },
@@ -150,7 +150,7 @@ var DEFAULT_BLOCKS = [
   },
   // ── MUSCU E (Mercredi S5 — 12 reps) ─────────────────────────────────────
   {
-    id: 1005, name: '💪 Muscu E — Haut (Mer. S5)', type: 'Hypertrophie',
+    id: 1005, name: '💪 Muscu E — Haut du corps', type: 'Hypertrophie',
     exercises: [
       { ex: 'Développé machine',             ser: 4, rep: 12, pds: 60,  grp: 'Pectoraux' },
       { ex: 'Presse épaule machine',         ser: 4, rep: 12, pds: 40,  grp: 'Épaules' },
@@ -163,7 +163,7 @@ var DEFAULT_BLOCKS = [
   },
   // ── MUSCU 1 (Dimanche S1 — Blocs Pousser + Tirer) ───────────────────────
   {
-    id: 1006, name: '🏋️ Muscu 1 — Blocs (Dim. S1)', type: 'Hypertrophie',
+    id: 1006, name: '🏋️ Muscu 1 — Blocs pousser/tirer', type: 'Hypertrophie',
     exercises: [
       // Bloc Pousser
       { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 70,  grp: 'Pectoraux' },
@@ -182,7 +182,7 @@ var DEFAULT_BLOCKS = [
   },
   // ── MUSCU 2 (Dimanche S2) ────────────────────────────────────────────────
   {
-    id: 1007, name: '🏋️ Muscu 2 — Blocs (Dim. S2)', type: 'Hypertrophie',
+    id: 1007, name: '🏋️ Muscu 2 — Blocs pousser/tirer', type: 'Hypertrophie',
     exercises: [
       // Bloc Pousser
       { ex: 'Développé machine',             ser: 4, rep: 10, pds: 60,  grp: 'Pectoraux' },
@@ -201,7 +201,7 @@ var DEFAULT_BLOCKS = [
   },
   // ── MUSCU 3 (Dimanche S3) ────────────────────────────────────────────────
   {
-    id: 1008, name: '🏋️ Muscu 3 — Blocs (Dim. S3)', type: 'Hypertrophie',
+    id: 1008, name: '🏋️ Muscu 3 — Blocs pousser/tirer', type: 'Hypertrophie',
     exercises: [
       // Bloc Pousser
       { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 70,  grp: 'Pectoraux' },
@@ -222,7 +222,7 @@ var DEFAULT_BLOCKS = [
   },
   // ── MUSCU 4 (Dimanche S4) ────────────────────────────────────────────────
   {
-    id: 1009, name: '🏋️ Muscu 4 — Blocs (Dim. S4)', type: 'Hypertrophie',
+    id: 1009, name: '🏋️ Muscu 4 — Blocs pousser/tirer', type: 'Hypertrophie',
     exercises: [
       // Bloc Pousser
       { ex: 'Développé machine',             ser: 4, rep: 10, pds: 60,  grp: 'Pectoraux' },
@@ -241,7 +241,7 @@ var DEFAULT_BLOCKS = [
   },
   // ── MUSCU 5 (Dimanche S5) ────────────────────────────────────────────────
   {
-    id: 1010, name: '🏋️ Muscu 5 — Blocs (Dim. S5)', type: 'Hypertrophie',
+    id: 1010, name: '🏋️ Muscu 5 — Blocs pousser/tirer', type: 'Hypertrophie',
     exercises: [
       // Bloc Pousser
       { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 70,  grp: 'Pectoraux' },
@@ -260,7 +260,7 @@ var DEFAULT_BLOCKS = [
   },
   // ── FULL BODY (Vendredi — hors cycle) ────────────────────────────────────
   {
-    id: 1011, name: '⚡ Full Body (Vendredi)', type: 'Hypertrophie',
+    id: 1011, name: '⚡ Full Body', type: 'Hypertrophie',
     exercises: [
       // Principaux 4×10
       { ex: 'Squat barre',                   ser: 4, rep: 10, pds: 70,  grp: 'Quadriceps' },
