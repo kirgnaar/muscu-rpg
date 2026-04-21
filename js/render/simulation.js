@@ -303,6 +303,43 @@ CYCLES.load = function() {
       }
     } catch(e) {}
   }
+  // Cycle PP Judo par défaut si liste vide
+  if (CYCLES.list.length === 0) {
+    CYCLES.list.push({
+      id: 1,
+      name: '🥋 PP Judo — 5 semaines',
+      duration: '5weeks',
+      repeat: 1,
+      sessions: [
+        // ── S1 (jours 0-6) ──────────────────────────────────────────────
+        { dayOffset: 0,  blockId: 1000 }, // Lun — Jambes
+        { dayOffset: 2,  blockId: 1001 }, // Mer — Muscu A
+        { dayOffset: 4,  blockId: 1011 }, // Ven — Full Body
+        { dayOffset: 6,  blockId: 1006 }, // Dim — Muscu 1
+        // ── S2 (jours 7-13) ─────────────────────────────────────────────
+        { dayOffset: 7,  blockId: 1000 }, // Lun — Jambes
+        { dayOffset: 9,  blockId: 1002 }, // Mer — Muscu B
+        { dayOffset: 11, blockId: 1011 }, // Ven — Full Body
+        { dayOffset: 13, blockId: 1007 }, // Dim — Muscu 2
+        // ── S3 (jours 14-20) ────────────────────────────────────────────
+        { dayOffset: 14, blockId: 1000 }, // Lun — Jambes
+        { dayOffset: 16, blockId: 1003 }, // Mer — Muscu C
+        { dayOffset: 18, blockId: 1011 }, // Ven — Full Body
+        { dayOffset: 20, blockId: 1008 }, // Dim — Muscu 3
+        // ── S4 (jours 21-27) ────────────────────────────────────────────
+        { dayOffset: 21, blockId: 1000 }, // Lun — Jambes
+        { dayOffset: 23, blockId: 1004 }, // Mer — Muscu D
+        { dayOffset: 25, blockId: 1011 }, // Ven — Full Body
+        { dayOffset: 27, blockId: 1009 }, // Dim — Muscu 4
+        // ── S5 (jours 28-34) ────────────────────────────────────────────
+        { dayOffset: 28, blockId: 1000 }, // Lun — Jambes
+        { dayOffset: 30, blockId: 1005 }, // Mer — Muscu E
+        { dayOffset: 32, blockId: 1011 }, // Ven — Full Body
+        { dayOffset: 34, blockId: 1010 }  // Dim — Muscu 5
+      ]
+    });
+    CYCLES.save();
+  }
 };
 
 // Brouillon d'édition (cycle en cours de création/modification)
@@ -318,6 +355,7 @@ var CYCLE_EDIT = {
 function _cycleDays(dur) {
   if (dur === 'week')    return 7;
   if (dur === '2weeks')  return 14;
+  if (dur === '5weeks')  return 35;
   if (dur === 'month')   return 28;
   if (dur === '3months') return 84;
   return 7;
@@ -343,7 +381,7 @@ function renderCycleList() {
   for (var i = 0; i < CYCLES.list.length; i++) {
     var c = CYCLES.list[i];
     var days = _cycleDays(c.duration);
-    var durLabel = { week: '1 sem.', '2weeks': '2 sem.', month: '1 mois', '3months': '3 mois' }[c.duration] || c.duration;
+    var durLabel = { week: '1 sem.', '2weeks': '2 sem.', '5weeks': '5 sem.', month: '1 mois', '3months': '3 mois' }[c.duration] || c.duration;
     html += '<div class="card" style="margin-bottom:10px">' +
       '<div class="flex-between" style="margin-bottom:8px">' +
         '<div>' +
