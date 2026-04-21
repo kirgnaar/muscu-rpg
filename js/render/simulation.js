@@ -19,7 +19,55 @@ PLAN.save = function() {
 PLAN.load = function() {
   var raw = localStorage.getItem(PLAN.dbKey);
   PLAN.entries = raw ? JSON.parse(raw) : [];
+  // Si le planning est vide, on génère le cycle PP Judo de 5 semaines à partir de ce lundi
+  if (!PLAN.entries || PLAN.entries.length === 0) {
+    PLAN.entries = PLAN.generateDefaultSchedule(_thisMonday());
+    PLAN.save();
+  }
 };
+
+// Génère 5 semaines de planning PP Judo à partir du lundi de la semaine donnée.
+// blockId mapping : Jambes=1000, MusA→E=1001-1005, Muscu1→5=1006-1010, FullBody=1011
+// Jours : Lun=0, Mar=1, Mer=2, Jeu=3, Ven=4, Sam=5, Dim=6
+PLAN.generateDefaultSchedule = function(startMonday) {
+  var entries = [];
+  var uid = Date.now();
+  // S1→S5 : Mercredi=MusA(1001)+1, Dimanche=Muscu1(1006)+s
+  for (var s = 0; s < 5; s++) {
+    var weekStart = new Date(startMonday);
+    weekStart.setDate(weekStart.getDate() + s * 7);
+
+    // Lundi — Jambes (fixe toutes semaines)
+    entries.push({ id: uid++, date: _isoDate(weekStart, 0), blockId: 1000, note: '' });
+    // Mercredi — Muscu A→E (S1→S5 = blockId 1001→1005)
+    entries.push({ id: uid++, date: _isoDate(weekStart, 2), blockId: 1001 + s, note: '' });
+    // Vendredi — Full Body (fixe toutes semaines)
+    entries.push({ id: uid++, date: _isoDate(weekStart, 4), blockId: 1011, note: '' });
+    // Dimanche — Muscu 1→5 (S1→S5 = blockId 1006→1010)
+    entries.push({ id: uid++, date: _isoDate(weekStart, 6), blockId: 1006 + s, note: '' });
+  }
+  return entries;
+};
+
+// Retourne la date ISO du jour "dayOffset" (0=lun, 2=mer, 4=ven, 6=dim) à partir d'un lundi
+function _isoDate(monday, dayOffset) {
+  var d = new Date(monday);
+  d.setDate(d.getDate() + dayOffset);
+  var mm = ('0' + (d.getMonth() + 1)).slice(-2);
+  var dd = ('0' + d.getDate()).slice(-2);
+  return d.getFullYear() + '-' + mm + '-' + dd;
+}
+
+// Retourne le lundi de la semaine courante
+function _thisMonday() {
+  var today = new Date();
+  var day = today.getDay(); // 0=dim, 1=lun, ...
+  var diff = (day === 0) ? -6 : 1 - day; // recule au lundi
+  var mon = new Date(today);
+  mon.setDate(today.getDate() + diff);
+  mon.setHours(0, 0, 0, 0);
+  return mon;
+}
 
 // ── Données Bibliothèque ──────────────────────────────────────────────────
 var SIM = {
