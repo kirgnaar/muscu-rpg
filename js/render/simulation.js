@@ -463,37 +463,43 @@ function deleteCycle(cycleId) {
   renderCycleList();
 }
 
-// ── Grille d'édition — lignes = Semaines, colonnes = J1…J7 ──────────────
+// ── Grille d'édition — en-tête J1…J7, lignes S1…Sn ──────────────────────
 function renderCycleGrid() {
   var totalDays = _cycleDays(CYCLE_EDIT.duration);
   var numWeeks  = totalDays / 7;
   var grid      = $('cycle-grid');
+  var html      = '';
+  var s, jj, k, b, dayOffset, slots, block, bname, short, badgesHtml;
 
-  // En-tête : coin vide + J1…J7
-  var html = '<div style="display:grid;grid-template-columns:28px repeat(7,1fr);gap:3px">';
+  html = '<div style="display:grid;grid-template-columns:28px repeat(7,1fr);gap:3px">';
+
+  // ── En-tête : coin vide + J1 … J7 ────────────────────────────────────
   html += '<div></div>';
-  for (var j = 1; j <= 7; j++) {
-    html += '<div style="text-align:center;font-size:11px;font-weight:800;color:var(--accent);padding:4px 2px;border-bottom:1px solid var(--border)">J' + j + '</div>';
+  for (jj = 1; jj <= 7; jj++) {
+    html += '<div style="text-align:center;font-size:11px;font-weight:800;color:var(--accent);padding:4px 2px;border-bottom:1px solid var(--border)">J' + jj + '</div>';
   }
 
-  // Une ligne par semaine
-  for (var s = 1; s <= numWeeks; s++) {
-    // Label Sn
-    html += '<div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--text2);border-right:1px solid var(--border)">S' + s + '</div>';
+  // ── Une ligne par semaine S1 … Sn ─────────────────────────────────────
+  for (s = 1; s <= numWeeks; s++) {
+    // Label Sn à gauche
+    html += '<div style="display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--accent);border-right:1px solid var(--border)">S' + s + '</div>';
 
-    for (var j = 1; j <= 7; j++) {
-      var dayOffset = (s - 1) * 7 + (j - 1);
+    // 7 cellules J1…J7
+    for (jj = 1; jj <= 7; jj++) {
+      dayOffset = (s - 1) * 7 + (jj - 1);
 
-      var slots = [];
-      for (var k = 0; k < CYCLE_EDIT.sessions.length; k++) {
-        if (CYCLE_EDIT.sessions[k].dayOffset === dayOffset) slots.push({ idx: k, s: CYCLE_EDIT.sessions[k] });
+      slots = [];
+      for (k = 0; k < CYCLE_EDIT.sessions.length; k++) {
+        if (CYCLE_EDIT.sessions[k].dayOffset === dayOffset) {
+          slots.push({ idx: k, s: CYCLE_EDIT.sessions[k] });
+        }
       }
 
-      var badgesHtml = '';
-      for (var b = 0; b < slots.length; b++) {
-        var block = _getBlockById(slots[b].s.blockId);
-        var bname = block ? block.name : '?';
-        var short = bname.length > 9 ? bname.substring(0, 8) + '…' : bname;
+      badgesHtml = '';
+      for (b = 0; b < slots.length; b++) {
+        block = _getBlockById(slots[b].s.blockId);
+        bname = block ? block.name : '?';
+        short = bname.length > 9 ? bname.substring(0, 8) + '…' : bname;
         badgesHtml +=
           '<div class="plan-session-badge" style="font-size:8px;padding:1px 3px;margin-top:2px;display:flex;justify-content:space-between;align-items:center;gap:2px">' +
             '<span style="overflow:hidden;white-space:nowrap">' + short + '</span>' +
@@ -503,7 +509,7 @@ function renderCycleGrid() {
 
       html +=
         '<div class="plan-day-cell" data-dayoffset="' + dayOffset + '" style="min-height:38px;padding:3px 3px 2px">' +
-          '<div style="display:flex;justify-content:flex-end;margin-bottom:1px">' +
+          '<div style="display:flex;justify-content:flex-end">' +
             '<button class="cycle-add-btn plan-add-btn" data-dayoffset="' + dayOffset + '" style="font-size:10px;padding:0 4px;min-width:16px;height:16px;line-height:16px">+</button>' +
           '</div>' +
           badgesHtml +
