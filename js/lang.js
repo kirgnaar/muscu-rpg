@@ -139,7 +139,7 @@ var I18N = {
     tab_pr: 'PR Big 6',
     tab_rpg: 'RPG',
     tab_seances: 'Séances',
-    tab_simu: 'Simu',
+    tab_simu: 'Planning',
     tab_stats: 'Stats',
     theme_amber: 'AMBRE',
     theme_dark: 'SOMBRE',

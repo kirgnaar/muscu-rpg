@@ -1,17 +1,78 @@
 /* ══════════════════════════════════════════════════════════════════════════
    MUSCU RPG — render/simulation.js
-   🧪 Gestion des Blocs de Programmation et Simulation d'XP (ES5 Stable)
+   📅 Onglet Planification : calendrier + bibliothèque de séances (ES5 Stable)
    ══════════════════════════════════════════════════════════════════════════ */
 
+// ── Données Planification ─────────────────────────────────────────────────
+var PLAN = {
+  entries: [],
+  period: 'week',
+  offset: 0,
+  activeView: 'calendar',
+  dbKey: 'mrpg_planning'
+};
+
+PLAN.save = function() {
+  localStorage.setItem(PLAN.dbKey, JSON.stringify(PLAN.entries));
+};
+
+PLAN.load = function() {
+  var raw = localStorage.getItem(PLAN.dbKey);
+  PLAN.entries = raw ? JSON.parse(raw) : [];
+};
+
+// ── Données Bibliothèque ──────────────────────────────────────────────────
 var SIM = {
   blocks: [],
   currentBlock: null,
   dbKey: 'mrpg_blocks'
 };
 
+// ── Init ──────────────────────────────────────────────────────────────────
 function initSimulation() {
+  PLAN.load();
   SIM.blocks = loadBlocks();
   populateExerciseSelect($('sim-ex-sel'), true);
+
+  $('plan-tab-cal').addEventListener('click', function() { _switchPlanView('calendar'); });
+  $('plan-tab-lib').addEventListener('click', function() { _switchPlanView('library'); });
+
+  $('plan-period-bar').addEventListener('click', function(ev) {
+    var btn = ev.target.closest('.plan-period-btn');
+    if (!btn) return;
+    PLAN.period = btn.dataset.period;
+    PLAN.offset = 0;
+    renderCalendar();
+  });
+
+  $('plan-prev').addEventListener('click', function() { PLAN.offset--; renderCalendar(); });
+  $('plan-next').addEventListener('click', function() { PLAN.offset++; renderCalendar(); });
+
+  $('plan-cal-view').addEventListener('click', function(ev) {
+    var addBtn = ev.target.closest('.plan-add-btn');
+    if (addBtn && addBtn.dataset.date) { openSessionPicker(addBtn.dataset.date); return; }
+    var badge = ev.target.closest('.plan-session-badge');
+    if (badge && badge.dataset.entryId) { openPlanDetail(parseInt(badge.dataset.entryId)); return; }
+  });
+
+  $('plan-picker-confirm').addEventListener('click', function() {
+    var date = this.dataset.date;
+    var blockId = $('plan-picker-sel').value;
+    if (!blockId) return;
+    addPlanEntry(date, blockId);
+    closePlanModal('plan-picker-modal');
+  });
+  $('plan-picker-cancel').addEventListener('click', function() { closePlanModal('plan-picker-modal'); });
+
+  $('plan-detail-log-btn').addEventListener('click', function() {
+    _logPlanEntry(parseInt(this.dataset.entryId));
+  });
+  $('plan-detail-del-btn').addEventListener('click', function() {
+    if (!confirm('Supprimer cette séance du planning ?')) return;
+    removePlanEntry(parseInt(this.dataset.entryId));
+    closePlanModal('plan-detail-modal');
+  });
+  $('plan-detail-close-btn').addEventListener('click', function() { closePlanModal('plan-detail-modal'); });
 
   $('sim-new-block-btn').addEventListener('click', function() { handleNewBlock(); });
   $('sim-save-block-btn').addEventListener('click', function() { saveCurrentBlock(); });
@@ -43,6 +104,250 @@ function initSimulation() {
   });
 }
 
+function _switchPlanView(view) {
+  PLAN.activeView = view;
+  $('plan-tab-cal').classList.toggle('active', view === 'calendar');
+  $('plan-tab-lib').classList.toggle('active', view === 'library');
+  $('plan-cal-view').style.display = view === 'calendar' ? 'block' : 'none';
+  $('plan-lib-view').style.display = view === 'library' ? 'block' : 'none';
+  if (view === 'calendar') renderCalendar();
+  if (view === 'library') renderBlockList();
+}
+
+// ── Rendu principal ───────────────────────────────────────────────────────
+function renderSimulation() {
+  if (PLAN.activeView === 'calendar') renderCalendar();
+  else renderBlockList();
+}
+
+// ── Calendrier ────────────────────────────────────────────────────────────
+function _isoDate(d) {
+  var m = d.getMonth() + 1;
+  var mStr = m < 10 ? '0' + m : '' + m;
+  var dayStr = d.getDate() < 10 ? '0' + d.getDate() : '' + d.getDate();
+  return d.getFullYear() + '-' + mStr + '-' + dayStr;
+}
+
+function _getWeekStart(date) {
+  var d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  var dow = d.getDay();
+  var diff = dow === 0 ? -6 : 1 - dow;
+  d.setDate(d.getDate() + diff);
+  return d;
+}
+
+function _getPeriodDays() {
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var days = [];
+  var i, d, m, y, dim;
+
+  if (PLAN.period === 'week') {
+    var start = _getWeekStart(today);
+    start.setDate(start.getDate() + PLAN.offset * 7);
+    for (i = 0; i < 7; i++) { d = new Date(start); d.setDate(d.getDate() + i); days.push(_isoDate(d)); }
+
+  } else if (PLAN.period === '2weeks') {
+    var start2 = _getWeekStart(today);
+    start2.setDate(start2.getDate() + PLAN.offset * 14);
+    for (i = 0; i < 14; i++) { d = new Date(start2); d.setDate(d.getDate() + i); days.push(_isoDate(d)); }
+
+  } else if (PLAN.period === 'month') {
+    var mo = new Date(today.getFullYear(), today.getMonth() + PLAN.offset, 1);
+    y = mo.getFullYear(); m = mo.getMonth();
+    dim = new Date(y, m + 1, 0).getDate();
+    for (i = 1; i <= dim; i++) days.push(_isoDate(new Date(y, m, i)));
+
+  } else if (PLAN.period === '3months') {
+    var base = new Date(today.getFullYear(), today.getMonth() + PLAN.offset * 3, 1);
+    for (var q = 0; q < 3; q++) {
+      var mm = base.getMonth() + q;
+      y = base.getFullYear() + Math.floor(mm / 12);
+      m = mm % 12;
+      dim = new Date(y, m + 1, 0).getDate();
+      for (i = 1; i <= dim; i++) days.push(_isoDate(new Date(y, m, i)));
+    }
+  }
+  return days;
+}
+
+function _getPeriodLabel() {
+  var days = _getPeriodDays();
+  if (!days.length) return '';
+  var MOIS = ['jan.', 'fév.', 'mar.', 'avr.', 'mai', 'jun.', 'jul.', 'août', 'sep.', 'oct.', 'nov.', 'déc.'];
+  var first = new Date(days[0] + 'T00:00:00');
+  var last  = new Date(days[days.length - 1] + 'T00:00:00');
+  if (PLAN.period === 'week') {
+    return first.getDate() + ' – ' + last.getDate() + ' ' + MOIS[last.getMonth()] + ' ' + last.getFullYear();
+  } else if (PLAN.period === '2weeks') {
+    return first.getDate() + ' ' + MOIS[first.getMonth()] + ' – ' + last.getDate() + ' ' + MOIS[last.getMonth()] + ' ' + last.getFullYear();
+  } else if (PLAN.period === 'month') {
+    var NOMS = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    return NOMS[first.getMonth()] + ' ' + first.getFullYear();
+  } else {
+    return MOIS[first.getMonth()] + ' – ' + MOIS[last.getMonth()] + ' ' + last.getFullYear();
+  }
+}
+
+function renderCalendar() {
+  var days = _getPeriodDays();
+  var todayStr = todayISO();
+
+  var periodBtns = document.querySelectorAll('.plan-period-btn');
+  for (var b = 0; b < periodBtns.length; b++) {
+    periodBtns[b].classList.toggle('active', periodBtns[b].dataset.period === PLAN.period);
+  }
+  $('plan-period-label').textContent = _getPeriodLabel();
+
+  var JOURS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+  var html = '<div class="plan-grid-header">';
+  for (var j = 0; j < 7; j++) html += '<div class="plan-grid-hcell">' + JOURS[j] + '</div>';
+  html += '</div><div class="plan-grid-body">';
+
+  var leadingPad = 0;
+  if (days.length > 0) {
+    var firstDow = new Date(days[0] + 'T00:00:00').getDay();
+    leadingPad = firstDow === 0 ? 6 : firstDow - 1;
+    for (var p = 0; p < leadingPad; p++) html += '<div class="plan-day-cell plan-day-empty"></div>';
+  }
+
+  for (var i = 0; i < days.length; i++) html += _buildDayCell(days[i], todayStr);
+
+  var totalCells = leadingPad + days.length;
+  var trailing = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (var t = 0; t < trailing; t++) html += '<div class="plan-day-cell plan-day-empty"></div>';
+
+  html += '</div>';
+  $('plan-grid').innerHTML = html;
+}
+
+function _buildDayCell(dateStr, todayStr) {
+  var d = new Date(dateStr + 'T00:00:00');
+  var isToday = dateStr === todayStr;
+  var entries = [];
+  for (var i = 0; i < PLAN.entries.length; i++) {
+    if (PLAN.entries[i].date === dateStr) entries.push(PLAN.entries[i]);
+  }
+  var badgesHtml = '';
+  for (var j = 0; j < entries.length; j++) {
+    var e = entries[j];
+    var block = _getBlockById(e.blockId);
+    var name = block ? block.name : '?';
+    var shortName = name.length > 10 ? name.substring(0, 9) + '…' : name;
+    badgesHtml += '<div class="plan-session-badge" data-entry-id="' + e.id + '">' + shortName + '</div>';
+  }
+  return '<div class="plan-day-cell' + (isToday ? ' plan-day-today' : '') + '" data-date="' + dateStr + '">' +
+    '<div class="plan-day-header"><span class="plan-day-num">' + d.getDate() + '</span>' +
+    '<button class="plan-add-btn" data-date="' + dateStr + '">+</button></div>' +
+    badgesHtml + '</div>';
+}
+
+function _getBlockById(id) {
+  for (var i = 0; i < SIM.blocks.length; i++) {
+    if (SIM.blocks[i].id === id) return SIM.blocks[i];
+  }
+  return null;
+}
+
+// ── Modal : sélecteur de séance ───────────────────────────────────────────
+function openSessionPicker(date) {
+  if (SIM.blocks.length === 0) {
+    toast('Créez d\'abord une séance dans l\'onglet Séances', 'err');
+    return;
+  }
+  var sel = $('plan-picker-sel');
+  sel.innerHTML = '';
+  for (var i = 0; i < SIM.blocks.length; i++) {
+    var b = SIM.blocks[i];
+    var opt = document.createElement('option');
+    opt.value = b.id;
+    opt.textContent = b.name;
+    sel.appendChild(opt);
+  }
+  $('plan-picker-date').textContent = _formatDateFull(date);
+  $('plan-picker-confirm').dataset.date = date;
+  $('plan-picker-modal').style.display = 'flex';
+}
+
+function _formatDateFull(dateStr) {
+  var JOURS = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+  var MOIS  = ['janv.', 'févr.', 'mars', 'avr.', 'mai', 'juin', 'juil.', 'août', 'sept.', 'oct.', 'nov.', 'déc.'];
+  var d = new Date(dateStr + 'T00:00:00');
+  return JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()] + ' ' + d.getFullYear();
+}
+
+function addPlanEntry(date, blockId) {
+  PLAN.entries.push({ id: Date.now(), date: date, blockId: parseInt(blockId), note: '' });
+  PLAN.save();
+  renderCalendar();
+}
+
+function removePlanEntry(id) {
+  var newEntries = [];
+  for (var i = 0; i < PLAN.entries.length; i++) {
+    if (PLAN.entries[i].id !== id) newEntries.push(PLAN.entries[i]);
+  }
+  PLAN.entries = newEntries;
+  PLAN.save();
+  renderCalendar();
+}
+
+function closePlanModal(id) {
+  $(id).style.display = 'none';
+}
+
+// ── Modal : détail séance planifiée ───────────────────────────────────────
+function openPlanDetail(entryId) {
+  var entry = null;
+  for (var i = 0; i < PLAN.entries.length; i++) {
+    if (PLAN.entries[i].id === entryId) { entry = PLAN.entries[i]; break; }
+  }
+  if (!entry) return;
+  var block = _getBlockById(entry.blockId);
+  if (!block) { toast('Séance introuvable', 'err'); return; }
+
+  $('plan-detail-title').textContent = block.name;
+  $('plan-detail-date').textContent = _formatDateFull(entry.date);
+
+  var html = '';
+  for (var j = 0; j < block.exercises.length; j++) {
+    var ex = block.exercises[j];
+    html += '<div style="padding:8px 0;border-bottom:1px solid var(--border)">' +
+      '<div style="font-weight:700;color:#fff">' + ex.ex + '</div>' +
+      '<div style="font-size:12px;color:var(--text2)">' + ex.ser + ' × ' + ex.rep + ' @ ' + ex.pds + ' kg</div>' +
+      '</div>';
+  }
+  $('plan-detail-exlist').innerHTML = html || '<div style="color:var(--text2);font-size:13px;padding:8px 0">Séance vide</div>';
+
+  $('plan-detail-log-btn').dataset.entryId  = entryId;
+  $('plan-detail-del-btn').dataset.entryId  = entryId;
+  $('plan-detail-modal').style.display = 'flex';
+}
+
+// ── Logger une séance planifiée ───────────────────────────────────────────
+function _logPlanEntry(entryId) {
+  var entry = null;
+  for (var i = 0; i < PLAN.entries.length; i++) {
+    if (PLAN.entries[i].id === entryId) { entry = PLAN.entries[i]; break; }
+  }
+  if (!entry) return;
+  var block = _getBlockById(entry.blockId);
+  if (!block || block.exercises.length === 0) { toast('Séance vide', 'err'); return; }
+  if (!confirm('Logger "' + block.name + '" pour le ' + _formatDateFull(entry.date) + ' ?')) return;
+
+  var type = block.type || 'Hypertrophie';
+  for (var j = 0; j < block.exercises.length; j++) {
+    var item = block.exercises[j];
+    addEntry({ date: entry.date, type: type, ex: item.ex, grp: item.grp || getPrimaryGroup(item.ex), ser: item.ser, rep: item.rep, pds: item.pds });
+  }
+  APP.render();
+  toast('Séance loggée dans le journal !');
+  closePlanModal('plan-detail-modal');
+  APP.switchView('seances');
+}
+
+// ── Bibliothèque ──────────────────────────────────────────────────────────
 function loadBlocks() {
   var raw = localStorage.getItem(SIM.dbKey);
   return raw ? JSON.parse(raw) : [];
@@ -50,27 +355,29 @@ function loadBlocks() {
 
 function saveBlocks() {
   localStorage.setItem(SIM.dbKey, JSON.stringify(SIM.blocks));
+  if (window.Auth && window.Auth.user && window.pushToCloud) {
+    window.pushToCloud(window.Auth.user.uid, {
+      sessions: APP.data,
+      user: APP.user,
+      blocks: SIM.blocks
+    });
+  }
 }
 
 function handleNewBlock() {
-  SIM.currentBlock = { id: Date.now(), name: APP.t('new_program'), type: "Hypertrophie", exercises: [] };
+  SIM.currentBlock = { id: Date.now(), name: 'Nouveau programme', type: 'Hypertrophie', exercises: [] };
   openEditor();
 }
 
 function openEditor(id) {
   if (id) {
     for (var i = 0; i < SIM.blocks.length; i++) {
-      if (SIM.blocks[i].id === id) {
-        SIM.currentBlock = JSON.parse(JSON.stringify(SIM.blocks[i]));
-        break;
-      }
+      if (SIM.blocks[i].id === id) { SIM.currentBlock = JSON.parse(JSON.stringify(SIM.blocks[i])); break; }
     }
   }
-  if (!SIM.currentBlock.type) SIM.currentBlock.type = "Hypertrophie";
+  if (!SIM.currentBlock.type) SIM.currentBlock.type = 'Hypertrophie';
+  $('plan-lib-header').style.display = 'none';
   $('sim-blocks-list').style.display = 'none';
-  var stitle = $('v-simulation').querySelector('.stitle span');
-  if (stitle) stitle.style.display = 'none';
-  $('sim-new-block-btn').style.display = 'none';
   $('sim-editor').style.display = 'block';
   $('sim-block-name').value = SIM.currentBlock.name;
   $('sim-block-type').value = SIM.currentBlock.type;
@@ -81,39 +388,34 @@ function closeEditor() {
   SIM.currentBlock = null;
   $('sim-editor').style.display = 'none';
   $('sim-blocks-list').style.display = 'block';
-  var stitle = $('v-simulation').querySelector('.stitle span');
-  if (stitle) stitle.style.display = 'inline';
-  $('sim-new-block-btn').style.display = 'inline';
-  renderSimulation();
+  $('plan-lib-header').style.display = 'flex';
+  renderBlockList();
 }
 
 function saveCurrentBlock() {
   if (!SIM.currentBlock) return;
-  SIM.currentBlock.name = $('sim-block-name').value || APP.t('untitled');
+  SIM.currentBlock.name = $('sim-block-name').value || 'Sans titre';
   SIM.currentBlock.type = $('sim-block-type').value;
   var foundIdx = -1;
   for (var i = 0; i < SIM.blocks.length; i++) {
-    if (SIM.blocks[i].id === SIM.currentBlock.id) {
-      foundIdx = i;
-      break;
-    }
+    if (SIM.blocks[i].id === SIM.currentBlock.id) { foundIdx = i; break; }
   }
   if (foundIdx !== -1) SIM.blocks[foundIdx] = JSON.parse(JSON.stringify(SIM.currentBlock));
   else SIM.blocks.push(JSON.parse(JSON.stringify(SIM.currentBlock)));
   saveBlocks();
-  toast(APP.t('saved'));
+  toast('Programme sauvegardé');
   closeEditor();
 }
 
 function deleteBlock(id) {
-  if (!confirm(APP.t('confirm_delete'))) return;
+  if (!confirm('Supprimer ce programme ?')) return;
   var newBlocks = [];
   for (var i = 0; i < SIM.blocks.length; i++) {
     if (SIM.blocks[i].id !== id) newBlocks.push(SIM.blocks[i]);
   }
   SIM.blocks = newBlocks;
   saveBlocks();
-  renderSimulation();
+  renderBlockList();
 }
 
 function handleAddExToBlock() {
@@ -121,55 +423,40 @@ function handleAddExToBlock() {
   var ser = parseInt($('sim-ser').value);
   var rep = parseInt($('sim-rep').value);
   var pds = parseFloat($('sim-pds').value);
-  if (!exName || !ser || !rep || isNaN(pds)) { toast(APP.t('invalid_fields'), 'err'); return; }
+  if (!exName || !ser || !rep || isNaN(pds)) { toast('Champs invalides', 'err'); return; }
   SIM.currentBlock.exercises.push({ ex: exName, ser: ser, rep: rep, pds: pds, grp: getPrimaryGroup(exName) });
   renderEditor();
 }
 
-function getTranslatedMuscle(m) {
-  var mKey = {
-    'Pectoraux':'pecs','Dorsaux':'back','Dorsal':'back','Épaules':'shoulders',
-    'Biceps':'biceps','Triceps':'triceps','Quadriceps':'quads',
-    'Ischios':'hams','Ischio-jambiers':'hams','Fessiers':'glutes',
-    'Mollets':'calves','Abdos':'abs','Abdominaux':'abs',
-    'Lombaires':'lumbars','Trapèzes':'traps','Full body':'fullbody'
-  }[m]||m;
-  return APP.t(mKey);
-}
-
-function renderSimulation() {
-  $('v-simulation').querySelector('.stitle span').textContent = APP.t('stitle_programs');
-  $('sim-new-block-btn').textContent = '+ ' + APP.t('btn_new');
-
+function renderBlockList() {
   var list = $('sim-blocks-list');
-  if (SIM.blocks.length === 0) { list.innerHTML = '<div class="empty"><p>' + APP.t('no_programs') + '</p></div>'; return; }
+  if (SIM.blocks.length === 0) {
+    list.innerHTML = '<div class="empty"><p>Aucun programme. Créez-en un !</p></div>';
+    return;
+  }
   var html = '';
   for (var i = 0; i < SIM.blocks.length; i++) {
     var b = SIM.blocks[i];
     var dist = calculateMuscleDistribution(b.exercises);
     var distHtml = '';
     if (dist.length > 0) {
-      distHtml = '<div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px">';
+      distHtml = '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">';
       for (var j = 0; j < dist.length; j++) {
-        distHtml += '<span style="font-size:9px; background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px; color:var(--text2)">' + getTranslatedMuscle(dist[j].grp) + ' ' + dist[j].pct + '%</span>';
+        distHtml += '<span style="font-size:9px;background:rgba(255,255,255,0.05);padding:2px 6px;border-radius:4px;color:var(--text2)">' + dist[j].grp + ' ' + dist[j].pct + '%</span>';
       }
       distHtml += '</div>';
     }
-
-    var typeKey = {
-      'Hypertrophie': 'hypertrophy',
-      'Force': 'strength',
-      'Hyperforce (PR)': 'hyperstrength',
-      'Endurance musculaire': 'endurance',
-      'Décharge': 'deload'
-    }[b.type] || '';
-    var translatedType = typeKey ? APP.t(typeKey) : b.type;
-
-    html += '<div class="card" style="margin-bottom:10px"><div class="flex-between"><div><div style="font-weight:800; color:#fff">' + b.name + '</div><div style="font-size:11px; color:var(--accent); font-weight:700">' + translatedType + '</div><div style="font-size:10px; color:var(--text2); margin-top:2px">' + b.exercises.length + ' ' + APP.t('exercises').toLowerCase() + '</div></div><div style="display:flex; gap:8px"><button class="btn btn-s sim-block-edit" data-id="' + b.id + '">' + APP.t('edit') + '</button><button class="btn btn-s sim-block-del" data-id="' + b.id + '" style="background:rgba(239,68,68,0.1); color:#ef4444">✕</button></div></div>' + distHtml + '</div>';
+    html += '<div class="card" style="margin-bottom:10px"><div class="flex-between"><div>' +
+      '<div style="font-weight:800;color:#fff">' + b.name + '</div>' +
+      '<div style="font-size:11px;color:var(--accent);font-weight:700">' + b.type + '</div>' +
+      '<div style="font-size:10px;color:var(--text2);margin-top:2px">' + b.exercises.length + ' exercice(s)</div>' +
+      '</div><div style="display:flex;gap:8px">' +
+      '<button class="btn btn-s sim-block-edit" data-id="' + b.id + '">Éditer</button>' +
+      '<button class="btn btn-s sim-block-del" data-id="' + b.id + '" style="background:rgba(239,68,68,0.1);color:#ef4444">✕</button>' +
+      '</div></div>' + distHtml + '</div>';
   }
   list.innerHTML = html;
 }
-
 
 function calculateMuscleDistribution(exercises) {
   if (!exercises.length) return [];
@@ -199,41 +486,35 @@ function calculateMuscleDistribution(exercises) {
 }
 
 function renderEditor() {
-  var editor = $('sim-editor');
-  editor.querySelector('.fgroup .flabel').textContent = APP.t('label_prog_type');
-  editor.querySelectorAll('.fgroup .flabel')[1].textContent = APP.t('label_add_ex');
-  var subLabels = editor.querySelectorAll('.card div .flabel');
-  subLabels[0].textContent = APP.t('label_ser');
-  subLabels[1].textContent = APP.t('label_rep');
-  subLabels[2].textContent = APP.t('label_pds');
-  $('sim-add-ex-btn').textContent = '+ ' + APP.t('btn_add_list');
-  editor.querySelector('.stitle').textContent = APP.t('stitle_content_block');
-  $('sim-results').querySelector('.stitle').textContent = APP.t('stitle_gains');
-  $('sim-results').querySelector('.clabel').textContent = APP.t('label_gain_global');
-  $('sim-confirm-btn').textContent = '⚡ ' + APP.t('btn_confirm_session');
-  $('sim-back-btn').textContent = APP.t('btn_back');
-
-  // Peupler les types de séances traduits pour l'éditeur
   var typeSel = $('sim-block-type');
-  var currentType = SIM.currentBlock.type || "Hypertrophie";
+  var currentType = SIM.currentBlock.type || 'Hypertrophie';
   typeSel.innerHTML = '';
-  var typeKeys = ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'];
-  for (var i = 0; i < typeKeys.length; i++) {
-    var k = typeKeys[i];
+  var types = ['Hypertrophie', 'Force', 'Hyperforce (PR)', 'Endurance musculaire', 'Décharge'];
+  for (var i = 0; i < types.length; i++) {
     var o = document.createElement('option');
-    o.value = I18N['fr'][k];
-    o.textContent = APP.t(k);
+    o.value = types[i]; o.textContent = types[i];
     typeSel.appendChild(o);
   }
   typeSel.value = currentType;
 
-  var list = $('sim-ex-list');
+  var list   = $('sim-ex-list');
   var exList = SIM.currentBlock.exercises;
-  if (exList.length === 0) { list.innerHTML = '<div class="empty" style="padding:20px"><p>' + (APP.user.langue === 'fr' ? 'Liste vide.' : 'Empty list.') + '</p></div>'; calculateSimResults([]); return; }
+  if (exList.length === 0) {
+    list.innerHTML = '<div class="empty" style="padding:20px"><p>Liste vide.</p></div>';
+    calculateSimResults([]);
+    return;
+  }
   var html = '';
-  for (var i = 0; i < exList.length; i++) {
-    var item = exList[i];
-    html += '<div class="sitem" style="flex-direction:column; align-items:stretch; gap:8px; padding:12px"><div class="flex-between"><div class="sname" style="font-size:14px">' + APP.t(item.ex) + '</div><button class="sim-ex-del" data-idx="' + i + '" style="background:none; border:none; color:#ef4444; font-size:18px; padding:0">✕</button></div><div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px"><div><label class="flabel" style="font-size:9px">' + APP.t('label_ser') + '</label><input type="number" class="sim-inline-input" data-idx="' + i + '" data-field="ser" value="' + item.ser + '"></div><div><label class="flabel" style="font-size:9px">' + APP.t('label_rep') + '</label><input type="number" class="sim-inline-input" data-idx="' + i + '" data-field="rep" value="' + item.rep + '"></div><div><label class="flabel" style="font-size:9px">' + APP.t('label_pds') + '</label><input type="number" class="sim-inline-input" data-idx="' + i + '" data-field="pds" step="0.5" value="' + item.pds + '"></div></div></div>';
+  for (var j = 0; j < exList.length; j++) {
+    var item = exList[j];
+    html += '<div class="sitem" style="flex-direction:column;align-items:stretch;gap:8px;padding:12px">' +
+      '<div class="flex-between"><div class="sname" style="font-size:14px">' + item.ex + '</div>' +
+      '<button class="sim-ex-del" data-idx="' + j + '" style="background:none;border:none;color:#ef4444;font-size:18px;padding:0">✕</button></div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">' +
+      '<div><label class="flabel" style="font-size:9px">Séries</label><input type="number" class="sim-inline-input" data-idx="' + j + '" data-field="ser" value="' + item.ser + '"></div>' +
+      '<div><label class="flabel" style="font-size:9px">Reps</label><input type="number" class="sim-inline-input" data-idx="' + j + '" data-field="rep" value="' + item.rep + '"></div>' +
+      '<div><label class="flabel" style="font-size:9px">Poids</label><input type="number" class="sim-inline-input" data-idx="' + j + '" data-field="pds" step="0.5" value="' + item.pds + '"></div>' +
+      '</div></div>';
   }
   list.innerHTML = html;
   calculateSimResults(exList);
@@ -244,59 +525,61 @@ function calculateSimResults(simList) {
   for (var i = 0; i < APP.data.length; i++) currentVol += APP.data[i].vol;
   var simVolGain = 0;
   for (var j = 0; j < simList.length; j++) simVolGain += (simList[j].ser * simList[j].rep * simList[j].pds);
-  var newVolTotal = currentVol + simVolGain;
-  var currentLvl = getLevel(currentVol);
-  var nextLvl = getLevel(newVolTotal);
-  var xpLabel = APP.t('global_level');
+  var newVolTotal  = currentVol + simVolGain;
+  var currentLvl   = getLevel(currentVol);
+  var nextLvl      = getLevel(newVolTotal);
   $('sim-xp-gain').textContent = '+ ' + fmtV(simVolGain) + ' XP';
-  var lvlHtml = '<div style="font-weight:700">' + xpLabel + ' : ' + currentLvl + ' ➔ ' + nextLvl + '</div>';
+  var lvlHtml = '<div style="font-weight:700">Niveau global : ' + currentLvl + ' ➔ ' + nextLvl + '</div>';
   if (nextLvl > currentLvl) {
-    lvlHtml += '<div style="color:var(--green); font-size:12px; margin-top:4px; font-weight:800">✨ ' + APP.t('lvl_up_global') + '</div>';
+    lvlHtml += '<div style="color:var(--green);font-size:12px;margin-top:4px;font-weight:800">✨ Level up !</div>';
   } else {
-    var nextThr = levelThreshold(nextLvl + 1);
-    var remaining = nextThr - newVolTotal;
-    var remTxt = APP.t('xp_left_for').replace('{{xp}}', fmtV(remaining)).replace('{{lvl}}', nextLvl + 1);
-    lvlHtml += '<div style="color:var(--text2); font-size:11px; margin-top:4px">' + remTxt + '</div>';
+    var remaining = levelThreshold(nextLvl + 1) - newVolTotal;
+    lvlHtml += '<div style="color:var(--text2);font-size:11px;margin-top:4px">' + fmtV(remaining) + ' XP pour le niveau ' + (nextLvl + 1) + '</div>';
   }
   $('sim-lvl-preview').innerHTML = lvlHtml;
+
   var muscleGains = {};
   for (var k = 0; k < simList.length; k++) {
     var item = simList[k];
     for (var m = 0; m < MUSCLES.length; m++) {
-      var grp = MUSCLES[m];
+      var grp       = MUSCLES[m];
       var influence = getMuscleInfluence(item.ex, grp);
       if (influence > 0) muscleGains[grp] = (muscleGains[grp] || 0) + (item.ser * item.rep * item.pds * influence);
     }
   }
-  var muscleHtml = '<div class="clabel" style="margin-bottom:8px">' + APP.t('prog_by_muscle') + '</div>';
+  var muscleHtml = '<div class="clabel" style="margin-bottom:8px">Progression par muscle</div>';
   for (var grpName in muscleGains) {
-    var currentVolGrp = volByGroup(grpName);
-    var gainVolGrp = muscleGains[grpName];
-    var newVolGrp = currentVolGrp + gainVolGrp;
-    var curL = getLevel(currentVolGrp);
-    var nxtL = getLevel(newVolGrp);
-    var color = levelColor(nxtL);
-    var missingXP = levelThreshold(curL + 1) - newVolGrp;
-    var subText = nxtL > curL
-      ? '<span style="color:var(--green); font-weight:800">LEVEL UP ! (+' + (nxtL - curL) + ')</span>'
-      : '<span style="opacity:0.6">' + APP.t('xp_missing').replace('{{xp}}', fmtV(missingXP)) + '</span>';
-    muscleHtml += '<div class="card" style="margin-bottom:8px; border-left: 4px solid ' + color + '; padding: 12px"><div class="flex-between"><div><div style="font-size:14px; font-weight:900; color:#fff">' + getTranslatedMuscle(grpName) + '</div><div style="font-size:12px; color:' + color + '; font-weight:700">' + APP.t('lvl') + ' ' + curL + ' ➔ ' + nxtL + '</div></div><div style="text-align:right"><div style="font-size:11px; font-weight:600">' + subText + '</div><div style="font-size:9px; color:var(--text2); margin-top:2px">+ ' + fmtV(gainVolGrp) + ' XP</div></div></div><div class="bar-bg" style="height:4px; margin-top:8px"><div class="bar-fill" style="width:' + (levelProgress(newVolGrp)*100).toFixed(0) + '%; background:' + color + '"></div></div></div>';
+    var curVolGrp  = volByGroup(grpName);
+    var gainGrp    = muscleGains[grpName];
+    var newVolGrp  = curVolGrp + gainGrp;
+    var curL       = getLevel(curVolGrp);
+    var nxtL       = getLevel(newVolGrp);
+    var color      = levelColor(nxtL);
+    var missingXP  = levelThreshold(curL + 1) - newVolGrp;
+    var subText    = nxtL > curL
+      ? '<span style="color:var(--green);font-weight:800">LEVEL UP ! (+' + (nxtL - curL) + ')</span>'
+      : '<span style="opacity:0.6">-' + fmtV(missingXP) + ' XP manquants</span>';
+    muscleHtml += '<div class="card" style="margin-bottom:8px;border-left:4px solid ' + color + ';padding:12px"><div class="flex-between"><div>' +
+      '<div style="font-size:14px;font-weight:900;color:#fff">' + grpName + '</div>' +
+      '<div style="font-size:12px;color:' + color + ';font-weight:700">Niv. ' + curL + ' ➔ ' + nxtL + '</div>' +
+      '</div><div style="text-align:right"><div style="font-size:11px;font-weight:600">' + subText + '</div>' +
+      '<div style="font-size:9px;color:var(--text2);margin-top:2px">+ ' + fmtV(gainGrp) + ' XP</div></div></div>' +
+      '<div class="bar-bg" style="height:4px;margin-top:8px"><div class="bar-fill" style="width:' + (levelProgress(newVolGrp) * 100).toFixed(0) + '%;background:' + color + '"></div></div></div>';
   }
-
   $('sim-muscle-results').innerHTML = muscleHtml;
 }
 
 function confirmSession() {
   if (!SIM.currentBlock || SIM.currentBlock.exercises.length === 0) return;
-  if (!confirm(APP.t('confirm_session'))) return;
+  if (!confirm('Logger cette séance dans le journal aujourd\'hui ?')) return;
   var date = todayISO();
-  var type = SIM.currentBlock.type || "Hypertrophie";
+  var type = SIM.currentBlock.type || 'Hypertrophie';
   for (var i = 0; i < SIM.currentBlock.exercises.length; i++) {
     var item = SIM.currentBlock.exercises[i];
-    addEntry({ date: date, type: type, ex: item.ex, grp: item.grp, ser: item.ser, rep: item.rep, pds: item.pds });
+    addEntry({ date: date, type: type, ex: item.ex, grp: item.grp || getPrimaryGroup(item.ex), ser: item.ser, rep: item.rep, pds: item.pds });
   }
   APP.render();
-  toast(APP.t('session_saved'));
+  toast('Séance loggée dans le journal !');
   closeEditor();
   APP.switchView('seances');
 }

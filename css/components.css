@@ -467,3 +467,188 @@ select {
   border-color: var(--accent);
   background: var(--navy4);
 }
+
+/* ── Planning : sous-onglets ─────────────────────────────────────────────── */
+.plan-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.plan-subtab {
+  flex: 1;
+  padding: 10px 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--navy2);
+  color: var(--text2);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+.plan-subtab.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ── Planning : sélecteur de période ────────────────────────────────────── */
+.plan-period-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.plan-period-btn {
+  flex: 1;
+  padding: 7px 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--navy2);
+  color: var(--text2);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.plan-period-btn.active {
+  background: var(--navy3);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* ── Planning : navigation ───────────────────────────────────────────────── */
+.plan-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+.plan-nav span {
+  flex: 1;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+.plan-nav-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--navy2);
+  color: var(--text2);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ── Planning : grille calendrier ───────────────────────────────────────── */
+.plan-grid-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 2px;
+}
+.plan-grid-hcell {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text2);
+  padding: 4px 0;
+}
+.plan-grid-body {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.plan-day-cell {
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-height: 64px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+.plan-day-cell.plan-day-today {
+  border-color: var(--accent);
+  background: rgba(99, 102, 241, 0.08);
+}
+.plan-day-cell.plan-day-empty {
+  background: transparent;
+  border: none;
+}
+.plan-day-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.plan-day-num {
+  font-size: 12px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1;
+}
+.plan-day-today .plan-day-num {
+  color: var(--accent);
+}
+.plan-add-btn {
+  background: none;
+  border: none;
+  color: var(--text2);
+  font-size: 16px;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+.plan-add-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+.plan-session-badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+/* ── Planning : modals ───────────────────────────────────────────────────── */
+.plan-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.plan-modal-box {
+  background: var(--navy1);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+  width: 100%;
+  max-width: 360px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.plan-modal-title {
+  font-size: 17px;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 8px;
+}
