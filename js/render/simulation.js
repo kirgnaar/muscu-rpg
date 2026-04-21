@@ -279,6 +279,208 @@ var DEFAULT_BLOCKS = [
   }
 ];
 
+// ── État Cycle Modèle ─────────────────────────────────────────────────────
+var CYCLE = {
+  duration:  'week',
+  sessions:  [],   // [{dayOffset: N, blockId: M}]
+  repeat:    1,
+  startDate: '',
+  dbKey:     'mrpg_cycle'
+};
+
+CYCLE.save = function() {
+  localStorage.setItem(CYCLE.dbKey, JSON.stringify({
+    duration: CYCLE.duration, sessions: CYCLE.sessions,
+    repeat: CYCLE.repeat, startDate: CYCLE.startDate
+  }));
+};
+
+CYCLE.load = function() {
+  var raw = localStorage.getItem(CYCLE.dbKey);
+  if (raw) {
+    var d = JSON.parse(raw);
+    CYCLE.duration  = d.duration  || 'week';
+    CYCLE.sessions  = d.sessions  || [];
+    CYCLE.repeat    = d.repeat    || 1;
+    CYCLE.startDate = d.startDate || '';
+  }
+  if (!CYCLE.startDate) {
+    var today = new Date();
+    var mm = ('0' + (today.getMonth() + 1)).slice(-2);
+    var dd = ('0' + today.getDate()).slice(-2);
+    CYCLE.startDate = today.getFullYear() + '-' + mm + '-' + dd;
+  }
+};
+
+// Nombre de jours selon la durée choisie
+function _cycleDays() {
+  if (CYCLE.duration === 'week')    return 7;
+  if (CYCLE.duration === '2weeks')  return 14;
+  if (CYCLE.duration === 'month')   return 28;  // 4 semaines fixes
+  if (CYCLE.duration === '3months') return 84;  // 12 semaines fixes
+  return 7;
+}
+
+// Noms courts des jours (affiché sur chaque case)
+var _SHORT_DAY = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+
+// ── Rendu de la vue Modèle ────────────────────────────────────────────────
+function renderCycleView() {
+  // Sync UI état courant
+  document.querySelectorAll('#cycle-duration-bar .plan-period-btn').forEach(function(b) {
+    b.classList.toggle('active', b.dataset.dur === CYCLE.duration);
+  });
+  $('cycle-repeat-val').textContent = CYCLE.repeat;
+  $('cycle-start-date').value = CYCLE.startDate;
+  $('cycle-summary').style.display = 'none';
+  renderCycleGrid();
+}
+
+function renderCycleGrid() {
+  var totalDays = _cycleDays();
+  var grid = $('cycle-grid');
+  var JOURS = _SHORT_DAY;
+
+  // En-tête fixe sur 7 colonnes
+  var html = '<div class="plan-grid-header">';
+  for (var j = 0; j < 7; j++) html += '<div class="plan-grid-hcell">' + JOURS[j] + '</div>';
+  html += '</div><div class="plan-grid-body">';
+
+  // Décalage pour commencer à Lundi (offset 0 = Lundi)
+  // (le cycle commence toujours au Jour 1 = Lundi)
+  for (var i = 0; i < totalDays; i++) {
+    var dow = i % 7; // 0=Lun, 1=Mar, ..., 6=Dim
+    var weekNum = Math.floor(i / 7) + 1;
+    var label = (totalDays > 7) ? 'S' + weekNum + ' · J' + (dow + 1) : JOURS[dow];
+
+    // Séances posées sur ce jour
+    var slots = [];
+    for (var k = 0; k < CYCLE.sessions.length; k++) {
+      if (CYCLE.sessions[k].dayOffset === i) slots.push({ idx: k, s: CYCLE.sessions[k] });
+    }
+
+    var badgesHtml = '';
+    for (var s = 0; s < slots.length; s++) {
+      var block = _getBlockById(slots[s].s.blockId);
+      var bname = block ? block.name : '?';
+      var short = bname.length > 12 ? bname.substring(0, 11) + '…' : bname;
+      badgesHtml += '<div class="plan-session-badge" style="font-size:9px;padding:2px 5px;margin-top:2px;display:flex;justify-content:space-between;align-items:center">' +
+        '<span>' + short + '</span>' +
+        '<span class="cycle-slot-del" data-idx="' + slots[s].idx + '" style="color:#ef4444;cursor:pointer;margin-left:4px;font-size:11px">✕</span>' +
+        '</div>';
+    }
+
+    html += '<div class="plan-day-cell" data-dayoffset="' + i + '">' +
+      '<div class="plan-day-header"><span class="plan-day-num" style="font-size:10px">' + label + '</span>' +
+      '<button class="cycle-add-btn plan-add-btn" data-dayoffset="' + i + '">+</button></div>' +
+      badgesHtml + '</div>';
+  }
+
+  // Cellules vides de fin pour compléter la grille 7 colonnes
+  var rem = totalDays % 7;
+  if (rem !== 0) {
+    for (var t = 0; t < (7 - rem); t++) html += '<div class="plan-day-cell plan-day-empty"></div>';
+  }
+
+  html += '</div>';
+  grid.innerHTML = html;
+}
+
+// Sélecteur de séance pour le cycle (modale réutilisée)
+function openCycleSlotPicker(dayOffset) {
+  var sel = $('plan-picker-sel');
+  sel.innerHTML = '';
+  for (var i = 0; i < SIM.blocks.length; i++) {
+    var o = document.createElement('option');
+    o.value = SIM.blocks[i].id;
+    o.textContent = SIM.blocks[i].name;
+    sel.appendChild(o);
+  }
+  var confirmBtn = $('plan-picker-confirm');
+  confirmBtn.dataset.date = '';
+  confirmBtn.dataset.dayoffset = dayOffset;
+
+  // Rerouter le bouton Confirmer vers l'ajout dans le cycle
+  confirmBtn.onclick = function() {
+    var blockId = parseInt($('plan-picker-sel').value);
+    CYCLE.sessions.push({ dayOffset: dayOffset, blockId: blockId });
+    CYCLE.save();
+    closePlanModal('plan-picker-modal');
+    renderCycleGrid();
+  };
+
+  $('plan-picker-modal').style.display = 'flex';
+}
+
+function removeCycleSlot(idx) {
+  CYCLE.sessions.splice(idx, 1);
+  CYCLE.save();
+  renderCycleGrid();
+}
+
+// Génère PLAN.entries à partir du CYCLE et redirige vers le calendrier
+function generatePlanFromCycle() {
+  if (CYCLE.sessions.length === 0) {
+    toast('Aucune séance dans le cycle !');
+    return;
+  }
+  if (!CYCLE.startDate) {
+    toast('Choisissez une date de début !');
+    return;
+  }
+
+  // Parser la date de début
+  var parts = CYCLE.startDate.split('-');
+  var sy = parseInt(parts[0]), sm = parseInt(parts[1]) - 1, sd = parseInt(parts[2]);
+  var cycleDays = _cycleDays();
+  var totalDays = cycleDays * CYCLE.repeat;
+
+  var entries = [];
+  var uid = Date.now();
+
+  for (var rep = 0; rep < CYCLE.repeat; rep++) {
+    for (var s = 0; s < CYCLE.sessions.length; s++) {
+      var slot = CYCLE.sessions[s];
+      var totalOffset = rep * cycleDays + slot.dayOffset;
+      var dt = new Date(sy, sm, sd + totalOffset);
+      var mm = ('0' + (dt.getMonth() + 1)).slice(-2);
+      var dd = ('0' + dt.getDate()).slice(-2);
+      entries.push({
+        id: uid++,
+        date: dt.getFullYear() + '-' + mm + '-' + dd,
+        blockId: slot.blockId,
+        note: ''
+      });
+    }
+  }
+
+  // Remplace le planning actuel
+  PLAN.entries = entries;
+  PLAN.save();
+
+  // Affiche le résumé
+  var endDt = new Date(sy, sm, sd + totalDays - 1);
+  var endMm = ('0' + (endDt.getMonth() + 1)).slice(-2);
+  var endDd = ('0' + endDt.getDate()).slice(-2);
+  var endStr = endDt.getFullYear() + '-' + endMm + '-' + endDd;
+
+  var summary = $('cycle-summary');
+  summary.style.display = 'block';
+  summary.innerHTML = '<div class="card" style="border-left:4px solid var(--green);background:rgba(34,197,94,0.08)">' +
+    '<div style="font-size:16px;font-weight:900;color:var(--green)">✅ Planning généré !</div>' +
+    '<div style="font-size:13px;color:var(--text2);margin-top:6px">' +
+    entries.length + ' séances · du ' + CYCLE.startDate + ' au ' + endStr +
+    ' (' + CYCLE.repeat + ' cycle(s) de ' + cycleDays + ' jours)</div>' +
+    '<button class="btn btn-p" style="margin-top:12px;width:100%" id="cycle-goto-cal">📅 Voir le calendrier</button>' +
+    '</div>';
+
+  $('cycle-goto-cal').addEventListener('click', function() {
+    _switchPlanView('calendar');
+  });
+
+  toast('Planning généré : ' + entries.length + ' séances sur ' + totalDays + ' jours !');
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────
 function loadBlocks() {
   try {
@@ -300,9 +502,11 @@ function saveBlocks() {
 function initSimulation() {
   PLAN.load();
   SIM.blocks = loadBlocks();
+  CYCLE.load();
   populateExerciseSelect($('sim-ex-sel'), true);
 
   $('plan-tab-cal').addEventListener('click', function() { _switchPlanView('calendar'); });
+  $('plan-tab-model').addEventListener('click', function() { _switchPlanView('model'); });
   $('plan-tab-lib').addEventListener('click', function() { _switchPlanView('library'); });
 
   $('plan-period-bar').addEventListener('click', function(ev) {
@@ -370,21 +574,58 @@ function initSimulation() {
     SIM.currentBlock.exercises[idx][field] = parseFloat(input.value) || 0;
     calculateSimResults(SIM.currentBlock.exercises);
   });
+
+  // ── Cycle Modèle ──────────────────────────────────────────────────────────
+  $('cycle-duration-bar').addEventListener('click', function(ev) {
+    var btn = ev.target.closest('.plan-period-btn');
+    if (!btn) return;
+    CYCLE.duration = btn.dataset.dur;
+    CYCLE.save();
+    document.querySelectorAll('#cycle-duration-bar .plan-period-btn').forEach(function(b) {
+      b.classList.toggle('active', b.dataset.dur === CYCLE.duration);
+    });
+    renderCycleGrid();
+  });
+
+  $('cycle-repeat-minus').addEventListener('click', function() {
+    if (CYCLE.repeat > 1) { CYCLE.repeat--; CYCLE.save(); $('cycle-repeat-val').textContent = CYCLE.repeat; }
+  });
+  $('cycle-repeat-plus').addEventListener('click', function() {
+    if (CYCLE.repeat < 52) { CYCLE.repeat++; CYCLE.save(); $('cycle-repeat-val').textContent = CYCLE.repeat; }
+  });
+
+  $('cycle-start-date').addEventListener('change', function() {
+    CYCLE.startDate = this.value;
+    CYCLE.save();
+  });
+
+  $('cycle-grid').addEventListener('click', function(ev) {
+    var addBtn = ev.target.closest('.cycle-add-btn');
+    var delBtn = ev.target.closest('.cycle-slot-del');
+    if (addBtn) { openCycleSlotPicker(parseInt(addBtn.dataset.dayoffset)); return; }
+    if (delBtn) { removeCycleSlot(parseInt(delBtn.dataset.idx)); return; }
+  });
+
+  $('cycle-generate-btn').addEventListener('click', function() { generatePlanFromCycle(); });
 }
 
 function _switchPlanView(view) {
   PLAN.activeView = view;
   $('plan-tab-cal').classList.toggle('active', view === 'calendar');
+  $('plan-tab-model').classList.toggle('active', view === 'model');
   $('plan-tab-lib').classList.toggle('active', view === 'library');
-  $('plan-cal-view').style.display = view === 'calendar' ? 'block' : 'none';
-  $('plan-lib-view').style.display = view === 'library' ? 'block' : 'none';
+  $('plan-cal-view').style.display   = view === 'calendar' ? 'block' : 'none';
+  $('plan-model-view').style.display = view === 'model'    ? 'block' : 'none';
+  $('plan-lib-view').style.display   = view === 'library'  ? 'block' : 'none';
   if (view === 'calendar') renderCalendar();
-  if (view === 'library') renderBlockList();
+  if (view === 'library')  renderBlockList();
+  if (view === 'model')    renderCycleView();
 }
 
 // ── Rendu principal ───────────────────────────────────────────────────────
 function renderSimulation() {
   if (PLAN.activeView === 'calendar') renderCalendar();
+  else if (PLAN.activeView === 'model') renderCycleView();
   else renderBlockList();
 }
 
