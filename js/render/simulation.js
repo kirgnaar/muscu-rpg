@@ -69,6 +69,13 @@ function _thisMonday() {
   return new Date(today.getFullYear(), today.getMonth(), today.getDate() + diff);
 }
 
+// Retourne la date ISO "YYYY-MM-DD" d'un objet Date (lecture seule, pas de mutation)
+function _isoDate(dateObj) {
+  var mm = ('0' + (dateObj.getMonth() + 1)).slice(-2);
+  var dd = ('0' + dateObj.getDate()).slice(-2);
+  return dateObj.getFullYear() + '-' + mm + '-' + dd;
+}
+
 // ── Données Bibliothèque ──────────────────────────────────────────────────
 var SIM = {
   blocks: [],
