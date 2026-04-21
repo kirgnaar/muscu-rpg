@@ -241,7 +241,7 @@
       <!-- Sous-onglets -->
       <div class="plan-tabs">
         <button class="plan-subtab active" id="plan-tab-cal">📅 Calendrier</button>
-        <button class="plan-subtab" id="plan-tab-model">🗓️ Modèle</button>
+        <button class="plan-subtab" id="plan-tab-model">🔄 Cycle</button>
         <button class="plan-subtab" id="plan-tab-lib">📋 Séances</button>
       </div>
 
@@ -261,54 +261,88 @@
         <div id="plan-grid"></div>
       </div>
 
-      <!-- ── Vue Bibliothèque ── -->
+      <!-- ── Vue Cycle ── -->
       <div id="plan-model-view" style="display:none">
 
-        <div class="stitle">Créer un cycle type</div>
-
-        <!-- 1. Durée du cycle -->
-        <div class="card" style="margin-bottom:12px">
-          <div class="clabel" style="margin-bottom:10px">① Durée du cycle</div>
-          <div class="plan-period-bar" id="cycle-duration-bar">
-            <button class="plan-period-btn active" data-dur="week">1 sem.</button>
-            <button class="plan-period-btn" data-dur="2weeks">2 sem.</button>
-            <button class="plan-period-btn" data-dur="month">1 mois</button>
-            <button class="plan-period-btn" data-dur="3months">3 mois</button>
+        <!-- Sous-vue : liste des cycles sauvegardés -->
+        <div id="cycle-list-subview">
+          <div class="stitle flex-between" style="display:flex">
+            <span>Mes cycles</span>
+            <button class="btn btn-s" id="cycle-new-btn">+ Nouveau</button>
           </div>
+          <div id="cycle-list"></div>
         </div>
 
-        <!-- 2. Mini-grille de placement -->
-        <div class="card" style="margin-bottom:12px">
-          <div class="clabel" style="margin-bottom:10px">② Placer les séances</div>
-          <div id="cycle-grid"></div>
+        <!-- Sous-vue : éditeur d'un cycle (caché par défaut) -->
+        <div id="cycle-editor-subview" style="display:none">
+
+          <!-- Nom du cycle -->
+          <div class="card" style="margin-bottom:12px">
+            <div class="clabel" style="margin-bottom:6px">Nom du cycle</div>
+            <input type="text" id="cycle-name-input" placeholder="Ex : Semaine PP Judo…"
+              style="background:none;border:none;border-bottom:1px solid var(--border);color:#fff;font-size:17px;font-weight:800;width:100%;padding-bottom:6px">
+          </div>
+
+          <!-- 1. Durée -->
+          <div class="card" style="margin-bottom:12px">
+            <div class="clabel" style="margin-bottom:10px">① Durée du cycle</div>
+            <div class="plan-period-bar" id="cycle-duration-bar">
+              <button class="plan-period-btn active" data-dur="week">1 sem.</button>
+              <button class="plan-period-btn" data-dur="2weeks">2 sem.</button>
+              <button class="plan-period-btn" data-dur="month">1 mois</button>
+              <button class="plan-period-btn" data-dur="3months">3 mois</button>
+            </div>
+          </div>
+
+          <!-- 2. Grille de placement -->
+          <div class="card" style="margin-bottom:12px">
+            <div class="clabel" style="margin-bottom:10px">② Placer les séances</div>
+            <div id="cycle-grid"></div>
+          </div>
+
+          <!-- 3. Répétitions par défaut -->
+          <div class="card" style="margin-bottom:12px">
+            <div class="clabel" style="margin-bottom:6px">③ Répétitions par défaut</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button class="btn btn-s" id="cycle-repeat-minus">−</button>
+              <span id="cycle-repeat-val" style="font-size:20px;font-weight:900;min-width:28px;text-align:center">1</span>
+              <button class="btn btn-s" id="cycle-repeat-plus">+</button>
+              <span style="font-size:12px;color:var(--text2)">fois</span>
+            </div>
+          </div>
+
+          <!-- Boutons Sauvegarder / Annuler -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <button class="btn" id="cycle-editor-cancel" style="background:rgba(255,255,255,0.07)">Annuler</button>
+            <button class="btn btn-p" id="cycle-editor-save">💾 Sauvegarder</button>
+          </div>
+
         </div>
 
-        <!-- 3. Répétitions + Date de début -->
-        <div class="card" style="margin-bottom:12px">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-            <div>
-              <div class="clabel" style="margin-bottom:6px">③ Répéter le cycle</div>
-              <div style="display:flex;align-items:center;gap:10px">
-                <button class="btn btn-s" id="cycle-repeat-minus">−</button>
-                <span id="cycle-repeat-val" style="font-size:20px;font-weight:900;min-width:28px;text-align:center">1</span>
-                <button class="btn btn-s" id="cycle-repeat-plus">+</button>
+        <!-- Modal : générer un cycle (date de début + répétitions) -->
+        <div id="cycle-gen-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center">
+          <div class="card" style="width:90%;max-width:380px;padding:20px">
+            <div style="font-size:16px;font-weight:900;margin-bottom:14px">🚀 Générer le planning</div>
+            <div id="cycle-gen-cycle-name" style="font-size:13px;color:var(--accent);font-weight:700;margin-bottom:14px"></div>
+            <div class="fgroup">
+              <label class="flabel">Date de début</label>
+              <input type="date" id="cycle-gen-start-date" style="background:var(--card);border:1px solid var(--border);color:#fff;padding:8px 10px;border-radius:8px;font-size:14px;width:100%">
+            </div>
+            <div class="fgroup" style="margin-top:12px">
+              <label class="flabel">Répéter le cycle</label>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+                <button class="btn btn-s" id="cycle-gen-repeat-minus">−</button>
+                <span id="cycle-gen-repeat-val" style="font-size:20px;font-weight:900;min-width:28px;text-align:center">1</span>
+                <button class="btn btn-s" id="cycle-gen-repeat-plus">+</button>
                 <span style="font-size:12px;color:var(--text2)">fois</span>
               </div>
             </div>
-            <div>
-              <div class="clabel" style="margin-bottom:6px">④ Date de début</div>
-              <input type="date" id="cycle-start-date" style="background:var(--card);border:1px solid var(--border);color:#fff;padding:8px 10px;border-radius:8px;font-size:14px;width:100%">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+              <button class="btn" id="cycle-gen-cancel" style="background:rgba(255,255,255,0.07)">Annuler</button>
+              <button class="btn btn-p" id="cycle-gen-confirm">🚀 Générer</button>
             </div>
           </div>
         </div>
-
-        <!-- Bouton générer -->
-        <button class="btn btn-p" id="cycle-generate-btn" style="width:100%;padding:14px;font-size:16px;font-weight:900">
-          🚀 Générer le planning
-        </button>
-
-        <!-- Résumé après génération -->
-        <div id="cycle-summary" style="display:none;margin-top:12px"></div>
 
       </div>
 
