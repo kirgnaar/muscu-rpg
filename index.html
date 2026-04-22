@@ -624,31 +624,113 @@
     <div class="view" id="v-profil">
     <div class="content">
       <div class="clabel" data-i18n="menu_profil">Mon Profil</div>
-      <div class="card">
-        <div class="fgroup">
-          <label class="flabel" data-i18n="label_prenom">Prénom</label>
-          <input type="text" id="prof-prenom" placeholder="Prénom">
-        </div>
-        <div class="fgroup">
-          <label class="flabel" data-i18n="label_nom">Nom</label>
-          <input type="text" id="prof-nom" placeholder="Nom">
-        </div>
-        <div class="kpi-row">
-          <div class="fgroup">
-            <label class="flabel" data-i18n="label_age">Âge</label>
-            <input type="number" id="prof-age" placeholder="25">
-          </div>
-          <div class="fgroup">
-            <label class="flabel" data-i18n="label_poids">Poids (kg)</label>
-            <input type="number" id="prof-poids" placeholder="75">
-          </div>
-        </div>
-        <div class="fgroup">
-          <label class="flabel" data-i18n="label_taille">Taille (cm)</label>
-          <input type="number" id="prof-taille" placeholder="180">
-        </div>
-        <button class="btn btn-p" onclick="saveProfile()" data-i18n="btn_save_profile">Enregistrer le Profil</button>
+
+      <!-- Sous-onglets -->
+      <div class="plan-tabs" style="margin-bottom:14px">
+        <button class="plan-subtab active" id="prof-tab-id">👤 Identité</button>
+        <button class="plan-subtab" id="prof-tab-poids">⚖️ Poids</button>
+        <button class="plan-subtab" id="prof-tab-force">💪 Force</button>
       </div>
+
+      <!-- ── Sous-vue Identité ── -->
+      <div id="prof-id-view">
+        <div class="card">
+          <div class="fgroup">
+            <label class="flabel" data-i18n="label_prenom">Prénom</label>
+            <input type="text" id="prof-prenom" placeholder="Prénom">
+          </div>
+          <div class="fgroup">
+            <label class="flabel" data-i18n="label_nom">Nom</label>
+            <input type="text" id="prof-nom" placeholder="Nom">
+          </div>
+          <div class="kpi-row">
+            <div class="fgroup">
+              <label class="flabel" data-i18n="label_age">Âge</label>
+              <input type="number" id="prof-age" placeholder="25">
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Sexe</label>
+              <select id="prof-sexe">
+                <option value="M">Homme</option>
+                <option value="F">Femme</option>
+              </select>
+            </div>
+          </div>
+          <div class="kpi-row">
+            <div class="fgroup">
+              <label class="flabel" data-i18n="label_poids">Poids (kg)</label>
+              <input type="number" id="prof-poids" placeholder="75" step="0.1">
+            </div>
+            <div class="fgroup">
+              <label class="flabel" data-i18n="label_taille">Taille (cm)</label>
+              <input type="number" id="prof-taille" placeholder="180">
+            </div>
+          </div>
+          <button class="btn btn-p" onclick="saveProfile()" data-i18n="btn_save_profile">Enregistrer le Profil</button>
+        </div>
+      </div>
+
+      <!-- ── Sous-vue Poids ── -->
+      <div id="prof-poids-view" style="display:none">
+
+        <!-- Saisie rapide -->
+        <div class="card" style="margin-bottom:12px">
+          <div class="clabel" style="margin-bottom:10px">Enregistrer mon poids</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <label class="flabel">Date</label>
+              <input type="date" id="wlog-date" style="background:var(--card);border:1px solid var(--border);color:#fff;padding:8px;border-radius:8px;font-size:14px;width:100%">
+            </div>
+            <div>
+              <label class="flabel">Poids (kg)</label>
+              <input type="number" id="wlog-poids" placeholder="75.0" step="0.1" style="width:100%">
+            </div>
+          </div>
+          <button class="btn btn-p" id="wlog-add-btn" style="width:100%">+ Enregistrer</button>
+        </div>
+
+        <!-- Stats rapides -->
+        <div id="wlog-stats" style="margin-bottom:12px"></div>
+
+        <!-- Sélecteur période -->
+        <div class="plan-period-bar" id="wlog-period-bar" style="margin-bottom:10px">
+          <button class="plan-period-btn active" data-period="1m">1 mois</button>
+          <button class="plan-period-btn" data-period="3m">3 mois</button>
+          <button class="plan-period-btn" data-period="6m">6 mois</button>
+          <button class="plan-period-btn" data-period="1y">1 an</button>
+          <button class="plan-period-btn" data-period="all">Tout</button>
+        </div>
+
+        <!-- Graphique SVG -->
+        <div class="card" style="padding:10px;margin-bottom:12px">
+          <div id="wlog-chart"></div>
+        </div>
+
+        <!-- Historique récent -->
+        <div class="card">
+          <div class="clabel" style="margin-bottom:8px">Historique</div>
+          <div id="wlog-history"></div>
+        </div>
+
+      </div>
+
+      <!-- ── Sous-vue Force ── -->
+      <div id="prof-force-view" style="display:none">
+
+        <!-- Ratio Force / Poids de corps -->
+        <div class="card" style="margin-bottom:12px">
+          <div class="clabel" style="margin-bottom:10px">⚡ Ratio Force / Poids de corps</div>
+          <div id="force-ratio-table"></div>
+        </div>
+
+        <!-- Wilks 2020 + Dots -->
+        <div class="card">
+          <div class="clabel" style="margin-bottom:10px">🏆 Coefficients Wilks & Dots</div>
+          <div id="force-wilks-dots"></div>
+        </div>
+
+      </div>
+
     </div>
   </div>
 
@@ -727,6 +809,7 @@
 <script src="js/render/badges.js"></script>
 
 <!-- 5. App (doit être en dernier) -->
+<script src="js/render/corps.js"></script>
 <script src="js/app.js"></script>
 
 <!-- 6. Firebase & Auth (Modules ESM) -->

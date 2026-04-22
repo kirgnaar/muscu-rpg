@@ -199,31 +199,31 @@ function confirmLang() {
 }
 
 function renderProfil() {
-
-  $('v-profil').querySelector('.clabel').textContent = APP.t('menu_profil');
-  var labels = $$('.flabel', $('v-profil'));
-  labels[0].textContent = APP.t('label_prenom');
-  labels[1].textContent = APP.t('label_nom');
-  labels[2].textContent = APP.t('label_age');
-  labels[3].textContent = APP.t('label_poids');
-  labels[4].textContent = APP.t('label_taille');
-  $('v-profil').querySelector('button').textContent = APP.t('btn_save_profile');
-
   if (!APP.user) return;
-  document.getElementById('prof-prenom').value = APP.user.prenom;
-  document.getElementById('prof-nom').value = APP.user.nom;
-  document.getElementById('prof-age').value = APP.user.age;
-  document.getElementById('prof-poids').value = APP.user.poids;
-  document.getElementById('prof-taille').value = APP.user.taille;
+  document.getElementById('prof-prenom').value  = APP.user.prenom  || '';
+  document.getElementById('prof-nom').value     = APP.user.nom     || '';
+  document.getElementById('prof-age').value     = APP.user.age     || '';
+  document.getElementById('prof-poids').value   = APP.user.poids   || '';
+  document.getElementById('prof-taille').value  = APP.user.taille  || '';
+  document.getElementById('prof-sexe').value    = APP.user.sexe    || 'M';
+  renderProfTabs();
 }
 
 function saveProfile() {
   APP.user.prenom = document.getElementById('prof-prenom').value;
-  APP.user.nom = document.getElementById('prof-nom').value;
-  APP.user.age = parseInt(document.getElementById('prof-age').value) || 0;
-  APP.user.poids = parseFloat(document.getElementById('prof-poids').value) || 0;
+  APP.user.nom    = document.getElementById('prof-nom').value;
+  APP.user.age    = parseInt(document.getElementById('prof-age').value)    || 0;
+  APP.user.poids  = parseFloat(document.getElementById('prof-poids').value) || 0;
   APP.user.taille = parseInt(document.getElementById('prof-taille').value) || 0;
+  APP.user.sexe   = document.getElementById('prof-sexe').value || 'M';
   saveUser(APP.user);
+  // Sync poids dans le log si valeur saisie
+  if (APP.user.poids > 0 && typeof CORPS !== 'undefined') {
+    var today = new Date();
+    var mm = ('0' + (today.getMonth()+1)).slice(-2);
+    var dd = ('0' + today.getDate()).slice(-2);
+    CORPS.addEntry(today.getFullYear() + '-' + mm + '-' + dd, APP.user.poids);
+  }
   renderHeader();
   if (typeof toast === 'function') toast(APP.t('profile_saved'));
 }
@@ -271,7 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   initJournal();
   initPR();
-  initStats();
+  initCorps();
   initBadges();
   initSimulation();
   if (typeof TIMER !== 'undefined') TIMER.init();
