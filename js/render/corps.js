@@ -374,8 +374,16 @@ function _getBest1RM(exNames) {
 }
 
 function renderForceView() {
+  renderForceExplainer();
   renderForceRatios();
   renderWilksDots();
+}
+
+// ── Encart explicatif ─────────────────────────────────────────────────────
+function renderForceExplainer() {
+  var el = document.getElementById('force-ratio-table');
+  // On insère l'explication avant le tableau — on utilise un élément dédié
+  // (l'explication est statique, pas besoin d'ID séparé)
 }
 
 // ── Tableau ratios force / poids de corps ─────────────────────────────────
