@@ -652,3 +652,39 @@ select {
   color: #fff;
   margin-bottom: 8px;
 }
+
+/* ── Profil : barre d'onglets bas (style nav principale) ────────────────── */
+.prof-tabs-bar {
+  flex-shrink: 0;
+  display: flex;
+  background: var(--tabs-bg);
+  border-top: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding-bottom: var(--safe-b);
+}
+.prof-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px 0 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  gap: 3px;
+}
+.prof-tab span:first-child  { font-size: 20px; line-height: 1; transition: transform 0.15s; }
+.prof-tab span:last-child   { font-size: 10px; font-weight: 600; color: var(--text2); letter-spacing: 0.2px; }
+.prof-tab.active span:first-child { transform: scale(1.1); }
+.prof-tab.active span:last-child  { color: var(--accent); }
+.prof-tab.active::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%;
+  transform: translateX(-50%);
+  width: 32px; height: 2px;
+  background: var(--accent);
+  border-radius: 2px;
+}

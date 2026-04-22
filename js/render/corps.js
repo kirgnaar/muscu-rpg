@@ -38,7 +38,7 @@ CORPS.addEntry = function(date, poids) {
 function initCorps() {
   CORPS.loadWlog();
 
-  // Sous-onglets
+  // Sous-onglets (barre du bas)
   document.getElementById('prof-tab-id').addEventListener('click',    function() { _switchProfTab('id'); });
   document.getElementById('prof-tab-poids').addEventListener('click', function() { _switchProfTab('poids'); });
   document.getElementById('prof-tab-force').addEventListener('click', function() { _switchProfTab('force'); });
@@ -80,7 +80,6 @@ function _switchProfTab(tab) {
   if (tab === 'poids') renderWeightView();
   if (tab === 'force') renderForceView();
 }
-
 // ══════════════════════════════════════════════════════════════════════════
 // ⚖️  ONGLET POIDS
 // ══════════════════════════════════════════════════════════════════════════

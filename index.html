@@ -625,13 +625,6 @@
     <div class="content">
       <div class="clabel" data-i18n="menu_profil">Mon Profil</div>
 
-      <!-- Sous-onglets -->
-      <div class="plan-tabs" style="margin-bottom:14px">
-        <button class="plan-subtab active" id="prof-tab-id">👤 Identité</button>
-        <button class="plan-subtab" id="prof-tab-poids">⚖️ Poids</button>
-        <button class="plan-subtab" id="prof-tab-force">💪 Force</button>
-      </div>
-
       <!-- ── Sous-vue Identité ── -->
       <div id="prof-id-view">
         <div class="card">
@@ -732,6 +725,20 @@
       </div>
 
     </div>
+
+    <!-- Barre d'onglets bas — style nav principale -->
+    <div class="prof-tabs-bar">
+      <button class="prof-tab active" id="prof-tab-id">
+        <span>👤</span><span>Identité</span>
+      </button>
+      <button class="prof-tab" id="prof-tab-poids">
+        <span>⚖️</span><span>Poids</span>
+      </button>
+      <button class="prof-tab" id="prof-tab-force">
+        <span>💪</span><span>Force</span>
+      </button>
+    </div>
+
   </div>
 
   <div class="view" id="v-settings">
