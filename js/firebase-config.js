@@ -8,8 +8,10 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase
 
 const firebaseConfig = {
   apiKey: "AIzaSyCjsXZ7jvxD5RsuAfI19DvDpaACFpmUnPg",
-  // ↓ Domaine de l'app GitHub Pages — critique pour iOS PWA (pas firebaseapp.com)
-  authDomain: "kirgnaar.github.io",
+  // authDomain = domaine Firebase Hosting qui héberge /__/auth/handler
+  // ⚠️  NE PAS mettre kirgnaar.github.io ici — GitHub Pages ne sert pas ce handler.
+  // kirgnaar.github.io doit être dans "Domaines autorisés" de la console Firebase (✅ fait).
+  authDomain: "muscu-rpg.firebaseapp.com",
   databaseURL: "https://muscu-rpg-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "muscu-rpg",
   storageBucket: "muscu-rpg.firebasestorage.app",
