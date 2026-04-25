@@ -96,15 +96,18 @@ export var Auth = {
 
   // ── Connexion : redirect uniquement (compatible iOS PWA + tout le reste) ──
   login: function() {
+    var self = this;
     var btn = document.getElementById('auth-login-btn');
     if (btn) {
-      btn.disabled = true;
+      btn.disabled  = true;
       btn.innerHTML = '🔄 Connexion...';
     }
-    // Petit délai pour que l'UI se mette à jour avant la navigation
-    setTimeout(function() {
-      signInWithRedirect(auth, googleProvider);
-    }, 100);
+    // ⚠️  PAS de setTimeout : iOS Safari bloque les navigations non-synchrones
+    // avec le geste utilisateur. On appelle signInWithRedirect directement.
+    signInWithRedirect(auth, googleProvider).catch(function(err) {
+      console.error('[Auth] signInWithRedirect error:', err.code, err.message);
+      self._showError('Connexion échouée (' + err.code + '). Réessaie.');
+    });
   },
 
   logout: function() {
