@@ -271,6 +271,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   initJournal();
   initPR();
+  initStats();
   initCorps();
   initBadges();
   initSimulation();
