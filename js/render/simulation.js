@@ -754,7 +754,6 @@ function _switchPlanView(view) {
 
 // ── Rendu principal ───────────────────────────────────────────────────────
 function renderSimulation() {
-  renderTodayTask();
   if (PLAN.activeView === 'calendar') renderCalendar();
   else if (PLAN.activeView === 'model') renderCycleView();
   else renderBlockList();
@@ -771,13 +770,13 @@ function renderTodayTask() {
   var d     = new Date(today + 'T00:00:00');
   var dateLabel = JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()];
 
-  // Toutes les entrées du jour
+  // Entrées du jour dans le planning
   var todayEntries = [];
   for (var i = 0; i < PLAN.entries.length; i++) {
     if (PLAN.entries[i].date === today) todayEntries.push(PLAN.entries[i]);
   }
 
-  // ── Aucune séance planifiée aujourd'hui ───────────────────────────────
+  // ── Repos ────────────────────────────────────────────────────────────
   if (!todayEntries.length) {
     el.innerHTML =
       '<div class="card" style="margin-bottom:12px;border-left:3px solid var(--border)">' +
@@ -792,62 +791,126 @@ function renderTodayTask() {
     return;
   }
 
-  // ── Une ou plusieurs séances planifiées ──────────────────────────────
+  // ── Séance(s) du jour avec inputs éditables ──────────────────────────
+  var typeColors = {
+    'Hypertrophie': '#3b82f6', 'Force': '#ef4444',
+    'Hyperforce (PR)': '#8b5cf6', 'Endurance musculaire': '#10b981', 'Décharge': '#64748b'
+  };
+
   var html = '';
   for (var j = 0; j < todayEntries.length; j++) {
-    var entry = todayEntries[j];
-    var block = _getBlockById(entry.blockId);
+    var entry  = todayEntries[j];
+    var block  = _getBlockById(entry.blockId);
     if (!block) continue;
+    var color  = typeColors[block.type] || 'var(--accent)';
+    var eid    = entry.id; // pour le logger
 
-    // Couleur selon type
-    var typeColors = {
-      'Hypertrophie':         '#3b82f6',
-      'Force':                '#ef4444',
-      'Hyperforce (PR)':      '#8b5cf6',
-      'Endurance musculaire': '#10b981',
-      'Décharge':             '#64748b'
-    };
-    var accentColor = typeColors[block.type] || 'var(--accent)';
-
-    // Liste des exercices (compacte)
-    var exHtml = '';
-    for (var k = 0; k < block.exercises.length; k++) {
-      var ex = block.exercises[k];
-      exHtml +=
-        '<div style="display:flex;justify-content:space-between;align-items:center;' +
-                    'padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">' +
-          '<span style="font-size:13px;color:#fff">' + ex.ex + '</span>' +
-          '<span style="font-size:12px;color:var(--text2);white-space:nowrap;margin-left:8px">' +
-            ex.ser + '×' + ex.rep + (ex.pds > 0 ? ' @ ' + ex.pds + ' kg' : '') +
-          '</span>' +
-        '</div>';
-    }
-
+    // En-tête
     html +=
-      '<div class="card" style="margin-bottom:12px;border-left:3px solid ' + accentColor + '">' +
-        // En-tête
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+      '<div class="card" style="margin-bottom:12px;border-left:3px solid ' + color + '">' +
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
           '<div>' +
-            '<div style="font-size:11px;color:' + accentColor + ';font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">' +
-              '📅 Séance du jour — ' + dateLabel +
+            '<div style="font-size:11px;color:' + color + ';font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">' +
+              '📅 ' + dateLabel +
             '</div>' +
             '<div style="font-size:16px;font-weight:800;color:#fff">' + block.name + '</div>' +
           '</div>' +
-          '<div style="font-size:11px;color:var(--text2);text-align:right">' +
-            block.exercises.length + ' exercice' + (block.exercises.length > 1 ? 's' : '') +
-          '</div>' +
-        '</div>' +
-        // Liste des exercices
-        '<div style="margin-bottom:12px">' + exHtml + '</div>' +
-        // Bouton logger
-        '<button class="btn btn-p" style="width:100%;background:' + accentColor + ';border-color:' + accentColor + '" ' +
-          'onclick="openPlanDetail(' + entry.id + ')">' +
-          '▶ Voir & Logger la séance' +
-        '</button>' +
-      '</div>';
+          '<div style="font-size:11px;color:var(--text2)">' + block.exercises.length + ' ex.</div>' +
+        '</div>';
+
+    // Tableau des exercices éditables
+    html +=
+      '<div style="margin-bottom:12px">' +
+        // En-tête colonne
+        '<div style="display:grid;grid-template-columns:1fr 44px 44px 60px;gap:4px;' +
+             'padding:0 0 6px;border-bottom:1px solid rgba(255,255,255,0.1);' +
+             'font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase">' +
+          '<div>Exercice</div><div style="text-align:center">Sér.</div>' +
+          '<div style="text-align:center">Rép.</div><div style="text-align:center">Poids</div>' +
+        '</div>';
+
+    for (var k = 0; k < block.exercises.length; k++) {
+      var ex  = block.exercises[k];
+      var pfx = 'td-' + eid + '-' + k; // préfixe unique par input
+      html +=
+        '<div style="display:grid;grid-template-columns:1fr 44px 44px 60px;gap:4px;' +
+             'align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
+          '<div style="font-size:12px;color:#fff;line-height:1.3">' + ex.ex + '</div>' +
+          // Séries
+          '<input type="number" id="' + pfx + '-s" value="' + ex.ser + '" min="1" max="20"' +
+            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);' +
+            'border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
+          // Reps
+          '<input type="number" id="' + pfx + '-r" value="' + ex.rep + '" min="1" max="100"' +
+            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);' +
+            'border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
+          // Poids
+          '<input type="number" id="' + pfx + '-p" value="' + ex.pds + '" min="0" max="500" step="0.5"' +
+            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);' +
+            'border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
+        '</div>';
+    }
+    html += '</div>'; // fin tableau
+
+    // Bouton logger — lit les inputs au moment du tap
+    html +=
+      '<button class="btn btn-p"' +
+        ' id="today-log-btn-' + eid + '"' +
+        ' style="width:100%;background:' + color + ';border-color:' + color + '"' +
+        ' onclick="_logTodayTask(' + eid + ',' + block.exercises.length + ')">' +
+        '✓ Logger cette séance' +
+      '</button>' +
+    '</div>';
   }
 
   el.innerHTML = html;
+}
+
+// ── Logger depuis la tâche du jour (lit les inputs éditables) ────────────
+function _logTodayTask(entryId, exCount) {
+  // Double-tap pour confirmer
+  var btn = $('today-log-btn-' + entryId);
+  if (btn && btn.dataset.confirm !== '1') {
+    btn.dataset.confirm = '1';
+    btn.textContent = '⚠️ Confirmer le log ?';
+    setTimeout(function() {
+      if (btn && btn.dataset.confirm === '1') {
+        btn.dataset.confirm = '';
+        btn.textContent = '✓ Logger cette séance';
+      }
+    }, 3000);
+    return;
+  }
+
+  var entry = null;
+  for (var i = 0; i < PLAN.entries.length; i++) {
+    if (PLAN.entries[i].id === entryId) { entry = PLAN.entries[i]; break; }
+  }
+  if (!entry) return;
+  var block = _getBlockById(entry.blockId);
+  if (!block) return;
+
+  var type = block.type || 'Hypertrophie';
+  var logged = 0;
+  for (var k = 0; k < exCount; k++) {
+    var pfx = 'td-' + entryId + '-' + k;
+    var sEl = $(pfx + '-s');
+    var rEl = $(pfx + '-r');
+    var pEl = $(pfx + '-p');
+    if (!sEl || !rEl || !pEl) continue;
+    var ser = parseInt(sEl.value)   || 0;
+    var rep = parseInt(rEl.value)   || 0;
+    var pds = parseFloat(pEl.value) || 0;
+    if (ser < 1 || rep < 1) continue;
+    var ex = block.exercises[k];
+    addEntry({ date: entry.date, type: type, ex: ex.ex, grp: ex.grp || getPrimaryGroup(ex.ex), ser: ser, rep: rep, pds: pds });
+    logged++;
+  }
+
+  if (logged === 0) { toast('Aucun exercice valide à loguer', 'err'); return; }
+  APP.render();
+  toast('✓ ' + logged + ' exercice' + (logged > 1 ? 's' : '') + ' loggé' + (logged > 1 ? 's' : '') + ' !');
+  APP.switchView('seances');
 }
 
 // ── Calendrier ────────────────────────────────────────────────────────────
@@ -921,6 +984,7 @@ function _getPeriodLabel() {
 }
 
 function renderCalendar() {
+  renderTodayTask();
   var days = _getPeriodDays();
   var todayStr = todayISO();
 
