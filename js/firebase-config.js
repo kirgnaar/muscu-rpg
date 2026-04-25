@@ -3,7 +3,11 @@
  * Mis à jour le 16/04/2026
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { initializeAuth, indexedDBLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  initializeAuth,
+  indexedDBLocalPersistence,
+  browserPopupRedirectResolver
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -22,11 +26,12 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// indexedDBLocalPersistence au lieu de sessionStorage (défaut) :
-// sessionStorage est vidé lors des navigations cross-origin (ex: redirect OAuth sur iOS).
-// IndexedDB persiste entre les navigations dans le même WebView → signInWithRedirect fonctionne.
+// indexedDBLocalPersistence : survit aux redirects cross-origin (iOS PWA)
+// browserPopupRedirectResolver : OBLIGATOIRE avec initializeAuth() manuel —
+//   sans lui, signInWithRedirect() et getRedirectResult() lèvent auth/argument-error
 export const auth = initializeAuth(app, {
-  persistence: indexedDBLocalPersistence
+  persistence:           indexedDBLocalPersistence,
+  popupRedirectResolver: browserPopupRedirectResolver
 });
 export const db = getFirestore(app);
 
