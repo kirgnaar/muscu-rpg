@@ -754,9 +754,100 @@ function _switchPlanView(view) {
 
 // ── Rendu principal ───────────────────────────────────────────────────────
 function renderSimulation() {
+  renderTodayTask();
   if (PLAN.activeView === 'calendar') renderCalendar();
   else if (PLAN.activeView === 'model') renderCycleView();
   else renderBlockList();
+}
+
+// ── Tâche du jour ─────────────────────────────────────────────────────────
+function renderTodayTask() {
+  var el = $('today-task');
+  if (!el) return;
+
+  var today = todayISO();
+  var JOURS = ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+  var MOIS  = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  var d     = new Date(today + 'T00:00:00');
+  var dateLabel = JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()];
+
+  // Toutes les entrées du jour
+  var todayEntries = [];
+  for (var i = 0; i < PLAN.entries.length; i++) {
+    if (PLAN.entries[i].date === today) todayEntries.push(PLAN.entries[i]);
+  }
+
+  // ── Aucune séance planifiée aujourd'hui ───────────────────────────────
+  if (!todayEntries.length) {
+    el.innerHTML =
+      '<div class="card" style="margin-bottom:12px;border-left:3px solid var(--border)">' +
+        '<div style="display:flex;align-items:center;gap:10px">' +
+          '<span style="font-size:22px">😴</span>' +
+          '<div>' +
+            '<div style="font-weight:800;color:#fff;font-size:14px">Repos — ' + dateLabel + '</div>' +
+            '<div style="font-size:12px;color:var(--text2);margin-top:2px">Aucune séance planifiée aujourd\'hui</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    return;
+  }
+
+  // ── Une ou plusieurs séances planifiées ──────────────────────────────
+  var html = '';
+  for (var j = 0; j < todayEntries.length; j++) {
+    var entry = todayEntries[j];
+    var block = _getBlockById(entry.blockId);
+    if (!block) continue;
+
+    // Couleur selon type
+    var typeColors = {
+      'Hypertrophie':         '#3b82f6',
+      'Force':                '#ef4444',
+      'Hyperforce (PR)':      '#8b5cf6',
+      'Endurance musculaire': '#10b981',
+      'Décharge':             '#64748b'
+    };
+    var accentColor = typeColors[block.type] || 'var(--accent)';
+
+    // Liste des exercices (compacte)
+    var exHtml = '';
+    for (var k = 0; k < block.exercises.length; k++) {
+      var ex = block.exercises[k];
+      exHtml +=
+        '<div style="display:flex;justify-content:space-between;align-items:center;' +
+                    'padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05)">' +
+          '<span style="font-size:13px;color:#fff">' + ex.ex + '</span>' +
+          '<span style="font-size:12px;color:var(--text2);white-space:nowrap;margin-left:8px">' +
+            ex.ser + '×' + ex.rep + (ex.pds > 0 ? ' @ ' + ex.pds + ' kg' : '') +
+          '</span>' +
+        '</div>';
+    }
+
+    html +=
+      '<div class="card" style="margin-bottom:12px;border-left:3px solid ' + accentColor + '">' +
+        // En-tête
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
+          '<div>' +
+            '<div style="font-size:11px;color:' + accentColor + ';font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">' +
+              '📅 Séance du jour — ' + dateLabel +
+            '</div>' +
+            '<div style="font-size:16px;font-weight:800;color:#fff">' + block.name + '</div>' +
+          '</div>' +
+          '<div style="font-size:11px;color:var(--text2);text-align:right">' +
+            block.exercises.length + ' exercice' + (block.exercises.length > 1 ? 's' : '') +
+          '</div>' +
+        '</div>' +
+        // Liste des exercices
+        '<div style="margin-bottom:12px">' + exHtml + '</div>' +
+        // Bouton logger
+        '<button class="btn btn-p" style="width:100%;background:' + accentColor + ';border-color:' + accentColor + '" ' +
+          'onclick="openPlanDetail(' + entry.id + ')">' +
+          '▶ Voir & Logger la séance' +
+        '</button>' +
+      '</div>';
+  }
+
+  el.innerHTML = html;
 }
 
 // ── Calendrier ────────────────────────────────────────────────────────────
@@ -973,7 +1064,24 @@ function _logPlanEntry(entryId) {
   if (!entry) return;
   var block = _getBlockById(entry.blockId);
   if (!block || block.exercises.length === 0) { toast('Séance vide', 'err'); return; }
-  if (!confirm('Logger "' + block.name + '" pour le ' + _formatDateFull(entry.date) + ' ?')) return;
+
+  // Pas de confirm() — bloqué sur iOS PWA : double-tap sur le bouton
+  var btn = $('plan-detail-log-btn');
+  if (btn && btn.dataset.confirm !== '1') {
+    btn.dataset.confirm = '1';
+    btn.textContent = '⚠️ Confirmer le log ?';
+    btn.style.background = '#f97316';
+    setTimeout(function() {
+      if (btn) {
+        btn.dataset.confirm = '';
+        btn.textContent = '✓ Logger cette séance';
+        btn.style.background = '';
+      }
+    }, 3000);
+    return;
+  }
+  // 2e appui : on logue
+  if (btn) { btn.dataset.confirm = ''; btn.textContent = '✓ Logger cette séance'; btn.style.background = ''; }
 
   var type = block.type || 'Hypertrophie';
   for (var j = 0; j < block.exercises.length; j++) {
