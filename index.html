@@ -841,25 +841,43 @@
 <script src="js/render/corps.js"></script>
 <script src="js/app.js"></script>
 
-<!-- 6. Firebase & Auth (Modules ESM) -->
+<!-- 6. Firebase & Auth (Modules ESM)
+     Chargé en dernier — expose window.Auth et window.pushToCloud pour les scripts classiques.
+     signInWithRedirect est utilisé partout (popup bloqué sur iOS PWA). -->
 <script type="module">
-  import { Auth } from './js/auth.js';
-  import { pushToCloud } from './js/sync.js';
+  import { Auth }         from './js/auth.js';
+  import { pushToCloud }  from './js/sync.js';
 
-  window.Auth = Auth;
-  window.pushToCloud = pushToCloud; // accessible depuis data.js (script classique)
+  // Exposition globale (data.js, sync.js les lisent via window.*)
+  window.Auth         = Auth;
+  window.pushToCloud  = pushToCloud;
+
+  // Boutons du menu latéral
+  var loginBtn  = document.getElementById('auth-login-btn');
+  var logoutBtn = document.getElementById('auth-logout-btn');
+
+  if (loginBtn)  loginBtn.addEventListener('click',  function() { Auth.login();  });
+  if (logoutBtn) logoutBtn.addEventListener('click',  function() {
+    // Confirmation inline (pas de confirm() — bloqué sur iOS PWA)
+    var btn = logoutBtn;
+    if (btn.dataset.confirm === '1') {
+      Auth.logout();
+      btn.dataset.confirm  = '';
+      btn.textContent      = '✕';
+    } else {
+      btn.dataset.confirm  = '1';
+      btn.textContent      = '⚠️ Confirmer ?';
+      btn.style.color      = '#ef4444';
+      setTimeout(function() {
+        btn.dataset.confirm = '';
+        btn.textContent     = '✕';
+        btn.style.color     = '';
+      }, 3000);
+    }
+  });
+
+  // Initialisation — getRedirectResult + onAuthStateChanged
   Auth.init();
-  
-  const loginBtn = document.getElementById('auth-login-btn');
-  const logoutBtn = document.getElementById('auth-logout-btn');
-  
-  if (loginBtn) loginBtn.addEventListener('click', function() { 
-    if (window.Auth) window.Auth.login(); 
-    else alert("Erreur : Le module Auth n'est pas prêt.");
-  });
-  if (logoutBtn) logoutBtn.addEventListener('click', function() { 
-    if (window.Auth) window.Auth.logout(); 
-  });
 </script>
 
 </body>

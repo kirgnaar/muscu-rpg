@@ -8,7 +8,8 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase
 
 const firebaseConfig = {
   apiKey: "AIzaSyCjsXZ7jvxD5RsuAfI19DvDpaACFpmUnPg",
-  authDomain: "muscu-rpg.firebaseapp.com",
+  // ↓ Domaine de l'app GitHub Pages — critique pour iOS PWA (pas firebaseapp.com)
+  authDomain: "kirgnaar.github.io",
   databaseURL: "https://muscu-rpg-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "muscu-rpg",
   storageBucket: "muscu-rpg.firebasestorage.app",
