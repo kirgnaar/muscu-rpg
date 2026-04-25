@@ -634,6 +634,29 @@ function initSimulation() {
 
   $('plan-prev').addEventListener('click', function() { PLAN.offset--; renderCalendar(); });
   $('plan-next').addEventListener('click', function() { PLAN.offset++; renderCalendar(); });
+  $('plan-clear-btn').addEventListener('click', function() {
+    var btn = this;
+    if (btn.dataset.confirm !== '1') {
+      btn.dataset.confirm = '1';
+      btn.textContent = '⚠️';
+      btn.style.opacity = '1';
+      setTimeout(function() {
+        if (btn.dataset.confirm === '1') {
+          btn.dataset.confirm = '';
+          btn.textContent = '🗑';
+          btn.style.opacity = '0.7';
+        }
+      }, 3000);
+      return;
+    }
+    btn.dataset.confirm = '';
+    btn.textContent = '🗑';
+    btn.style.opacity = '0.7';
+    PLAN.entries = [];
+    PLAN.save();
+    renderCalendar();
+    toast('Calendrier vidé');
+  });
 
   $('plan-cal-view').addEventListener('click', function(ev) {
     var addBtn = ev.target.closest('.plan-add-btn');
