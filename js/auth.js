@@ -53,44 +53,47 @@ export var Auth = {
       self._updateUI(cachedUser);
     }
 
-    // ── 2. Résultat du redirect OAuth (si on revient d'une auth Google) ───
-    // Appelé à CHAQUE chargement de page. Sur iOS PWA après redirect, c'est
-    // ici que le user est récupéré depuis IndexedDB.
+    // ── 2. Résultat du redirect OAuth (si on revient d'une auth Google) ────
     getRedirectResult(auth).then(function(result) {
       if (result && result.user) {
-        // Auth fraîche après redirect — onAuthStateChanged va aussi se déclencher
         console.log('[Auth] Redirect result OK :', result.user.displayName);
       }
     }).catch(function(err) {
-      // auth/no-auth-event est normal (pas de redirect en cours) — ignorer silencieusement
-      if (err.code !== 'auth/no-auth-event') {
-        console.warn('[Auth] getRedirectResult error :', err.code, err.message);
-        self._showError('Connexion échouée (' + err.code + '). Réessaie.');
+      // Codes normaux quand aucun redirect n'est en cours — ignorer
+      var silent = ['auth/no-auth-event', 'auth/null-user', 'auth/operation-not-supported-in-this-environment'];
+      if (silent.indexOf(err.code) === -1) {
+        console.warn('[Auth] getRedirectResult :', err.code, err.message);
       }
     });
 
-    // ── 3. Source de vérité — écoute tous les changements d'état ──────────
-    onAuthStateChanged(auth, function(user) {
-      if (user) {
-        var userData = {
-          uid:         user.uid,
-          displayName: user.displayName || 'Guerrier',
-          photoURL:    user.photoURL    || ''
-        };
-        try {
-          localStorage.setItem('mrpg_auth_cache', JSON.stringify(userData));
-        } catch(e) {}
-        self.user   = user;
-        self._updateUI(user);
-        self._setSyncStatus('syncing');
-        // Sync différée (ne bloque pas l'UI)
-        setTimeout(function() { syncData(user.uid); }, 300);
-      } else {
-        self.user = null;
-        try { localStorage.removeItem('mrpg_auth_cache'); } catch(e) {}
-        self._updateUI(null);
-        self._setSyncStatus('offline');
-      }
+    // ── 3. Source de vérité — attend que Firebase ait lu localStorage ──────
+    // authStateReady() résout UNE SEULE FOIS, quand l'état initial est connu
+    // avec certitude (lecture localStorage terminée). Sans cela, onAuthStateChanged
+    // peut émettre null avant d'avoir fini de lire le token persisté → déconnexion
+    // apparente à chaque rechargement de page.
+    auth.authStateReady().then(function() {
+      onAuthStateChanged(auth, function(user) {
+        if (user) {
+          var userData = {
+            uid:         user.uid,
+            displayName: user.displayName || 'Guerrier',
+            photoURL:    user.photoURL    || ''
+          };
+          try {
+            localStorage.setItem('mrpg_auth_cache', JSON.stringify(userData));
+          } catch(e) {}
+          self.user = user;
+          self._updateUI(user);
+          self._setSyncStatus('syncing');
+          setTimeout(function() { syncData(user.uid); }, 300);
+        } else {
+          // null ici = Firebase a terminé sa lecture ET il n'y a vraiment pas de session
+          self.user = null;
+          try { localStorage.removeItem('mrpg_auth_cache'); } catch(e) {}
+          self._updateUI(null);
+          self._setSyncStatus('offline');
+        }
+      });
     });
   },
 

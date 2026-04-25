@@ -5,7 +5,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import {
   initializeAuth,
-  indexedDBLocalPersistence,
+  browserLocalPersistence,
   browserPopupRedirectResolver
 } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -26,11 +26,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// indexedDBLocalPersistence : survit aux redirects cross-origin (iOS PWA)
+// browserLocalPersistence : stocke le token dans localStorage.
+//   Plus fiable qu'IndexedDB sur iOS PWA — localStorage survit aux redirects
+//   cross-origin et n'est pas sujet aux purges aléatoires d'IndexedDB sur iOS.
 // browserPopupRedirectResolver : OBLIGATOIRE avec initializeAuth() manuel —
 //   sans lui, signInWithRedirect() et getRedirectResult() lèvent auth/argument-error
 export const auth = initializeAuth(app, {
-  persistence:           indexedDBLocalPersistence,
+  persistence:           browserLocalPersistence,
   popupRedirectResolver: browserPopupRedirectResolver
 });
 export const db = getFirestore(app);
