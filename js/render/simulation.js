@@ -783,6 +783,12 @@ function renderSimulation() {
 }
 
 // ── Tâche du jour ─────────────────────────────────────────────────────────
+var SESSION_TYPES = ['Hypertrophie','Force','Hyperforce (PR)','Endurance musculaire','Décharge'];
+var TYPE_COLORS   = {
+  'Hypertrophie':'#3b82f6','Force':'#ef4444',
+  'Hyperforce (PR)':'#8b5cf6','Endurance musculaire':'#10b981','Décharge':'#64748b'
+};
+
 function renderTodayTask() {
   var el = $('today-task');
   if (!el) return;
@@ -793,7 +799,6 @@ function renderTodayTask() {
   var d     = new Date(today + 'T00:00:00');
   var dateLabel = JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()];
 
-  // Entrées du jour dans le planning
   var todayEntries = [];
   for (var i = 0; i < PLAN.entries.length; i++) {
     if (PLAN.entries[i].date === today) todayEntries.push(PLAN.entries[i]);
@@ -814,84 +819,83 @@ function renderTodayTask() {
     return;
   }
 
-  // ── Séance(s) du jour avec inputs éditables ──────────────────────────
-  var typeColors = {
-    'Hypertrophie': '#3b82f6', 'Force': '#ef4444',
-    'Hyperforce (PR)': '#8b5cf6', 'Endurance musculaire': '#10b981', 'Décharge': '#64748b'
-  };
-
+  // ── Séance(s) du jour ────────────────────────────────────────────────
   var html = '';
   for (var j = 0; j < todayEntries.length; j++) {
-    var entry  = todayEntries[j];
-    var block  = _getBlockById(entry.blockId);
+    var entry = todayEntries[j];
+    var block = _getBlockById(entry.blockId);
     if (!block) continue;
-    var color  = typeColors[block.type] || 'var(--accent)';
-    var eid    = entry.id; // pour le logger
+    var eid   = entry.id;
+    var btype = block.type || 'Hypertrophie';
+    var color = TYPE_COLORS[btype] || 'var(--accent)';
 
-    // En-tête
+    // Sélecteur de type (séance entière)
+    var typeOpts = '';
+    for (var t = 0; t < SESSION_TYPES.length; t++) {
+      typeOpts += '<option value="' + SESSION_TYPES[t] + '"' +
+        (SESSION_TYPES[t] === btype ? ' selected' : '') + '>' +
+        SESSION_TYPES[t] + '</option>';
+    }
+
     html +=
-      '<div class="card" style="margin-bottom:12px;border-left:3px solid ' + color + '">' +
-        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
+      '<div class="card" style="margin-bottom:12px;border-left:3px solid ' + color + '" id="today-card-' + eid + '">' +
+        // En-tête
+        '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">' +
           '<div>' +
-            '<div style="font-size:11px;color:' + color + ';font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">' +
-              '📅 ' + dateLabel +
-            '</div>' +
+            '<div style="font-size:11px;color:' + color + ';font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px">📅 ' + dateLabel + '</div>' +
             '<div style="font-size:16px;font-weight:800;color:#fff">' + block.name + '</div>' +
           '</div>' +
           '<div style="font-size:11px;color:var(--text2)">' + block.exercises.length + ' ex.</div>' +
-        '</div>';
-
-    // Tableau des exercices éditables
-    html +=
-      '<div style="margin-bottom:12px">' +
-        // En-tête colonne
-        '<div style="display:grid;grid-template-columns:1fr 44px 44px 60px;gap:4px;' +
-             'padding:0 0 6px;border-bottom:1px solid rgba(255,255,255,0.1);' +
-             'font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase">' +
-          '<div>Exercice</div><div style="text-align:center">Sér.</div>' +
-          '<div style="text-align:center">Rép.</div><div style="text-align:center">Poids</div>' +
-        '</div>';
+        '</div>' +
+        // Type de séance — sélecteur unique pour toute la séance
+        '<div style="margin-bottom:12px">' +
+          '<div style="font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;margin-bottom:5px">Type de séance</div>' +
+          '<select id="today-type-' + eid + '"' +
+            ' style="width:100%;background:rgba(255,255,255,0.07);border:1px solid var(--border);' +
+            'border-radius:8px;color:#fff;font-size:13px;font-weight:700;padding:7px 10px">' +
+            typeOpts +
+          '</select>' +
+        '</div>' +
+        // Tableau exercices éditables
+        '<div style="margin-bottom:12px">' +
+          '<div style="display:grid;grid-template-columns:1fr 44px 44px 60px;gap:4px;' +
+               'padding:0 0 6px;border-bottom:1px solid rgba(255,255,255,0.1);' +
+               'font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase">' +
+            '<div>Exercice</div><div style="text-align:center">Sér.</div>' +
+            '<div style="text-align:center">Rép.</div><div style="text-align:center">Poids</div>' +
+          '</div>';
 
     for (var k = 0; k < block.exercises.length; k++) {
       var ex  = block.exercises[k];
-      var pfx = 'td-' + eid + '-' + k; // préfixe unique par input
+      var pfx = 'td-' + eid + '-' + k;
       html +=
         '<div style="display:grid;grid-template-columns:1fr 44px 44px 60px;gap:4px;' +
              'align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
           '<div style="font-size:12px;color:#fff;line-height:1.3">' + ex.ex + '</div>' +
-          // Séries
           '<input type="number" id="' + pfx + '-s" value="' + ex.ser + '" min="1" max="20"' +
-            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);' +
-            'border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
-          // Reps
+            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
           '<input type="number" id="' + pfx + '-r" value="' + ex.rep + '" min="1" max="100"' +
-            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);' +
-            'border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
-          // Poids
+            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
           '<input type="number" id="' + pfx + '-p" value="' + ex.pds + '" min="0" max="500" step="0.5"' +
-            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);' +
-            'border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
+            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
         '</div>';
     }
-    html += '</div>'; // fin tableau
 
-    // Bouton logger — lit les inputs au moment du tap
     html +=
-      '<button class="btn btn-p"' +
-        ' id="today-log-btn-' + eid + '"' +
-        ' style="width:100%;background:' + color + ';border-color:' + color + '"' +
-        ' onclick="_logTodayTask(' + eid + ',' + block.exercises.length + ')">' +
-        '✓ Logger cette séance' +
-      '</button>' +
-    '</div>';
+        '</div>' + // fin tableau
+        '<button class="btn btn-p" id="today-log-btn-' + eid + '"' +
+          ' style="width:100%;background:' + color + ';border-color:' + color + '"' +
+          ' onclick="_logTodayTask(' + eid + ',' + block.exercises.length + ')">' +
+          '✓ Logger cette séance' +
+        '</button>' +
+      '</div>';
   }
 
   el.innerHTML = html;
 }
 
-// ── Logger depuis la tâche du jour (lit les inputs éditables) ────────────
+// ── Logger depuis la tâche du jour ────────────────────────────────────────
 function _logTodayTask(entryId, exCount) {
-  // Double-tap pour confirmer
   var btn = $('today-log-btn-' + entryId);
   if (btn && btn.dataset.confirm !== '1') {
     btn.dataset.confirm = '1';
@@ -913,13 +917,14 @@ function _logTodayTask(entryId, exCount) {
   var block = _getBlockById(entry.blockId);
   if (!block) return;
 
-  var type = block.type || 'Hypertrophie';
+  // Type lu depuis le sélecteur de la carte (unique pour toute la séance)
+  var typeEl = $('today-type-' + entryId);
+  var type   = (typeEl && typeEl.value) ? typeEl.value : (block.type || 'Hypertrophie');
+
   var logged = 0;
   for (var k = 0; k < exCount; k++) {
     var pfx = 'td-' + entryId + '-' + k;
-    var sEl = $(pfx + '-s');
-    var rEl = $(pfx + '-r');
-    var pEl = $(pfx + '-p');
+    var sEl = $(pfx + '-s'), rEl = $(pfx + '-r'), pEl = $(pfx + '-p');
     if (!sEl || !rEl || !pEl) continue;
     var ser = parseInt(sEl.value)   || 0;
     var rep = parseInt(rEl.value)   || 0;
@@ -932,7 +937,7 @@ function _logTodayTask(entryId, exCount) {
 
   if (logged === 0) { toast('Aucun exercice valide à loguer', 'err'); return; }
   APP.render();
-  toast('✓ ' + logged + ' exercice' + (logged > 1 ? 's' : '') + ' loggé' + (logged > 1 ? 's' : '') + ' !');
+  toast('✓ ' + logged + ' ex. loggés en ' + type.toLowerCase());
   APP.switchView('seances');
 }
 
