@@ -614,6 +614,13 @@ function saveBlocks() {
   localStorage.setItem(SIM.dbKey, JSON.stringify(SIM.blocks));
 }
 
+function resetBlocksToDefaults() {
+  SIM.blocks = JSON.parse(JSON.stringify(DEFAULT_BLOCKS));
+  saveBlocks();
+  renderBlockList();
+  toast('Séances par défaut restaurées');
+}
+
 function initSimulation() {
   PLAN.load();
   SIM.blocks = loadBlocks();
@@ -683,6 +690,27 @@ function initSimulation() {
     closePlanModal('plan-detail-modal');
   });
   $('plan-detail-close-btn').addEventListener('click', function() { closePlanModal('plan-detail-modal'); });
+
+  $('sim-reset-btn').addEventListener('click', function() {
+    var btn = this;
+    if (btn.dataset.confirm !== '1') {
+      btn.dataset.confirm = '1';
+      btn.textContent = '⚠️';
+      btn.style.opacity = '1';
+      setTimeout(function() {
+        if (btn.dataset.confirm === '1') {
+          btn.dataset.confirm = '';
+          btn.textContent = '↺';
+          btn.style.opacity = '0.6';
+        }
+      }, 3000);
+      return;
+    }
+    btn.dataset.confirm = '';
+    btn.textContent = '↺';
+    btn.style.opacity = '0.6';
+    resetBlocksToDefaults();
+  });
 
   $('sim-new-block-btn').addEventListener('click', function() { handleNewBlock(); });
   $('sim-save-block-btn').addEventListener('click', function() { saveCurrentBlock(); });
