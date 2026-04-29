@@ -76,6 +76,16 @@ function _isoDate(dateObj) {
   return dateObj.getFullYear() + '-' + mm + '-' + dd;
 }
 
+// Retourne le dernier poids utilisé pour un exercice (depuis l'historique réel)
+function _lastPds(exName) {
+  var best = null, bestDate = '';
+  for (var i = 0; i < APP.data.length; i++) {
+    var e = APP.data[i];
+    if (e.ex === exName && e.date >= bestDate) { bestDate = e.date; best = e.pds; }
+  }
+  return best;
+}
+
 // ── Données Bibliothèque ──────────────────────────────────────────────────
 var SIM = {
   blocks: [],
@@ -89,22 +99,22 @@ var DEFAULT_BLOCKS = [
   {
     id: 1000, name: '🦵 Jambes', type: 'Force',
     exercises: [
-      { ex: 'Squat barre',                  ser: 4, rep: 6,  pds: 80,  grp: 'Quadriceps' },
-      { ex: 'Soulevé de terre roumain',      ser: 4, rep: 6,  pds: 70,  grp: 'Ischio-jambiers' },
-      { ex: 'Fentes arrière haltères',       ser: 4, rep: 10, pds: 20,  grp: 'Fessiers' },
-      { ex: 'Leg extension machine',         ser: 2, rep: 12, pds: 50,  grp: 'Quadriceps' },
-      { ex: 'Leg curl couché machine',       ser: 2, rep: 12, pds: 40,  grp: 'Ischio-jambiers' }
+      { ex: 'Squat barre',                  ser: 4, rep: 6,  pds: 0,  grp: 'Quadriceps' },
+      { ex: 'Soulevé de terre roumain',      ser: 4, rep: 6,  pds: 0,  grp: 'Ischio-jambiers' },
+      { ex: 'Fentes arrière haltères',       ser: 4, rep: 10, pds: 0,  grp: 'Fessiers' },
+      { ex: 'Leg extension machine',         ser: 2, rep: 12, pds: 0,  grp: 'Quadriceps' },
+      { ex: 'Leg curl couché machine',       ser: 2, rep: 12, pds: 0,  grp: 'Ischio-jambiers' }
     ]
   },
   // ── MUSCU A (Mercredi S1 — 8 reps) ──────────────────────────────────────
   {
     id: 1001, name: '💪 Muscu A — Haut du corps', type: 'Hypertrophie',
     exercises: [
-      { ex: 'Développé machine',             ser: 4, rep: 8,  pds: 60,  grp: 'Pectoraux' },
-      { ex: 'Presse épaule machine',         ser: 4, rep: 8,  pds: 40,  grp: 'Épaules' },
+      { ex: 'Développé machine',             ser: 4, rep: 8,  pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Presse épaule machine',         ser: 4, rep: 8,  pds: 0,  grp: 'Épaules' },
       { ex: 'Dips',                          ser: 4, rep: 10, pds: 0,   grp: 'Triceps' },
-      { ex: 'Développé couché haltères',     ser: 4, rep: 8,  pds: 25,  grp: 'Pectoraux' },
-      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 8,  pds: 10,  grp: 'Triceps' },
+      { ex: 'Développé couché haltères',     ser: 4, rep: 8,  pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 8,  pds: 0,  grp: 'Triceps' },
       { ex: 'Pompes',                        ser: 4, rep: 12, pds: 0,   grp: 'Pectoraux' },
       { ex: 'Traction haute kimono isométrique', ser: 1, rep: 30, pds: 0, grp: 'Abdominaux' }
     ]
@@ -113,11 +123,11 @@ var DEFAULT_BLOCKS = [
   {
     id: 1002, name: '💪 Muscu B — Haut du corps', type: 'Hypertrophie',
     exercises: [
-      { ex: 'Développé machine',             ser: 4, rep: 9,  pds: 60,  grp: 'Pectoraux' },
-      { ex: 'Presse épaule machine',         ser: 4, rep: 9,  pds: 40,  grp: 'Épaules' },
+      { ex: 'Développé machine',             ser: 4, rep: 9,  pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Presse épaule machine',         ser: 4, rep: 9,  pds: 0,  grp: 'Épaules' },
       { ex: 'Dips',                          ser: 4, rep: 12, pds: 0,   grp: 'Triceps' },
-      { ex: 'Développé couché haltères',     ser: 4, rep: 9,  pds: 25,  grp: 'Pectoraux' },
-      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 9,  pds: 10,  grp: 'Triceps' },
+      { ex: 'Développé couché haltères',     ser: 4, rep: 9,  pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 9,  pds: 0,  grp: 'Triceps' },
       { ex: 'Pompes',                        ser: 4, rep: 14, pds: 0,   grp: 'Pectoraux' },
       { ex: 'Traction haute kimono isométrique', ser: 1, rep: 30, pds: 0, grp: 'Abdominaux' }
     ]
@@ -126,11 +136,11 @@ var DEFAULT_BLOCKS = [
   {
     id: 1003, name: '💪 Muscu C — Haut du corps', type: 'Hypertrophie',
     exercises: [
-      { ex: 'Développé machine',             ser: 4, rep: 10, pds: 60,  grp: 'Pectoraux' },
-      { ex: 'Presse épaule machine',         ser: 4, rep: 10, pds: 40,  grp: 'Épaules' },
+      { ex: 'Développé machine',             ser: 4, rep: 10, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Presse épaule machine',         ser: 4, rep: 10, pds: 0,  grp: 'Épaules' },
       { ex: 'Dips',                          ser: 4, rep: 14, pds: 0,   grp: 'Triceps' },
-      { ex: 'Développé couché haltères',     ser: 4, rep: 10, pds: 25,  grp: 'Pectoraux' },
-      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 10, pds: 10,  grp: 'Triceps' },
+      { ex: 'Développé couché haltères',     ser: 4, rep: 10, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 10, pds: 0,  grp: 'Triceps' },
       { ex: 'Pompes',                        ser: 4, rep: 16, pds: 0,   grp: 'Pectoraux' },
       { ex: 'Traction haute kimono isométrique', ser: 1, rep: 30, pds: 0, grp: 'Abdominaux' }
     ]
@@ -139,11 +149,11 @@ var DEFAULT_BLOCKS = [
   {
     id: 1004, name: '💪 Muscu D — Haut du corps', type: 'Hypertrophie',
     exercises: [
-      { ex: 'Développé machine',             ser: 4, rep: 11, pds: 60,  grp: 'Pectoraux' },
-      { ex: 'Presse épaule machine',         ser: 4, rep: 11, pds: 40,  grp: 'Épaules' },
+      { ex: 'Développé machine',             ser: 4, rep: 11, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Presse épaule machine',         ser: 4, rep: 11, pds: 0,  grp: 'Épaules' },
       { ex: 'Dips',                          ser: 4, rep: 16, pds: 0,   grp: 'Triceps' },
-      { ex: 'Développé couché haltères',     ser: 4, rep: 11, pds: 25,  grp: 'Pectoraux' },
-      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 11, pds: 10,  grp: 'Triceps' },
+      { ex: 'Développé couché haltères',     ser: 4, rep: 11, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 11, pds: 0,  grp: 'Triceps' },
       { ex: 'Pompes',                        ser: 4, rep: 18, pds: 0,   grp: 'Pectoraux' },
       { ex: 'Traction haute kimono isométrique', ser: 1, rep: 30, pds: 0, grp: 'Abdominaux' }
     ]
@@ -152,11 +162,11 @@ var DEFAULT_BLOCKS = [
   {
     id: 1005, name: '💪 Muscu E — Haut du corps', type: 'Hypertrophie',
     exercises: [
-      { ex: 'Développé machine',             ser: 4, rep: 12, pds: 60,  grp: 'Pectoraux' },
-      { ex: 'Presse épaule machine',         ser: 4, rep: 12, pds: 40,  grp: 'Épaules' },
+      { ex: 'Développé machine',             ser: 4, rep: 12, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Presse épaule machine',         ser: 4, rep: 12, pds: 0,  grp: 'Épaules' },
       { ex: 'Dips',                          ser: 4, rep: 16, pds: 0,   grp: 'Triceps' },
-      { ex: 'Développé couché haltères',     ser: 4, rep: 12, pds: 25,  grp: 'Pectoraux' },
-      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 12, pds: 10,  grp: 'Triceps' },
+      { ex: 'Développé couché haltères',     ser: 4, rep: 12, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 12, pds: 0,  grp: 'Triceps' },
       { ex: 'Pompes',                        ser: 4, rep: 18, pds: 0,   grp: 'Pectoraux' },
       { ex: 'Traction haute kimono isométrique', ser: 1, rep: 30, pds: 0, grp: 'Abdominaux' }
     ]
@@ -166,12 +176,12 @@ var DEFAULT_BLOCKS = [
     id: 1006, name: '🏋️ Muscu 1 — Blocs pousser/tirer', type: 'Hypertrophie',
     exercises: [
       // Bloc Pousser
-      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 70,  grp: 'Pectoraux' },
-      { ex: 'Développé militaire barre',     ser: 4, rep: 10, pds: 40,  grp: 'Épaules' },
+      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Développé militaire barre',     ser: 4, rep: 10, pds: 0,  grp: 'Épaules' },
       { ex: 'Dips',                          ser: 4, rep: 10, pds: 0,   grp: 'Triceps' },
       // Bloc Tirer
-      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
-      { ex: 'Rowing barre',                  ser: 4, rep: 10, pds: 60,  grp: 'Dorsal' },
+      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 0,  grp: 'Dorsal' },
+      { ex: 'Rowing barre',                  ser: 4, rep: 10, pds: 0,  grp: 'Dorsal' },
       { ex: 'Tractions pronation',           ser: 4, rep: 8,  pds: 0,   grp: 'Dorsal' },
       // Finisher gainage
       { ex: 'Traction haute kimono isométrique', ser: 3, rep: 30, pds: 0, grp: 'Abdominaux' },
@@ -185,12 +195,12 @@ var DEFAULT_BLOCKS = [
     id: 1007, name: '🏋️ Muscu 2 — Blocs pousser/tirer', type: 'Hypertrophie',
     exercises: [
       // Bloc Pousser
-      { ex: 'Développé machine',             ser: 4, rep: 10, pds: 60,  grp: 'Pectoraux' },
-      { ex: 'Pull over haltère',             ser: 4, rep: 10, pds: 20,  grp: 'Dorsal' },
-      { ex: 'Barre explosive (power clean)', ser: 4, rep: 10, pds: 40,  grp: 'Full body' },
+      { ex: 'Développé machine',             ser: 4, rep: 10, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Pull over haltère',             ser: 4, rep: 10, pds: 0,  grp: 'Dorsal' },
+      { ex: 'Barre explosive (power clean)', ser: 4, rep: 10, pds: 0,  grp: 'Full body' },
       // Bloc Tirer
-      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
-      { ex: 'Tirage allongé poulie basse',   ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
+      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 0,  grp: 'Dorsal' },
+      { ex: 'Tirage allongé poulie basse',   ser: 4, rep: 10, pds: 0,  grp: 'Dorsal' },
       { ex: 'Traction haute kimono isométrique', ser: 4, rep: 6, pds: 0, grp: 'Dorsal' },
       // Finisher
       { ex: 'Traction haute kimono isométrique', ser: 3, rep: 30, pds: 0, grp: 'Abdominaux' },
@@ -204,14 +214,14 @@ var DEFAULT_BLOCKS = [
     id: 1008, name: '🏋️ Muscu 3 — Blocs pousser/tirer', type: 'Hypertrophie',
     exercises: [
       // Bloc Pousser
-      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 70,  grp: 'Pectoraux' },
-      { ex: 'Développé militaire barre',     ser: 4, rep: 10, pds: 40,  grp: 'Épaules' },
-      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 10, pds: 10,  grp: 'Triceps' },
+      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Développé militaire barre',     ser: 4, rep: 10, pds: 0,  grp: 'Épaules' },
+      { ex: 'Triceps poulie 1 bras',         ser: 4, rep: 10, pds: 0,  grp: 'Triceps' },
       { ex: 'Dips',                          ser: 4, rep: 10, pds: 0,   grp: 'Triceps' },
       // Bloc Tirer
-      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
-      { ex: 'Rowing barre',                  ser: 4, rep: 10, pds: 60,  grp: 'Dorsal' },
-      { ex: 'Biceps poulie 1 bras',          ser: 4, rep: 10, pds: 10,  grp: 'Biceps' },
+      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 0,  grp: 'Dorsal' },
+      { ex: 'Rowing barre',                  ser: 4, rep: 10, pds: 0,  grp: 'Dorsal' },
+      { ex: 'Biceps poulie 1 bras',          ser: 4, rep: 10, pds: 0,  grp: 'Biceps' },
       { ex: 'Tractions pronation',           ser: 4, rep: 8,  pds: 0,   grp: 'Dorsal' },
       // Finisher (35s)
       { ex: 'Traction haute kimono isométrique', ser: 3, rep: 35, pds: 0, grp: 'Abdominaux' },
@@ -225,12 +235,12 @@ var DEFAULT_BLOCKS = [
     id: 1009, name: '🏋️ Muscu 4 — Blocs pousser/tirer', type: 'Hypertrophie',
     exercises: [
       // Bloc Pousser
-      { ex: 'Développé machine',             ser: 4, rep: 10, pds: 60,  grp: 'Pectoraux' },
-      { ex: 'Barre explosive (power clean)', ser: 4, rep: 10, pds: 40,  grp: 'Full body' },
+      { ex: 'Développé machine',             ser: 4, rep: 10, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Barre explosive (power clean)', ser: 4, rep: 10, pds: 0,  grp: 'Full body' },
       { ex: 'Pompes',                        ser: 4, rep: 20, pds: 0,   grp: 'Pectoraux' },
       // Bloc Tirer
-      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
-      { ex: 'Tirage allongé poulie basse',   ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
+      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 0,  grp: 'Dorsal' },
+      { ex: 'Tirage allongé poulie basse',   ser: 4, rep: 10, pds: 0,  grp: 'Dorsal' },
       { ex: 'Traction haute kimono isométrique', ser: 4, rep: 6, pds: 0, grp: 'Dorsal' },
       // Finisher (35s)
       { ex: 'Traction haute kimono isométrique', ser: 3, rep: 35, pds: 0, grp: 'Abdominaux' },
@@ -244,12 +254,12 @@ var DEFAULT_BLOCKS = [
     id: 1010, name: '🏋️ Muscu 5 — Blocs pousser/tirer', type: 'Hypertrophie',
     exercises: [
       // Bloc Pousser
-      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 70,  grp: 'Pectoraux' },
-      { ex: 'Développé militaire barre',     ser: 4, rep: 10, pds: 40,  grp: 'Épaules' },
+      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Développé militaire barre',     ser: 4, rep: 10, pds: 0,  grp: 'Épaules' },
       { ex: 'Dips',                          ser: 4, rep: 10, pds: 0,   grp: 'Triceps' },
       // Bloc Tirer
-      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 50,  grp: 'Dorsal' },
-      { ex: 'Rowing barre',                  ser: 4, rep: 10, pds: 60,  grp: 'Dorsal' },
+      { ex: 'Tirage haut kimono',            ser: 4, rep: 10, pds: 0,  grp: 'Dorsal' },
+      { ex: 'Rowing barre',                  ser: 4, rep: 10, pds: 0,  grp: 'Dorsal' },
       { ex: 'Tractions pronation',           ser: 4, rep: 8,  pds: 0,   grp: 'Dorsal' },
       // Finisher (40s)
       { ex: 'Traction haute kimono isométrique', ser: 3, rep: 40, pds: 0, grp: 'Abdominaux' },
@@ -263,18 +273,18 @@ var DEFAULT_BLOCKS = [
     id: 1011, name: '⚡ Full Body', type: 'Hypertrophie',
     exercises: [
       // Principaux 4×10
-      { ex: 'Squat barre',                   ser: 4, rep: 10, pds: 70,  grp: 'Quadriceps' },
-      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 70,  grp: 'Pectoraux' },
-      { ex: 'Soulevé de terre conventionnel',ser: 4, rep: 10, pds: 80,  grp: 'Ischio-jambiers' },
+      { ex: 'Squat barre',                   ser: 4, rep: 10, pds: 0,  grp: 'Quadriceps' },
+      { ex: 'Développé couché barre',        ser: 4, rep: 10, pds: 0,  grp: 'Pectoraux' },
+      { ex: 'Soulevé de terre conventionnel',ser: 4, rep: 10, pds: 0,  grp: 'Ischio-jambiers' },
       // Secondaires 3×12
-      { ex: 'Développé militaire barre',     ser: 3, rep: 12, pds: 40,  grp: 'Épaules' },
-      { ex: 'Rowing barre',                  ser: 3, rep: 12, pds: 60,  grp: 'Dorsal' },
-      { ex: 'Leg press 45°',                 ser: 3, rep: 12, pds: 100, grp: 'Quadriceps' },
+      { ex: 'Développé militaire barre',     ser: 3, rep: 12, pds: 0,  grp: 'Épaules' },
+      { ex: 'Rowing barre',                  ser: 3, rep: 12, pds: 0,  grp: 'Dorsal' },
+      { ex: 'Leg press 45°',                 ser: 3, rep: 12, pds: 0, grp: 'Quadriceps' },
       // Isolation 2×16
-      { ex: 'Extensions triceps poulie haute', ser: 2, rep: 16, pds: 15, grp: 'Triceps' },
-      { ex: 'Rowing vertical / Upright row', ser: 2, rep: 16, pds: 20,  grp: 'Épaules' },
-      { ex: 'Leg extension machine',         ser: 2, rep: 16, pds: 40,  grp: 'Quadriceps' },
-      { ex: 'Leg curl couché machine',       ser: 2, rep: 16, pds: 35,  grp: 'Ischio-jambiers' }
+      { ex: 'Extensions triceps poulie haute', ser: 2, rep: 16, pds: 0, grp: 'Triceps' },
+      { ex: 'Rowing vertical / Upright row', ser: 2, rep: 16, pds: 0,  grp: 'Épaules' },
+      { ex: 'Leg extension machine',         ser: 2, rep: 16, pds: 0,  grp: 'Quadriceps' },
+      { ex: 'Leg curl couché machine',       ser: 2, rep: 16, pds: 0,  grp: 'Ischio-jambiers' }
     ]
   }
 ];
@@ -868,15 +878,18 @@ function renderTodayTask() {
     for (var k = 0; k < block.exercises.length; k++) {
       var ex  = block.exercises[k];
       var pfx = 'td-' + eid + '-' + k;
+      var lastPdsTd = _lastPds(ex.ex);
+      var pdsFillTd = (lastPdsTd !== null) ? lastPdsTd : ex.pds;
+      var exLabel = ex.ex + (lastPdsTd !== null ? '<div style="font-size:9px;color:var(--accent);margin-top:1px">↑ dernière perf</div>' : '');
       html +=
         '<div style="display:grid;grid-template-columns:1fr 44px 44px 60px;gap:4px;' +
              'align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
-          '<div style="font-size:12px;color:#fff;line-height:1.3">' + ex.ex + '</div>' +
+          '<div style="font-size:12px;color:#fff;line-height:1.3">' + exLabel + '</div>' +
           '<input type="number" id="' + pfx + '-s" value="' + ex.ser + '" min="1" max="20"' +
             ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
           '<input type="number" id="' + pfx + '-r" value="' + ex.rep + '" min="1" max="100"' +
             ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
-          '<input type="number" id="' + pfx + '-p" value="' + ex.pds + '" min="0" max="500" step="0.5"' +
+          '<input type="number" id="' + pfx + '-p" value="' + pdsFillTd + '" min="0" max="500" step="0.5"' +
             ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
         '</div>';
     }
@@ -1135,12 +1148,21 @@ function openPlanDetail(entryId) {
   var typeEl = $('plan-detail-type');
   typeEl.value = block.type || 'Hypertrophie';
 
-  var html = '';
+  var INP = 'width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px';
+  var html = '<div style="display:grid;grid-template-columns:1fr 40px 40px 56px;gap:4px;padding:0 0 6px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase">' +
+    '<div>Exercice</div><div style="text-align:center">Sér.</div><div style="text-align:center">Rép.</div><div style="text-align:center">Poids</div></div>';
   for (var j = 0; j < block.exercises.length; j++) {
     var ex = block.exercises[j];
-    html += '<div style="padding:8px 0;border-bottom:1px solid var(--border)">' +
-      '<div style="font-weight:700;color:#fff">' + ex.ex + '</div>' +
-      '<div style="font-size:12px;color:var(--text2)">' + ex.ser + ' × ' + ex.rep + ' @ ' + ex.pds + ' kg</div>' +
+    var lastPds = _lastPds(ex.ex);
+    var pdsFill = (lastPds !== null) ? lastPds : ex.pds;
+    var pfx = 'pd-' + entryId + '-' + j;
+    var perfHint = (lastPds !== null) ? ' title="Dernière perf : ' + lastPds + ' kg"' : '';
+    html += '<div style="display:grid;grid-template-columns:1fr 40px 40px 56px;gap:4px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
+      '<div style="font-size:12px;color:#fff;line-height:1.3"' + perfHint + '>' + ex.ex +
+        (lastPds !== null ? '<div style="font-size:9px;color:var(--accent);margin-top:1px">↑ dernière perf</div>' : '') + '</div>' +
+      '<input type="number" id="' + pfx + '-s" value="' + ex.ser + '" min="1" max="20" style="' + INP + '">' +
+      '<input type="number" id="' + pfx + '-r" value="' + ex.rep + '" min="1" max="100" style="' + INP + '">' +
+      '<input type="number" id="' + pfx + '-p" value="' + pdsFill + '" min="0" step="0.5" style="' + INP + '">' +
       '</div>';
   }
   $('plan-detail-exlist').innerHTML = html || '<div style="color:var(--text2);font-size:13px;padding:8px 0">Séance vide</div>';
@@ -1180,12 +1202,20 @@ function _logPlanEntry(entryId) {
 
   var typeEl = $('plan-detail-type');
   var type = (typeEl && typeEl.value) ? typeEl.value : (block.type || 'Hypertrophie');
+  var logged = 0;
   for (var j = 0; j < block.exercises.length; j++) {
     var item = block.exercises[j];
-    addEntry({ date: entry.date, type: type, ex: item.ex, grp: item.grp || getPrimaryGroup(item.ex), ser: item.ser, rep: item.rep, pds: item.pds });
+    var pfx = 'pd-' + entryId + '-' + j;
+    var sEl = $(pfx + '-s'), rEl = $(pfx + '-r'), pEl = $(pfx + '-p');
+    var ser = sEl ? (parseInt(sEl.value) || item.ser) : item.ser;
+    var rep = rEl ? (parseInt(rEl.value) || item.rep) : item.rep;
+    var pds = pEl ? (parseFloat(pEl.value) || 0) : (item.pds || 0);
+    if (ser < 1 || rep < 1) continue;
+    addEntry({ date: entry.date, type: type, ex: item.ex, grp: item.grp || getPrimaryGroup(item.ex), ser: ser, rep: rep, pds: pds });
+    logged++;
   }
   APP.render();
-  toast('✓ Séance loggée en ' + type.toLowerCase());
+  toast('✓ ' + logged + ' ex. loggés en ' + type.toLowerCase());
   closePlanModal('plan-detail-modal');
   APP.switchView('seances');
 }
@@ -1263,9 +1293,11 @@ function handleAddExToBlock() {
   var exName = $('sim-ex-sel').value;
   var ser = parseInt($('sim-ser').value);
   var rep = parseInt($('sim-rep').value);
-  var pds = parseFloat($('sim-pds').value);
-  if (!exName || !ser || !rep || isNaN(pds)) { toast('Champs invalides', 'err'); return; }
-  SIM.currentBlock.exercises.push({ ex: exName, ser: ser, rep: rep, pds: pds, grp: getPrimaryGroup(exName) });
+  var pdsRaw = $('sim-pds').value;
+  var pds = (pdsRaw === '' || pdsRaw === null) ? 0 : parseFloat(pdsRaw);
+  if (!exName || !ser || !rep) { toast('Champs invalides', 'err'); return; }
+  SIM.currentBlock.exercises.push({ ex: exName, ser: ser, rep: rep, pds: isNaN(pds) ? 0 : pds, grp: getPrimaryGroup(exName) });
+  $('sim-pds').value = '';
   renderEditor();
 }
 
@@ -1354,7 +1386,7 @@ function renderEditor() {
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">' +
       '<div><label class="flabel" style="font-size:9px">Séries</label><input type="number" class="sim-inline-input" data-idx="' + j + '" data-field="ser" value="' + item.ser + '"></div>' +
       '<div><label class="flabel" style="font-size:9px">Reps</label><input type="number" class="sim-inline-input" data-idx="' + j + '" data-field="rep" value="' + item.rep + '"></div>' +
-      '<div><label class="flabel" style="font-size:9px">Poids</label><input type="number" class="sim-inline-input" data-idx="' + j + '" data-field="pds" step="0.5" value="' + item.pds + '"></div>' +
+      '<div><label class="flabel" style="font-size:9px">Poids (kg)</label><input type="number" class="sim-inline-input" data-idx="' + j + '" data-field="pds" step="0.5" placeholder="Auto" value="' + (item.pds || '') + '"></div>' +
       '</div></div>';
   }
   list.innerHTML = html;
@@ -1365,7 +1397,11 @@ function calculateSimResults(simList) {
   var currentVol = 0;
   for (var i = 0; i < APP.data.length; i++) currentVol += APP.data[i].vol;
   var simVolGain = 0;
-  for (var j = 0; j < simList.length; j++) simVolGain += (simList[j].ser * simList[j].rep * simList[j].pds);
+  for (var j = 0; j < simList.length; j++) {
+    var ex = simList[j];
+    var effectivePds = ex.pds || (_lastPds(ex.ex) || 0);
+    simVolGain += ex.ser * ex.rep * effectivePds;
+  }
   var newVolTotal  = currentVol + simVolGain;
   var currentLvl   = getLevel(currentVol);
   var nextLvl      = getLevel(newVolTotal);
@@ -1385,7 +1421,8 @@ function calculateSimResults(simList) {
     for (var m = 0; m < MUSCLES.length; m++) {
       var grp       = MUSCLES[m];
       var influence = getMuscleInfluence(item.ex, grp);
-      if (influence > 0) muscleGains[grp] = (muscleGains[grp] || 0) + (item.ser * item.rep * item.pds * influence);
+      var itemPds = item.pds || (_lastPds(item.ex) || 0);
+      if (influence > 0) muscleGains[grp] = (muscleGains[grp] || 0) + (item.ser * item.rep * itemPds * influence);
     }
   }
   var muscleHtml = '<div class="clabel" style="margin-bottom:8px">Progression par muscle</div>';
@@ -1417,7 +1454,8 @@ function confirmSession() {
   var type = SIM.currentBlock.type || 'Hypertrophie';
   for (var i = 0; i < SIM.currentBlock.exercises.length; i++) {
     var item = SIM.currentBlock.exercises[i];
-    addEntry({ date: date, type: type, ex: item.ex, grp: item.grp || getPrimaryGroup(item.ex), ser: item.ser, rep: item.rep, pds: item.pds });
+    var pdsLog = item.pds || (_lastPds(item.ex) || 0);
+    addEntry({ date: date, type: type, ex: item.ex, grp: item.grp || getPrimaryGroup(item.ex), ser: item.ser, rep: item.rep, pds: pdsLog });
   }
   APP.render();
   toast('Séance loggée dans le journal !');
