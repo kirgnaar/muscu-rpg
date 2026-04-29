@@ -209,6 +209,15 @@
     <div class="view" id="v-pr">
       <div class="stitle" data-i18n="stitle_pr">PR — Big 6</div>
       <div id="pr-list"></div>
+
+      <div class="stitle" data-i18n="stitle_pr_bonus" style="margin-top:25px">Analyse PR (Bonus)</div>
+      <div class="card" style="margin-bottom:15px">
+        <div class="fgroup">
+          <label class="flabel" data-i18n="label_ex_analyze">Choisir un exercice</label>
+          <select id="pr-bonus-ex-sel"></select>
+        </div>
+      </div>
+      <div id="pr-bonus-container"></div>
     </div>
 
     <!-- ════════════════════════════════════════════════════════════════════
@@ -225,64 +234,216 @@
     </div>
 
     <!-- ════════════════════════════════════════════════════════════════════
-         SIMULATION / PROGRAMMATION
+         PLANIFICATION
     ════════════════════════════════════════════════════════════════════ -->
     <div class="view" id="v-simulation">
-      <div class="stitle flex-between">
-        <span data-i18n="stitle_programs">Mes Programmes</span>
-        <button class="btn btn-s" id="sim-new-block-btn" data-i18n="btn_new">+ Nouveau</button>
-      </div>
-      
-      <!-- Liste des Blocs -->
-      <div id="sim-blocks-list" style="margin-bottom:20px"></div>
 
-      <!-- Éditeur de Bloc (Caché par défaut) -->
-      <div id="sim-editor" style="display:none">
-        <div class="card" style="margin-bottom:15px; border-left: 4px solid var(--accent)">
-          <div class="flex-between" style="margin-bottom:12px">
-            <input type="text" id="sim-block-name" placeholder="Nom du programme..." style="background:none; border:none; color:#fff; font-size:18px; font-weight:800; width:70%">
-            <button class="btn btn-s" id="sim-save-block-btn" data-i18n="btn_save_prog">Sauver</button>
+      <!-- Sous-onglets -->
+      <div class="plan-tabs">
+        <button class="plan-subtab active" id="plan-tab-cal">📅 Calendrier</button>
+        <button class="plan-subtab" id="plan-tab-model">🔄 Cycle</button>
+        <button class="plan-subtab" id="plan-tab-lib">📋 Séances</button>
+      </div>
+
+      <!-- ── Vue Calendrier ── -->
+      <div id="plan-cal-view">
+        <!-- Tâche du jour — visible uniquement dans Calendrier -->
+        <div id="today-task"></div>
+        <div class="plan-period-bar" id="plan-period-bar">
+          <button class="plan-period-btn active" data-period="week">1 sem</button>
+          <button class="plan-period-btn" data-period="2weeks">2 sem</button>
+          <button class="plan-period-btn" data-period="month">1 mois</button>
+          <button class="plan-period-btn" data-period="3months">3 mois</button>
+        </div>
+        <div class="plan-nav">
+          <button class="plan-nav-btn" id="plan-prev">◀</button>
+          <span id="plan-period-label">…</span>
+          <button class="plan-nav-btn" id="plan-next">▶</button>
+          <button class="plan-nav-btn" id="plan-clear-btn" title="Vider le calendrier" style="margin-left:4px;color:#ef4444;opacity:0.7">🗑</button>
+        </div>
+        <div id="plan-grid"></div>
+      </div>
+
+      <!-- ── Vue Cycle ── -->
+      <div id="plan-model-view" style="display:none">
+
+        <!-- Sous-vue : liste des cycles sauvegardés -->
+        <div id="cycle-list-subview">
+          <div class="stitle flex-between" style="display:flex">
+            <span>Mes cycles</span>
+            <button class="btn btn-s" id="cycle-new-btn">+ Nouveau</button>
           </div>
-  
-          <div class="fgroup">
-            <label class="flabel" data-i18n="label_prog_type">Type de séance (appliqué au log)</label>
-            <select id="sim-block-type">
-              <option data-i18n="hypertrophy">Hypertrophie</option>
-              <option data-i18n="strength">Force</option>
-              <option data-i18n="hyperstrength">Hyperforce (PR)</option>
-              <option data-i18n="endurance">Endurance musculaire</option>
-              <option data-i18n="deload">Décharge</option>
+          <div id="cycle-list"></div>
+        </div>
+
+        <!-- Sous-vue : éditeur d'un cycle (caché par défaut) -->
+        <div id="cycle-editor-subview" style="display:none">
+
+          <!-- Nom du cycle -->
+          <div class="card" style="margin-bottom:12px">
+            <div class="clabel" style="margin-bottom:6px">Nom du cycle</div>
+            <input type="text" id="cycle-name-input" placeholder="Ex : Semaine PP Judo…"
+              style="background:none;border:none;border-bottom:1px solid var(--border);color:#fff;font-size:17px;font-weight:800;width:100%;padding-bottom:6px">
+          </div>
+
+          <!-- 1. Durée -->
+          <div class="card" style="margin-bottom:12px">
+            <div class="clabel" style="margin-bottom:10px">① Durée du cycle</div>
+            <div class="plan-period-bar" id="cycle-duration-bar">
+              <button class="plan-period-btn active" data-dur="week">1 sem.</button>
+              <button class="plan-period-btn" data-dur="2weeks">2 sem.</button>
+              <button class="plan-period-btn" data-dur="5weeks">5 sem.</button>
+              <button class="plan-period-btn" data-dur="month">1 mois</button>
+              <button class="plan-period-btn" data-dur="3months">3 mois</button>
+            </div>
+          </div>
+
+          <!-- 2. Grille de placement -->
+          <div class="card" style="margin-bottom:12px">
+            <div class="clabel" style="margin-bottom:10px">② Placer les séances</div>
+            <div id="cycle-grid"></div>
+          </div>
+
+          <!-- 3. Répétitions par défaut -->
+          <div class="card" style="margin-bottom:12px">
+            <div class="clabel" style="margin-bottom:6px">③ Répétitions par défaut</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <button class="btn btn-s" id="cycle-repeat-minus">−</button>
+              <span id="cycle-repeat-val" style="font-size:20px;font-weight:900;min-width:28px;text-align:center">1</span>
+              <button class="btn btn-s" id="cycle-repeat-plus">+</button>
+              <span style="font-size:12px;color:var(--text2)">fois</span>
+            </div>
+          </div>
+
+          <!-- Boutons Sauvegarder / Annuler -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <button class="btn" id="cycle-editor-cancel" style="background:rgba(255,255,255,0.07)">Annuler</button>
+            <button class="btn btn-p" id="cycle-editor-save">💾 Sauvegarder</button>
+          </div>
+
+        </div>
+
+        <!-- Modal : générer un cycle (date de début + répétitions) -->
+        <div id="cycle-gen-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center">
+          <div class="card" style="width:90%;max-width:380px;padding:20px">
+            <div style="font-size:16px;font-weight:900;margin-bottom:14px">🚀 Générer le planning</div>
+            <div id="cycle-gen-cycle-name" style="font-size:13px;color:var(--accent);font-weight:700;margin-bottom:14px"></div>
+            <div class="fgroup">
+              <label class="flabel">Date de début</label>
+              <input type="date" id="cycle-gen-start-date" style="background:var(--card);border:1px solid var(--border);color:#fff;padding:8px 10px;border-radius:8px;font-size:14px;width:100%">
+            </div>
+            <div class="fgroup" style="margin-top:12px">
+              <label class="flabel">Répéter le cycle</label>
+              <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+                <button class="btn btn-s" id="cycle-gen-repeat-minus">−</button>
+                <span id="cycle-gen-repeat-val" style="font-size:20px;font-weight:900;min-width:28px;text-align:center">1</span>
+                <button class="btn btn-s" id="cycle-gen-repeat-plus">+</button>
+                <span style="font-size:12px;color:var(--text2)">fois</span>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px">
+              <button class="btn" id="cycle-gen-cancel" style="background:rgba(255,255,255,0.07)">Annuler</button>
+              <button class="btn btn-p" id="cycle-gen-confirm">🚀 Générer</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Vue Bibliothèque ── -->
+      <div id="plan-lib-view" style="display:none">
+        <div class="stitle flex-between" id="plan-lib-header" style="display:flex">
+          <span>Mes Programmes</span>
+          <button class="btn btn-s" id="sim-new-block-btn">+ Nouveau</button>
+        </div>
+        <div id="sim-blocks-list" style="margin-bottom:20px"></div>
+
+        <!-- Éditeur de Bloc (caché par défaut) -->
+        <div id="sim-editor" style="display:none">
+          <div class="card" style="margin-bottom:15px;border-left:4px solid var(--accent)">
+            <div class="flex-between" style="margin-bottom:12px">
+              <input type="text" id="sim-block-name" placeholder="Nom du programme…" style="background:none;border:none;color:#fff;font-size:18px;font-weight:800;width:70%">
+              <button class="btn btn-s" id="sim-save-block-btn">Sauver</button>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Type de séance</label>
+              <select id="sim-block-type">
+                <option>Hypertrophie</option>
+                <option>Force</option>
+                <option>Hyperforce (PR)</option>
+                <option>Endurance musculaire</option>
+                <option>Décharge</option>
+              </select>
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Ajouter un exercice</label>
+              <select id="sim-ex-sel"></select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:8px;margin-bottom:10px">
+              <div><label class="flabel">Séries</label><input type="number" id="sim-ser" placeholder="4"></div>
+              <div><label class="flabel">Reps</label><input type="number" id="sim-rep" placeholder="10"></div>
+              <div><label class="flabel">Poids</label><input type="number" id="sim-pds" placeholder="60" step="0.5"></div>
+            </div>
+            <button class="btn btn-p" id="sim-add-ex-btn">+ Ajouter à la liste</button>
+          </div>
+
+          <div class="stitle">Contenu du bloc</div>
+          <div id="sim-ex-list" style="margin-bottom:20px"></div>
+
+          <div id="sim-results">
+            <div class="stitle">Prévisions de Gain</div>
+            <div class="card card-rpg-score" style="margin-bottom:12px">
+              <div class="clabel clabel-accent">Gain Global Estimé</div>
+              <div style="font-size:24px;font-weight:900" id="sim-xp-gain">+ 0 XP</div>
+              <div id="sim-lvl-preview" style="margin-top:8px"></div>
+            </div>
+            <div id="sim-muscle-results" style="margin-bottom:20px"></div>
+            <button class="btn btn-p" id="sim-confirm-btn" style="background:var(--green);margin-bottom:15px">⚡ Confirmer la séance (Log)</button>
+            <button class="btn btn-s" id="sim-back-btn" style="width:100%">Retour aux programmes</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Modal : Choisir une séance ── -->
+      <div id="plan-picker-modal" class="plan-modal-overlay" style="display:none">
+        <div class="plan-modal-box">
+          <div class="plan-modal-title">Planifier une séance</div>
+          <div id="plan-picker-date" style="font-size:13px;color:var(--text2);margin-bottom:12px"></div>
+          <label class="flabel">Séance</label>
+          <select id="plan-picker-sel" style="width:100%;margin-bottom:16px"></select>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-p" id="plan-picker-confirm" style="flex:1">Ajouter</button>
+            <button class="btn btn-s" id="plan-picker-cancel" style="flex:1">Annuler</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Modal : Détail séance planifiée ── -->
+      <div id="plan-detail-modal" class="plan-modal-overlay" style="display:none">
+        <div class="plan-modal-box">
+          <div class="plan-detail-header">
+            <div class="plan-modal-title" id="plan-detail-title"></div>
+            <div id="plan-detail-date" style="font-size:13px;color:var(--text2)"></div>
+          </div>
+          <div class="fgroup" style="margin-bottom:12px">
+            <label class="flabel">Type de séance</label>
+            <select id="plan-detail-type">
+              <option>Hypertrophie</option>
+              <option>Force</option>
+              <option>Hyperforce (PR)</option>
+              <option>Endurance musculaire</option>
+              <option>Décharge</option>
             </select>
           </div>
-  
-          <div class="fgroup">
-            <label class="flabel" data-i18n="label_add_ex">Ajouter un exercice</label>
-            <select id="sim-ex-sel"></select>
+          <div id="plan-detail-exlist" style="margin-bottom:16px;max-height:35vh;overflow-y:auto"></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-p" id="plan-detail-log-btn" style="background:var(--green)">⚡ Logger la séance</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-s" id="plan-detail-close-btn" style="flex:1">Fermer</button>
+              <button class="btn btn-s" id="plan-detail-del-btn" style="flex:1;background:rgba(239,68,68,0.1);color:#ef4444">Supprimer</button>
+            </div>
           </div>
-          <div style="display:grid; grid-template-columns:1fr 1fr 1.2fr; gap:8px; margin-bottom:10px">
-            <div><label class="flabel" data-i18n="label_ser">Séries</label><input type="number" id="sim-ser" placeholder="4"></div>
-            <div><label class="flabel" data-i18n="label_rep">Reps</label><input type="number" id="sim-rep" placeholder="10"></div>
-            <div><label class="flabel" data-i18n="label_pds">Poids</label><input type="number" id="sim-pds" placeholder="60" step="0.5"></div>
-          </div>
-          <button class="btn btn-p" id="sim-add-ex-btn" data-i18n="btn_add_list">+ Ajouter à la liste</button>
         </div>
-  
-        <div class="stitle" data-i18n="stitle_content_block">Contenu du bloc</div>
-        <div id="sim-ex-list" style="margin-bottom:20px"></div>
-  
-        <div id="sim-results">
-          <div class="stitle" data-i18n="stitle_gains">Prévisions de Gain</div>
-          <div class="card card-rpg-score" style="margin-bottom:12px">
-            <div class="clabel clabel-accent" data-i18n="label_gain_global">Gain Global Estimé</div>
-            <div style="font-size:24px; font-weight:900" id="sim-xp-gain">+ 0 XP</div>
-            <div id="sim-lvl-preview" style="margin-top:8px"></div>
-          </div>
-          <div id="sim-muscle-results" style="margin-bottom:20px"></div>
-  
-          <button class="btn btn-p" id="sim-confirm-btn" style="background:var(--green); margin-bottom:15px" data-i18n="btn_confirm_session">⚡ Confirmer la séance (Log)</button>
-          <button class="btn btn-s" id="sim-back-btn" style="width:100%" data-i18n="btn_back">Retour aux programmes</button>
-        </div>
-
       </div>
 
     </div><!-- /v-simulation -->
@@ -428,7 +589,7 @@
     <div class="tab on" data-v="seances"><span class="tab-icon">📋</span><span class="tab-label" data-i18n="tab_seances">Séances</span></div>
     <div class="tab" data-v="pr"><span class="tab-icon">🏆</span><span class="tab-label" data-i18n="tab_pr">PR Big 6</span></div>
     <div class="tab" data-v="rpg"><span class="tab-icon">⚔️</span><span class="tab-label" data-i18n="tab_rpg">RPG</span></div>
-    <div class="tab" data-v="simulation"><span class="tab-icon">🧪</span><span class="tab-label" data-i18n="tab_simu">Simu</span></div>
+    <div class="tab" data-v="simulation"><span class="tab-icon">📅</span><span class="tab-label" data-i18n="tab_simu">Planning</span></div>
     <div class="tab" data-v="stats"><span class="tab-icon">📊</span><span class="tab-label" data-i18n="tab_stats">Stats</span></div>
     <div class="tab" data-v="badges"><span class="tab-icon">🏅</span><span class="tab-label" data-i18n="tab_badges">Badges</span></div>
   </div>
@@ -442,6 +603,7 @@
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width:16px">
         Connexion Google
       </button>
+
 
       <div id="auth-user-profile" style="display:none; align-items:center; gap:12px">
         <img id="auth-user-photo" src="" style="width:38px; height:38px; border-radius:50%; border: 2px solid var(--accent); background: #1e293b">
@@ -477,32 +639,143 @@
     <div class="view" id="v-profil">
     <div class="content">
       <div class="clabel" data-i18n="menu_profil">Mon Profil</div>
-      <div class="card">
-        <div class="fgroup">
-          <label class="flabel" data-i18n="label_prenom">Prénom</label>
-          <input type="text" id="prof-prenom" placeholder="Prénom">
-        </div>
-        <div class="fgroup">
-          <label class="flabel" data-i18n="label_nom">Nom</label>
-          <input type="text" id="prof-nom" placeholder="Nom">
-        </div>
-        <div class="kpi-row">
+
+      <!-- ── Sous-vue Identité ── -->
+      <div id="prof-id-view">
+        <div class="card">
           <div class="fgroup">
-            <label class="flabel" data-i18n="label_age">Âge</label>
-            <input type="number" id="prof-age" placeholder="25">
+            <label class="flabel" data-i18n="label_prenom">Prénom</label>
+            <input type="text" id="prof-prenom" placeholder="Prénom">
           </div>
           <div class="fgroup">
-            <label class="flabel" data-i18n="label_poids">Poids (kg)</label>
-            <input type="number" id="prof-poids" placeholder="75">
+            <label class="flabel" data-i18n="label_nom">Nom</label>
+            <input type="text" id="prof-nom" placeholder="Nom">
           </div>
+          <div class="kpi-row">
+            <div class="fgroup">
+              <label class="flabel" data-i18n="label_age">Âge</label>
+              <input type="number" id="prof-age" placeholder="25">
+            </div>
+            <div class="fgroup">
+              <label class="flabel">Sexe</label>
+              <select id="prof-sexe">
+                <option value="M">Homme</option>
+                <option value="F">Femme</option>
+              </select>
+            </div>
+          </div>
+          <div class="kpi-row">
+            <div class="fgroup">
+              <label class="flabel" data-i18n="label_poids">Poids (kg)</label>
+              <input type="number" id="prof-poids" placeholder="75" step="0.1">
+            </div>
+            <div class="fgroup">
+              <label class="flabel" data-i18n="label_taille">Taille (cm)</label>
+              <input type="number" id="prof-taille" placeholder="180">
+            </div>
+          </div>
+          <button class="btn btn-p" onclick="saveProfile()" data-i18n="btn_save_profile">Enregistrer le Profil</button>
         </div>
-        <div class="fgroup">
-          <label class="flabel" data-i18n="label_taille">Taille (cm)</label>
-          <input type="number" id="prof-taille" placeholder="180">
-        </div>
-        <button class="btn btn-p" onclick="saveProfile()" data-i18n="btn_save_profile">Enregistrer le Profil</button>
       </div>
+
+      <!-- ── Sous-vue Poids ── -->
+      <div id="prof-poids-view" style="display:none">
+
+        <!-- Saisie rapide -->
+        <div class="card" style="margin-bottom:12px">
+          <div class="clabel" style="margin-bottom:10px">Enregistrer mon poids</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div>
+              <label class="flabel">Date</label>
+              <input type="date" id="wlog-date" style="background:var(--card);border:1px solid var(--border);color:#fff;padding:8px;border-radius:8px;font-size:14px;width:100%">
+            </div>
+            <div>
+              <label class="flabel">Poids (kg)</label>
+              <input type="number" id="wlog-poids" placeholder="75.0" step="0.1" style="width:100%">
+            </div>
+          </div>
+          <button class="btn btn-p" id="wlog-add-btn" style="width:100%">+ Enregistrer</button>
+        </div>
+
+        <!-- Stats rapides -->
+        <div id="wlog-stats" style="margin-bottom:12px"></div>
+
+        <!-- Sélecteur période -->
+        <div class="plan-period-bar" id="wlog-period-bar" style="margin-bottom:10px">
+          <button class="plan-period-btn active" data-period="1m">1 mois</button>
+          <button class="plan-period-btn" data-period="3m">3 mois</button>
+          <button class="plan-period-btn" data-period="6m">6 mois</button>
+          <button class="plan-period-btn" data-period="1y">1 an</button>
+          <button class="plan-period-btn" data-period="all">Tout</button>
+        </div>
+
+        <!-- Graphique SVG -->
+        <div class="card" style="padding:10px;margin-bottom:12px">
+          <div id="wlog-chart"></div>
+        </div>
+
+        <!-- Historique récent -->
+        <div class="card">
+          <div class="clabel" style="margin-bottom:8px">Historique</div>
+          <div id="wlog-history"></div>
+        </div>
+
+      </div>
+
+      <!-- ── Sous-vue Force ── -->
+      <div id="prof-force-view" style="display:none">
+
+        <!-- Ratio Force / Poids de corps -->
+        <div class="card" style="margin-bottom:12px">
+          <div class="clabel" style="margin-bottom:10px">⚡ Ratio Force / Poids de corps</div>
+          <div id="force-ratio-table"></div>
+        </div>
+
+        <!-- Wilks 2020 + Dots -->
+        <div class="card" style="margin-bottom:12px">
+          <div class="clabel" style="margin-bottom:10px">🏆 Coefficients Wilks & Dots</div>
+          <div id="force-wilks-dots"></div>
+        </div>
+
+        <!-- Encart explicatif -->
+        <div class="card" style="border-left:3px solid var(--accent)">
+          <div class="clabel" style="margin-bottom:10px;font-size:12px">📖 Les 3 mesures de force</div>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:12px;line-height:1.6;color:var(--text2)">
+            <div>
+              <span style="font-weight:800;color:#fff">⚡ Ratio Force / Poids de corps</span><br>
+              Mesure ta force <em>relative</em> : ton 1RM divisé par ton poids. Idéal pour suivre ta progression indépendamment de ta prise de masse. Un ratio de ×2 au squat signifie que tu soulèves 2 fois ton poids. Universel et simple à interpréter.
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">
+              <span style="font-weight:800;color:#fff">🏆 Wilks 2020</span><br>
+              Score utilisé en <em>powerlifting fédéral</em> pour comparer des athlètes de poids de corps différents. Basé sur une formule polynomiale précise (mise à jour en 2020), il permet de se comparer entre catégories de poids. Plus le score est élevé, plus tu es fort relativement à ta catégorie.
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">
+              <span style="font-weight:800;color:#fff">🎯 Dots</span><br>
+              Alternative plus récente au Wilks, conçue pour être plus <em>équitable entre les petits et grands gabarits</em>. Utilise une courbe différente qui favorise moins les athlètes lourds. Adopté par certaines fédérations comme complément ou remplacement du Wilks.
+            </div>
+            <div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:8px;font-size:11px;opacity:0.6">
+              Les trois se basent sur le 1RM estimé via la formule Epley (poids × (1 + reps ÷ 30)) depuis tes meilleures séances enregistrées.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
     </div>
+
+    <!-- Barre d'onglets bas — style nav principale -->
+    <div class="prof-tabs-bar">
+      <button class="prof-tab active" id="prof-tab-id">
+        <span>👤</span><span>Identité</span>
+      </button>
+      <button class="prof-tab" id="prof-tab-poids">
+        <span>⚖️</span><span>Poids</span>
+      </button>
+      <button class="prof-tab" id="prof-tab-force">
+        <span>💪</span><span>Force</span>
+      </button>
+    </div>
+
   </div>
 
   <div class="view" id="v-settings">
@@ -580,25 +853,46 @@
 <script src="js/render/badges.js"></script>
 
 <!-- 5. App (doit être en dernier) -->
+<script src="js/render/corps.js"></script>
 <script src="js/app.js"></script>
 
-<!-- 6. Firebase & Auth (Modules ESM) -->
+<!-- 6. Firebase & Auth (Modules ESM)
+     Chargé en dernier — expose window.Auth et window.pushToCloud pour les scripts classiques.
+     signInWithRedirect est utilisé partout (popup bloqué sur iOS PWA). -->
 <script type="module">
-  import { Auth } from './js/auth.js';
-  // Rendre global pour les boutons si nécessaire (ou attacher les listeners ici)
-  window.Auth = Auth;
+  import { Auth }         from './js/auth.js';
+  import { pushToCloud }  from './js/sync.js';
+
+  // Exposition globale (data.js, sync.js les lisent via window.*)
+  window.Auth         = Auth;
+  window.pushToCloud  = pushToCloud;
+
+  // Boutons du menu latéral
+  var loginBtn  = document.getElementById('auth-login-btn');
+  var logoutBtn = document.getElementById('auth-logout-btn');
+
+  if (loginBtn)  loginBtn.addEventListener('click',  function() { Auth.login();  });
+  if (logoutBtn) logoutBtn.addEventListener('click',  function() {
+    // Confirmation inline (pas de confirm() — bloqué sur iOS PWA)
+    var btn = logoutBtn;
+    if (btn.dataset.confirm === '1') {
+      Auth.logout();
+      btn.dataset.confirm  = '';
+      btn.textContent      = '✕';
+    } else {
+      btn.dataset.confirm  = '1';
+      btn.textContent      = '⚠️ Confirmer ?';
+      btn.style.color      = '#ef4444';
+      setTimeout(function() {
+        btn.dataset.confirm = '';
+        btn.textContent     = '✕';
+        btn.style.color     = '';
+      }, 3000);
+    }
+  });
+
+  // Initialisation — getRedirectResult + onAuthStateChanged
   Auth.init();
-  
-  const loginBtn = document.getElementById('auth-login-btn');
-  const logoutBtn = document.getElementById('auth-logout-btn');
-  
-  if (loginBtn) loginBtn.addEventListener('click', function() { 
-    if (window.Auth) window.Auth.login(); 
-    else alert("Erreur : Le module Auth n'est pas prêt.");
-  });
-  if (logoutBtn) logoutBtn.addEventListener('click', function() { 
-    if (window.Auth) window.Auth.logout(); 
-  });
 </script>
 
 </body>

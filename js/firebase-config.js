@@ -1,13 +1,20 @@
 /**
  * CONFIGURATION FIREBASE
- * Mis à jour le 14/04/2026
+ * Mis à jour le 16/04/2026
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import {
+  initializeAuth,
+  browserLocalPersistence,
+  browserPopupRedirectResolver
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCjsXZ7jvxD5RsuAfI19DvDpaACFpmUnPg",
+  // authDomain = domaine Firebase Hosting qui héberge /__/auth/handler
+  // ⚠️  NE PAS mettre kirgnaar.github.io ici — GitHub Pages ne sert pas ce handler.
+  // kirgnaar.github.io doit être dans "Domaines autorisés" de la console Firebase (✅ fait).
   authDomain: "muscu-rpg.firebaseapp.com",
   databaseURL: "https://muscu-rpg-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "muscu-rpg",
@@ -18,6 +25,15 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+
+// browserLocalPersistence : stocke le token dans localStorage.
+//   Plus fiable qu'IndexedDB sur iOS PWA — localStorage survit aux redirects
+//   cross-origin et n'est pas sujet aux purges aléatoires d'IndexedDB sur iOS.
+// browserPopupRedirectResolver : OBLIGATOIRE avec initializeAuth() manuel —
+//   sans lui, signInWithRedirect() et getRedirectResult() lèvent auth/argument-error
+export const auth = initializeAuth(app, {
+  persistence:           browserLocalPersistence,
+  popupRedirectResolver: browserPopupRedirectResolver
+});
 export const db = getFirestore(app);
 

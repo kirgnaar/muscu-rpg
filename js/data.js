@@ -37,13 +37,11 @@ function saveUser(user) {
     var timestamp = Date.now();
     localStorage.setItem('mrpg_last_sync', timestamp.toString());
 
-    if (window.Auth && window.Auth.user) {
-      import('./sync.js').then(function(m) {
-        m.pushToCloud(window.Auth.user.uid, {
-          sessions: APP.data,
-          user: APP.user,
-          blocks: (window.SIM && SIM.blocks) ? SIM.blocks : []
-        });
+    if (window.Auth && window.Auth.user && window.pushToCloud) {
+      window.pushToCloud(window.Auth.user.uid, {
+        sessions: APP.data,
+        user: APP.user,
+        blocks: (window.SIM && SIM.blocks) ? SIM.blocks : []
       });
     }
   } catch(e) {}
@@ -73,13 +71,11 @@ function saveData(data) {
 
     // Déclencher la sync Cloud si l'utilisateur est connecté
     // On utilise dynamic import pour rester compatible ES5 et éviter les erreurs de chargement
-    if (window.Auth && window.Auth.user) {
-      import('./sync.js').then(function(m) {
-        m.pushToCloud(window.Auth.user.uid, {
-          sessions: APP.data,
-          user: APP.user,
-          blocks: (window.SIM && SIM.blocks) ? SIM.blocks : []
-        });
+    if (window.Auth && window.Auth.user && window.pushToCloud) {
+      window.pushToCloud(window.Auth.user.uid, {
+        sessions: APP.data,
+        user: APP.user,
+        blocks: (window.SIM && SIM.blocks) ? SIM.blocks : []
       });
     }
   } catch(e) {
@@ -254,4 +250,27 @@ function allDates() {
     if (dates.indexOf(d) === -1) dates.push(d);
   }
   return dates.sort().reverse();
+}
+
+/**
+ * Liste de tous les noms d'exercices existants (statique)
+ */
+function getAllExercises() {
+  var list = [];
+  for (var i = 0; i < EX.length; i++) {
+    list.push(EX[i][0]);
+  }
+  return list;
+}
+
+/**
+ * Liste des exercices ayant au moins une série enregistrée
+ */
+function allExercisesWithData() {
+  var list = [];
+  for (var i = 0; i < APP.data.length; i++) {
+    var ex = APP.data[i].ex;
+    if (list.indexOf(ex) === -1) list.push(ex);
+  }
+  return list.sort();
 }
