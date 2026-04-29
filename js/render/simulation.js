@@ -528,7 +528,7 @@ function openCycleSlotPicker(dayOffset) {
   for (var i = 0; i < SIM.blocks.length; i++) {
     var o = document.createElement('option');
     o.value = SIM.blocks[i].id;
-    o.textContent = SIM.blocks[i].name;
+    o.textContent = SIM.blocks[i].name + (SIM.blocks[i].type ? ' — ' + SIM.blocks[i].type : '');
     sel.appendChild(o);
   }
   $('plan-picker-confirm').onclick = function() {
@@ -1084,7 +1084,7 @@ function openSessionPicker(date) {
     var b = SIM.blocks[i];
     var opt = document.createElement('option');
     opt.value = b.id;
-    opt.textContent = b.name;
+    opt.textContent = b.name + (b.type ? ' — ' + b.type : '');
     sel.appendChild(opt);
   }
   $('plan-picker-date').textContent = _formatDateFull(date);
@@ -1132,6 +1132,9 @@ function openPlanDetail(entryId) {
   $('plan-detail-title').textContent = block.name;
   $('plan-detail-date').textContent = _formatDateFull(entry.date);
 
+  var typeEl = $('plan-detail-type');
+  typeEl.value = block.type || 'Hypertrophie';
+
   var html = '';
   for (var j = 0; j < block.exercises.length; j++) {
     var ex = block.exercises[j];
@@ -1175,13 +1178,14 @@ function _logPlanEntry(entryId) {
   // 2e appui : on logue
   if (btn) { btn.dataset.confirm = ''; btn.textContent = '✓ Logger cette séance'; btn.style.background = ''; }
 
-  var type = block.type || 'Hypertrophie';
+  var typeEl = $('plan-detail-type');
+  var type = (typeEl && typeEl.value) ? typeEl.value : (block.type || 'Hypertrophie');
   for (var j = 0; j < block.exercises.length; j++) {
     var item = block.exercises[j];
     addEntry({ date: entry.date, type: type, ex: item.ex, grp: item.grp || getPrimaryGroup(item.ex), ser: item.ser, rep: item.rep, pds: item.pds });
   }
   APP.render();
-  toast('Séance loggée dans le journal !');
+  toast('✓ Séance loggée en ' + type.toLowerCase());
   closePlanModal('plan-detail-modal');
   APP.switchView('seances');
 }

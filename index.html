@@ -421,9 +421,21 @@
       <!-- ── Modal : Détail séance planifiée ── -->
       <div id="plan-detail-modal" class="plan-modal-overlay" style="display:none">
         <div class="plan-modal-box">
-          <div class="plan-modal-title" id="plan-detail-title"></div>
-          <div id="plan-detail-date" style="font-size:13px;color:var(--text2);margin-bottom:12px"></div>
-          <div id="plan-detail-exlist" style="margin-bottom:16px;max-height:40vh;overflow-y:auto"></div>
+          <div class="plan-detail-header">
+            <div class="plan-modal-title" id="plan-detail-title"></div>
+            <div id="plan-detail-date" style="font-size:13px;color:var(--text2)"></div>
+          </div>
+          <div class="fgroup" style="margin-bottom:12px">
+            <label class="flabel">Type de séance</label>
+            <select id="plan-detail-type">
+              <option>Hypertrophie</option>
+              <option>Force</option>
+              <option>Hyperforce (PR)</option>
+              <option>Endurance musculaire</option>
+              <option>Décharge</option>
+            </select>
+          </div>
+          <div id="plan-detail-exlist" style="margin-bottom:16px;max-height:35vh;overflow-y:auto"></div>
           <div style="display:flex;flex-direction:column;gap:8px">
             <button class="btn btn-p" id="plan-detail-log-btn" style="background:var(--green)">⚡ Logger la séance</button>
             <div style="display:flex;gap:8px">
