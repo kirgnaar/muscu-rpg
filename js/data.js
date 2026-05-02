@@ -89,19 +89,33 @@ function saveData(data) {
  */
 function addEntry(entry) {
   var data = APP.data;
-  var vol = entry.ser * entry.rep * entry.pds;
-  var rm1 = epley(entry.pds, entry.rep);
 
-  var isPR = false;
-  if (entry.pds >= 1) { // PR possible sur tout exercice avec charge
-    var prevBest = 0;
-    for (var i = 0; i < data.length; i++) {
-      if (data[i].ex === entry.ex) {
-        var val = epley(data[i].pds, data[i].rep);
-        if (val > prevBest) prevBest = val;
+  // Détecter le mode : priorité à exMode explicite, sinon déduire du type d'exercice
+  var rawMode = entry.exMode || getExType(entry.ex);
+  var isTimed  = (rawMode === 'timed'  || rawMode === 'Timed');
+  var isCardio = (rawMode === 'cardio' || rawMode === 'Cardio');
+
+  var vol, rm1 = 0, isPR = false;
+  if (isTimed) {
+    var dur = entry.dur || entry.rep || 0;
+    vol = entry.ser * dur; // total secondes d'effort
+  } else if (isCardio) {
+    var dist = entry.dist || 0;
+    var durC = entry.dur || 0;
+    vol = dist > 0 ? Math.round(dist * 100) : Math.round(durC * 10);
+  } else {
+    vol = entry.ser * entry.rep * entry.pds;
+    rm1 = epley(entry.pds, entry.rep);
+    if (entry.pds >= 1) {
+      var prevBest = 0;
+      for (var i = 0; i < data.length; i++) {
+        if (data[i].ex === entry.ex) {
+          var val = epley(data[i].pds, data[i].rep);
+          if (val > prevBest) prevBest = val;
+        }
       }
+      if (rm1 > prevBest && prevBest > 0) isPR = true;
     }
-    if (rm1 > prevBest && prevBest > 0) isPR = true;
   }
 
   var prevVol = 0;
@@ -114,13 +128,15 @@ function addEntry(entry) {
     type:  entry.type,
     ex:    entry.ex,
     grp:   entry.grp || getPrimaryGroup(entry.ex),
-    ser:   entry.ser,
-    rep:   entry.rep,
-    pds:   entry.pds,
+    ser:   entry.ser || 1,
+    rep:   entry.rep || 0,
+    pds:   entry.pds || 0,
     vol:   vol,
     rm1:   rm1,
     isPR:  isPR
   };
+  if (isTimed)  { newEntry.exMode = 'timed';  newEntry.dur = entry.dur || entry.rep || 0; }
+  if (isCardio) { newEntry.exMode = 'cardio'; newEntry.dur = entry.dur || 0; newEntry.dist = entry.dist || 0; }
 
   APP.data.push(newEntry);
   APP.save();

@@ -86,6 +86,16 @@ function _lastPds(exName) {
   return best;
 }
 
+// Retourne la dernière valeur rep (= durée pour les exercices Timed)
+function _lastRep(exName) {
+  var best = null, bestDate = '';
+  for (var i = 0; i < APP.data.length; i++) {
+    var e = APP.data[i];
+    if (e.ex === exName && e.date >= bestDate) { bestDate = e.date; best = e.rep; }
+  }
+  return best;
+}
+
 // ── Données Bibliothèque ──────────────────────────────────────────────────
 var SIM = {
   blocks: [],
@@ -793,10 +803,11 @@ function renderSimulation() {
 }
 
 // ── Tâche du jour ─────────────────────────────────────────────────────────
-var SESSION_TYPES = ['Hypertrophie','Force','Hyperforce (PR)','Endurance musculaire','Décharge'];
+var SESSION_TYPES = ['Hypertrophie','Force','Hyperforce (PR)','Endurance musculaire','Décharge','Cardio'];
 var TYPE_COLORS   = {
   'Hypertrophie':'#3b82f6','Force':'#ef4444',
-  'Hyperforce (PR)':'#8b5cf6','Endurance musculaire':'#10b981','Décharge':'#64748b'
+  'Hyperforce (PR)':'#8b5cf6','Endurance musculaire':'#10b981','Décharge':'#64748b',
+  'Cardio':'#f97316'
 };
 
 function renderTodayTask() {
@@ -875,23 +886,43 @@ function renderTodayTask() {
             '<div style="text-align:center">Rép.</div><div style="text-align:center">Poids</div>' +
           '</div>';
 
+    var INP_TD = 'width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px';
     for (var k = 0; k < block.exercises.length; k++) {
-      var ex  = block.exercises[k];
-      var pfx = 'td-' + eid + '-' + k;
-      var lastPdsTd = _lastPds(ex.ex);
-      var pdsFillTd = (lastPdsTd !== null) ? lastPdsTd : ex.pds;
-      var exLabel = ex.ex + (lastPdsTd !== null ? '<div style="font-size:9px;color:var(--accent);margin-top:1px">↑ dernière perf</div>' : '');
-      html +=
-        '<div style="display:grid;grid-template-columns:1fr 44px 44px 60px;gap:4px;' +
-             'align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
-          '<div style="font-size:12px;color:#fff;line-height:1.3">' + exLabel + '</div>' +
-          '<input type="number" id="' + pfx + '-s" value="' + ex.ser + '" min="1" max="20"' +
-            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
-          '<input type="number" id="' + pfx + '-r" value="' + ex.rep + '" min="1" max="100"' +
-            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
-          '<input type="number" id="' + pfx + '-p" value="' + pdsFillTd + '" min="0" max="500" step="0.5"' +
-            ' style="width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px">' +
-        '</div>';
+      var ex      = block.exercises[k];
+      var pfx     = 'td-' + eid + '-' + k;
+      var exTypeTd  = getExType(ex.ex);
+      var isTimedTd  = (exTypeTd === 'Timed');
+      var isCardioTd = (exTypeTd === 'Cardio');
+
+      if (isTimedTd) {
+        var lastDurTd = _lastRep(ex.ex) || ex.rep || 60;
+        html +=
+          '<div style="display:grid;grid-template-columns:1fr 44px 60px;gap:4px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
+            '<div style="font-size:12px;color:#fff;line-height:1.3">' + ex.ex +
+              '<div style="font-size:9px;color:var(--text2);margin-top:1px">⏱ Sér. × Durée (s)</div></div>' +
+            '<input type="number" id="' + pfx + '-s" value="' + ex.ser + '" min="1" max="20" style="' + INP_TD + '">' +
+            '<input type="number" id="' + pfx + '-r" value="' + lastDurTd + '" min="1" max="7200" step="5" style="' + INP_TD + '">' +
+          '</div>';
+      } else if (isCardioTd) {
+        html +=
+          '<div style="display:grid;grid-template-columns:1fr 56px 64px;gap:4px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
+            '<div style="font-size:12px;color:#fff;line-height:1.3">' + ex.ex +
+              '<div style="font-size:9px;color:var(--text2);margin-top:1px">🏃 Durée (min) · Dist (km)</div></div>' +
+            '<input type="number" id="' + pfx + '-r" value="' + (ex.rep || 30) + '" min="1" step="1" style="' + INP_TD + '">' +
+            '<input type="number" id="' + pfx + '-p" value="0" min="0" step="0.1" style="' + INP_TD + '">' +
+          '</div>';
+      } else {
+        var lastPdsTd = _lastPds(ex.ex);
+        var pdsFillTd = (lastPdsTd !== null) ? lastPdsTd : ex.pds;
+        var exLabel = ex.ex + (lastPdsTd !== null ? '<div style="font-size:9px;color:var(--accent);margin-top:1px">↑ dernière perf</div>' : '');
+        html +=
+          '<div style="display:grid;grid-template-columns:1fr 44px 44px 60px;gap:4px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
+            '<div style="font-size:12px;color:#fff;line-height:1.3">' + exLabel + '</div>' +
+            '<input type="number" id="' + pfx + '-s" value="' + ex.ser + '" min="1" max="20" style="' + INP_TD + '">' +
+            '<input type="number" id="' + pfx + '-r" value="' + ex.rep + '" min="1" max="100" style="' + INP_TD + '">' +
+            '<input type="number" id="' + pfx + '-p" value="' + pdsFillTd + '" min="0" max="500" step="0.5" style="' + INP_TD + '">' +
+          '</div>';
+      }
     }
 
     html +=
@@ -937,14 +968,30 @@ function _logTodayTask(entryId, exCount) {
   var logged = 0;
   for (var k = 0; k < exCount; k++) {
     var pfx = 'td-' + entryId + '-' + k;
+    var ex  = block.exercises[k];
+    var exTypeLt  = getExType(ex.ex);
+    var isTimedLt  = (exTypeLt === 'Timed');
+    var isCardioLt = (exTypeLt === 'Cardio');
     var sEl = $(pfx + '-s'), rEl = $(pfx + '-r'), pEl = $(pfx + '-p');
-    if (!sEl || !rEl || !pEl) continue;
-    var ser = parseInt(sEl.value)   || 0;
-    var rep = parseInt(rEl.value)   || 0;
-    var pds = parseFloat(pEl.value) || 0;
-    if (ser < 1 || rep < 1) continue;
-    var ex = block.exercises[k];
-    addEntry({ date: entry.date, type: type, ex: ex.ex, grp: ex.grp || getPrimaryGroup(ex.ex), ser: ser, rep: rep, pds: pds });
+
+    if (isTimedLt) {
+      var serLt = sEl ? (parseInt(sEl.value) || 1) : 1;
+      var durLt = rEl ? (parseInt(rEl.value) || 60) : 60;
+      if (serLt < 1 || durLt < 1) continue;
+      addEntry({ date: entry.date, type: type, ex: ex.ex, grp: ex.grp || getPrimaryGroup(ex.ex), ser: serLt, rep: durLt, pds: 0, exMode: 'timed', dur: durLt });
+    } else if (isCardioLt) {
+      var durLtC = rEl ? (parseInt(rEl.value) || 1) : 1;
+      var distLt = pEl ? (parseFloat(pEl.value) || 0) : 0;
+      if (durLtC < 1) continue;
+      addEntry({ date: entry.date, type: type, ex: ex.ex, grp: ex.grp || getPrimaryGroup(ex.ex), ser: 1, rep: 0, pds: 0, exMode: 'cardio', dur: durLtC, dist: distLt });
+    } else {
+      if (!sEl || !rEl || !pEl) continue;
+      var serLtS = parseInt(sEl.value)   || 0;
+      var repLtS = parseInt(rEl.value)   || 0;
+      var pdsLtS = parseFloat(pEl.value) || 0;
+      if (serLtS < 1 || repLtS < 1) continue;
+      addEntry({ date: entry.date, type: type, ex: ex.ex, grp: ex.grp || getPrimaryGroup(ex.ex), ser: serLtS, rep: repLtS, pds: pdsLtS });
+    }
     logged++;
   }
 
@@ -1149,21 +1196,38 @@ function openPlanDetail(entryId) {
   typeEl.value = block.type || 'Hypertrophie';
 
   var INP = 'width:100%;text-align:center;background:rgba(255,255,255,0.07);border:1px solid var(--border);border-radius:6px;color:#fff;font-size:13px;font-weight:700;padding:4px 2px';
-  var html = '<div style="display:grid;grid-template-columns:1fr 40px 40px 56px;gap:4px;padding:0 0 6px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase">' +
-    '<div>Exercice</div><div style="text-align:center">Sér.</div><div style="text-align:center">Rép.</div><div style="text-align:center">Poids</div></div>';
+  var html = '';
   for (var j = 0; j < block.exercises.length; j++) {
     var ex = block.exercises[j];
-    var lastPds = _lastPds(ex.ex);
-    var pdsFill = (lastPds !== null) ? lastPds : ex.pds;
     var pfx = 'pd-' + entryId + '-' + j;
-    var perfHint = (lastPds !== null) ? ' title="Dernière perf : ' + lastPds + ' kg"' : '';
-    html += '<div style="display:grid;grid-template-columns:1fr 40px 40px 56px;gap:4px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
-      '<div style="font-size:12px;color:#fff;line-height:1.3"' + perfHint + '>' + ex.ex +
-        (lastPds !== null ? '<div style="font-size:9px;color:var(--accent);margin-top:1px">↑ dernière perf</div>' : '') + '</div>' +
-      '<input type="number" id="' + pfx + '-s" value="' + ex.ser + '" min="1" max="20" style="' + INP + '">' +
-      '<input type="number" id="' + pfx + '-r" value="' + ex.rep + '" min="1" max="100" style="' + INP + '">' +
-      '<input type="number" id="' + pfx + '-p" value="' + pdsFill + '" min="0" step="0.5" style="' + INP + '">' +
-      '</div>';
+    var exType = getExType(ex.ex);
+    var isTimed  = (exType === 'Timed');
+    var isCardio = (exType === 'Cardio');
+
+    if (isTimed) {
+      var lastDur = _lastRep(ex.ex) || ex.rep || 60;
+      html += '<div style="display:grid;grid-template-columns:1fr 44px 60px;gap:4px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
+        '<div style="font-size:12px;color:#fff">' + ex.ex + '<div style="font-size:9px;color:var(--text2)">⏱ Sér. × Durée (s)</div></div>' +
+        '<input type="number" id="' + pfx + '-s" value="' + ex.ser + '" min="1" max="20" style="' + INP + '">' +
+        '<input type="number" id="' + pfx + '-r" value="' + lastDur + '" min="1" max="7200" step="5" style="' + INP + '">' +
+        '</div>';
+    } else if (isCardio) {
+      html += '<div style="display:grid;grid-template-columns:1fr 56px 64px;gap:4px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
+        '<div style="font-size:12px;color:#fff">' + ex.ex + '<div style="font-size:9px;color:var(--text2)">🏃 Durée (min) · Dist (km)</div></div>' +
+        '<input type="number" id="' + pfx + '-r" value="' + (ex.rep || 30) + '" min="1" step="1" style="' + INP + '">' +
+        '<input type="number" id="' + pfx + '-p" value="0" min="0" step="0.1" style="' + INP + '">' +
+        '</div>';
+    } else {
+      var lastPds = _lastPds(ex.ex);
+      var pdsFill = (lastPds !== null) ? lastPds : ex.pds;
+      html += '<div style="display:grid;grid-template-columns:1fr 40px 40px 56px;gap:4px;align-items:center;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04)">' +
+        '<div style="font-size:12px;color:#fff;line-height:1.3">' + ex.ex +
+          (lastPds !== null ? '<div style="font-size:9px;color:var(--accent);margin-top:1px">↑ dernière perf</div>' : '') + '</div>' +
+        '<input type="number" id="' + pfx + '-s" value="' + ex.ser + '" min="1" max="20" style="' + INP + '">' +
+        '<input type="number" id="' + pfx + '-r" value="' + ex.rep + '" min="1" max="100" style="' + INP + '">' +
+        '<input type="number" id="' + pfx + '-p" value="' + pdsFill + '" min="0" step="0.5" style="' + INP + '">' +
+        '</div>';
+    }
   }
   $('plan-detail-exlist').innerHTML = html || '<div style="color:var(--text2);font-size:13px;padding:8px 0">Séance vide</div>';
 
@@ -1205,13 +1269,29 @@ function _logPlanEntry(entryId) {
   var logged = 0;
   for (var j = 0; j < block.exercises.length; j++) {
     var item = block.exercises[j];
-    var pfx = 'pd-' + entryId + '-' + j;
+    var pfx  = 'pd-' + entryId + '-' + j;
+    var exTypeLp  = getExType(item.ex);
+    var isTimedLp  = (exTypeLp === 'Timed');
+    var isCardioLp = (exTypeLp === 'Cardio');
     var sEl = $(pfx + '-s'), rEl = $(pfx + '-r'), pEl = $(pfx + '-p');
-    var ser = sEl ? (parseInt(sEl.value) || item.ser) : item.ser;
-    var rep = rEl ? (parseInt(rEl.value) || item.rep) : item.rep;
-    var pds = pEl ? (parseFloat(pEl.value) || 0) : (item.pds || 0);
-    if (ser < 1 || rep < 1) continue;
-    addEntry({ date: entry.date, type: type, ex: item.ex, grp: item.grp || getPrimaryGroup(item.ex), ser: ser, rep: rep, pds: pds });
+
+    if (isTimedLp) {
+      var serLp = sEl ? (parseInt(sEl.value) || item.ser) : item.ser;
+      var durLp = rEl ? (parseInt(rEl.value) || item.rep || 60) : (item.rep || 60);
+      if (serLp < 1 || durLp < 1) continue;
+      addEntry({ date: entry.date, type: type, ex: item.ex, grp: item.grp || getPrimaryGroup(item.ex), ser: serLp, rep: durLp, pds: 0, exMode: 'timed', dur: durLp });
+    } else if (isCardioLp) {
+      var durLpC = rEl ? (parseInt(rEl.value) || 30) : 30;
+      var distLp = pEl ? (parseFloat(pEl.value) || 0) : 0;
+      if (durLpC < 1) continue;
+      addEntry({ date: entry.date, type: type, ex: item.ex, grp: item.grp || getPrimaryGroup(item.ex), ser: 1, rep: 0, pds: 0, exMode: 'cardio', dur: durLpC, dist: distLp });
+    } else {
+      var serLpS = sEl ? (parseInt(sEl.value) || item.ser) : item.ser;
+      var repLpS = rEl ? (parseInt(rEl.value) || item.rep) : item.rep;
+      var pdsLpS = pEl ? (parseFloat(pEl.value) || 0) : (item.pds || 0);
+      if (serLpS < 1 || repLpS < 1) continue;
+      addEntry({ date: entry.date, type: type, ex: item.ex, grp: item.grp || getPrimaryGroup(item.ex), ser: serLpS, rep: repLpS, pds: pdsLpS });
+    }
     logged++;
   }
   APP.render();

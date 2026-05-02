@@ -69,13 +69,13 @@ var EX = [
   ["Relevé de jambes suspendu",        "Core",           "Abdominaux",       "Poly"],
   ["Relevé de buste banc décliné",     "Core",           "Abdominaux",       "Mono"],
   ["Rotation russe",                   "Core",           "Abdominaux",       "Mono"],
-  ["Gainage face (planche)",           "Core",           "Abdominaux",       "Mono"],
-  ["Gainage latéral",                  "Core",           "Abdominaux",       "Mono"],
+  ["Gainage face (planche)",           "Core",           "Abdominaux",       "Timed"],
+  ["Gainage latéral",                  "Core",           "Abdominaux",       "Timed"],
   ["Ab wheel (roue abdominale)",       "Core",           {p:"Abdominaux", s:{Lombaires:0.4}},          "Poly"],
   ["Cable crunch poulie haute",        "Core",           "Abdominaux",       "Mono"],
-  ["Traction haute kimono isométrique","Core",           "Abdominaux",       "Mono"],
+  ["Traction haute kimono isométrique","Core",           "Abdominaux",       "Timed"],
   // ── CORE — LOMBAIRES ──────────────────────────────────────────────────────
-  ["Extensions lombaires banc romain", "Core",           "Lombaires",        "Mono"],
+  ["Extensions lombaires banc romain", "Core",           "Lombaires",        "Timed"],
   ["Superman",                         "Core",           "Lombaires",        "Mono"],
   ["Good morning barre",               "Core",           {p:"Lombaires", s:{"Ischio-jambiers":0.5}},     "Poly"],
   // ── BAS ANTÉRIEUR — QUADRICEPS ───────────────────────────────────────────
@@ -119,6 +119,12 @@ var EX = [
   ["Soulevé de terre complet",         "Full body",      {p:"Full body", s:{Lombaires:0.6, "Ischio-jambiers":0.6}}, "Poly"],
   ["Squat sauté",                      "Full body",      {p:"Full body", s:{Quadriceps:0.8}},           "Poly"],
   ["Burpee avec développé",            "Full body",      {p:"Full body", s:{Pectoraux:0.5, Épaules:0.5}},  "Poly"],
+  // ── CARDIO ──────────────────────────────────────────────────────────────────
+  ["Course à pied",                    "Cardio",         "Full body",        "Cardio"],
+  ["Vélo",                             "Cardio",         "Full body",        "Cardio"],
+  ["Natation",                         "Cardio",         "Full body",        "Cardio"],
+  ["Rameur cardio",                    "Cardio",         "Full body",        "Cardio"],
+  ["Corde à sauter",                   "Cardio",         "Full body",        "Cardio"],
 ];
 
 // Big 6 pour PR tracking
@@ -164,6 +170,7 @@ var TCOL = {
   "Hyperforce (PR)":      "#8b5cf6",
   "Endurance musculaire": "#10b981",
   "Décharge":             "#64748b",
+  "Cardio":               "#f97316",
 };
 
 // Icône emoji par groupe musculaire (body map badges)
@@ -287,6 +294,11 @@ var ICON_MAP = {
   "Mollets haltères 1 jambe": "calf",
   "Mollets à la barre": "calf",
   "Burpee avec développé": "pushup",
+  "Course à pied":  "run",
+  "Vélo":           "run",
+  "Natation":       "run",
+  "Rameur cardio":  "row",
+  "Corde à sauter": "run",
 };
 
 // Population du <select> avec optgroups par chaîne
@@ -315,7 +327,8 @@ function populateExerciseSelect(selectEl, includeEmpty) {
       'Core': 'chain_core',
       'Bas Antérieur': 'chain_lower_ant',
       'Bas Postérieur': 'chain_lower_post',
-      'Full body': 'chain_full_body'
+      'Full body': 'chain_full_body',
+      'Cardio': 'chain_cardio'
     }[g] || g;
     og.label = APP.t(gKey);
 
@@ -378,4 +391,12 @@ function getMuscleInfluence(exName, targetGrp) {
   }
 
   return 0;
+}
+
+// Retourne le type d'exercice : "Poly" | "Mono" | "Timed" | "Cardio"
+function getExType(exName) {
+  for (var i = 0; i < EX.length; i++) {
+    if (EX[i][0] === exName) return EX[i][3];
+  }
+  return 'Poly';
 }

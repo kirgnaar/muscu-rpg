@@ -39,7 +39,7 @@ function initJournal() {
   // Peupler les types de séances traduits
   var typeSel = $('sel-type');
   typeSel.innerHTML = '';
-  var typeKeys = ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload'];
+  var typeKeys = ['hypertrophy', 'strength', 'hyperstrength', 'endurance', 'deload', 'cardio'];
   for (var i = 0; i < typeKeys.length; i++) {
     var k = typeKeys[i];
     var o = document.createElement('option');
@@ -67,10 +67,10 @@ function initJournal() {
   // Mettre la date d'aujourd'hui par défaut
   $('in-date').value = todayISO();
 
-  // Preview 1RM live
+  // Preview 1RM live + adaptation du formulaire selon type d'exercice
   $('in-rep').addEventListener('input', updatePreview1RM);
   $('in-pds').addEventListener('input', updatePreview1RM);
-  $('sel-ex').addEventListener('change', updatePreview1RM);
+  $('sel-ex').addEventListener('change', function() { _adaptJournalForm(); updatePreview1RM(); });
 
   // Bouton Enregistrer
   $('btn-save').addEventListener('click', handleSave);
@@ -103,21 +103,54 @@ $('journal').addEventListener('click', function(ev) {
   });
 }
 
+// ── Adaptation du formulaire selon type d'exercice ────────────────────────
+function _adaptJournalForm() {
+  var exName = $('sel-ex').value;
+  var mode = exName ? getExType(exName) : 'Poly';
+  var isTimed  = (mode === 'Timed');
+  var isCardio = (mode === 'Cardio');
+
+  $('fgroup-ser-rep').style.display = isCardio ? 'none' : 'grid';
+  $('fgroup-pds').style.display     = (isTimed || isCardio) ? 'none' : '';
+  $('fgroup-cardio').style.display  = isCardio ? 'grid' : 'none';
+
+  var lblRep = $('lbl-rep');
+  if (isTimed) {
+    lblRep.textContent = APP.t('label_dur_s');
+    $('in-rep').placeholder = '60';
+    $('in-rep').setAttribute('max', '7200');
+  } else {
+    lblRep.setAttribute('data-i18n', 'label_rep');
+    lblRep.textContent = APP.t('label_rep');
+    $('in-rep').placeholder = '10';
+    $('in-rep').setAttribute('max', '9999');
+  }
+
+  // Auto-sélectionner "Cardio" comme type de séance pour les exercices cardio
+  if (isCardio) {
+    var typeSel = $('sel-type');
+    for (var i = 0; i < typeSel.options.length; i++) {
+      if (typeSel.options[i].value === 'Cardio') { typeSel.value = 'Cardio'; break; }
+    }
+  }
+}
+
 // ── Preview 1RM ───────────────────────────────────────────────────────────
 function updatePreview1RM() {
+  var exNm = $('sel-ex').value;
+  var mode = exNm ? getExType(exNm) : 'Poly';
+  var prev = $('preview-1rm');
+  if (mode === 'Timed' || mode === 'Cardio') { prev.style.display = 'none'; return; }
+
   var rep  = parseInt($('in-rep').value);
   var pds  = parseFloat($('in-pds').value);
-  var exNm = $('sel-ex').value;
-  var prev = $('preview-1rm');
   if (rep && pds && pds > 0) {
     var rm1    = epley(pds, rep);
     var best   = bestRM1(exNm);
     var isPR   = rm1 > best && best > 0;
     prev.style.display = 'block';
-    
     var label1RM = APP.user.langue === 'ja' ? '1RM 推定' : '⚡ 1RM ' + APP.t('progress').toLowerCase();
     var recordTxt = APP.user.langue === 'fr' ? 'Nouveau record !' : 'New record!';
-    
     prev.innerHTML = label1RM + ' : <strong>' + rm1 + ' kg</strong>'
       + (isPR ? ' &nbsp;·&nbsp; 🏆 <em style="color:var(--gold)">' + recordTxt + '</em>' : '');
   } else {
@@ -129,40 +162,54 @@ function updatePreview1RM() {
 function handleSave() {
   var type = $('sel-type').value;
   var ex   = $('sel-ex').value;
-  var ser  = parseInt($('in-ser').value);
-  var rep  = parseInt($('in-rep').value);
-  var pds  = parseFloat($('in-pds').value);
   var date = $('in-date').value || todayISO();
+  if (!ex) { toast('Choisis un exercice', 'err'); return; }
 
-  if (!ex)                     { toast('Choisis un exercice', 'err'); return; }
-  if (!ser || !rep || !pds)    { toast('Remplis tous les champs', 'err'); return; }
-  if (ser < 1 || rep < 1 || pds <= 0) { toast('Valeurs incorrectes', 'err'); return; }
+  var mode = getExType(ex);
+  var entryData;
+
+  if (mode === 'Timed') {
+    var ser = parseInt($('in-ser').value);
+    var dur = parseInt($('in-rep').value); // champ rep = durée en secondes
+    if (!ser || !dur) { toast('Remplis tous les champs', 'err'); return; }
+    entryData = { date: date, type: type, ex: ex, ser: ser, rep: dur, pds: 0, exMode: 'timed', dur: dur };
+
+  } else if (mode === 'Cardio') {
+    var durMin = parseFloat($('in-dur').value);
+    var dist   = parseFloat($('in-dist').value) || 0;
+    if (!durMin || durMin < 1) { toast('Remplis la durée', 'err'); return; }
+    entryData = { date: date, type: type, ex: ex, ser: 1, rep: Math.round(durMin), pds: 0, exMode: 'cardio', dur: durMin, dist: dist };
+
+  } else {
+    var ser = parseInt($('in-ser').value);
+    var rep = parseInt($('in-rep').value);
+    var pds = parseFloat($('in-pds').value);
+    if (!ser || !rep || !pds)          { toast('Remplis tous les champs', 'err'); return; }
+    if (ser < 1 || rep < 1 || pds <= 0) { toast('Valeurs incorrectes', 'err');  return; }
+    entryData = { date: date, type: type, ex: ex, ser: ser, rep: rep, pds: pds };
+  }
 
   var exData = null;
   for (var i = 0; i < EX.length; i++) {
     if (EX[i][0] === ex) { exData = EX[i]; break; }
   }
-  var entry = addEntry({
-    date: date,
-    type: type,
-    ex:   ex,
-    grp:  exData ? exData[2] : '',
-    ser:  ser,
-    rep:  rep,
-    pds:  pds,
-  });
+  entryData.grp = exData ? getPrimaryGroup(ex) : '';
+
+  var entry = addEntry(entryData);
 
   // Reset form
   $('in-ser').value = '';
   $('in-rep').value = '';
   $('in-pds').value = '';
+  $('in-dur').value = '';
+  $('in-dist').value = '';
   $('in-date').value = todayISO();
   $('preview-1rm').style.display = 'none';
 
   APP.render();
 
-  // Démarrer le chrono de repos
-  if (typeof TIMER !== 'undefined') {
+  // Chrono de repos seulement pour la muscu et le gainage
+  if (mode !== 'Cardio' && typeof TIMER !== 'undefined') {
     TIMER.start();
   }
 
@@ -177,7 +224,6 @@ function handleSave() {
     toast(savedTxt + fmtV(entry.vol), '');
   }
 
-  // Animation XP
   var xp = $('hdr-xp');
   xp.classList.add('xp-gain');
   setTimeout(function() { xp.classList.remove('xp-gain'); }, 600);
@@ -311,7 +357,8 @@ function renderJournal() {
         'Force': 'strength',
         'Hyperforce (PR)': 'hyperstrength',
         'Endurance musculaire': 'endurance',
-        'Décharge': 'deload'
+        'Décharge': 'deload',
+        'Cardio': 'cardio'
       }[entry.type] || '';
       var translatedType = typeKey ? APP.t(typeKey) : entry.type;
 
@@ -319,7 +366,15 @@ function renderJournal() {
             + '<div class="sdot" style="background:' + c + '"></div>'
             + '<div class="sinfo">'
             + '<div class="sname">' + APP.t(entry.ex) + pr + '</div>'
-            + '<div class="smeta">' + translatedType + ' \u00b7 ' + entry.ser + '\u00d7' + entry.rep + ' \u00b7 ' + entry.pds + ' kg</div>'
+      var metaStr;
+      if (entry.exMode === 'timed') {
+        metaStr = entry.ser + '×' + (entry.dur || entry.rep || 0) + 's';
+      } else if (entry.exMode === 'cardio') {
+        metaStr = (entry.dur || 0) + ' min' + (entry.dist ? ' · ' + entry.dist + ' km' : '');
+      } else {
+        metaStr = entry.ser + '×' + entry.rep + ' · ' + entry.pds + ' kg';
+      }
+            + '<div class="smeta">' + translatedType + ' · ' + metaStr + '</div>'
             + '</div>'
             + '<div style="display:flex;align-items:center;gap:2px">'
             + '<div class="svol">' + fmtV(entry.vol) + '</div>'
