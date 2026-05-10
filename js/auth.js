@@ -3,18 +3,21 @@
    Authentification Google via Firebase Auth — Compatible iOS PWA / Android / Desktop
    ══════════════════════════════════════════════════════════════════════════
 
-   STRATÉGIE UNIQUE : signInWithRedirect partout.
-   ─────────────────────────────────────────────
-   • signInWithPopup est bloqué sur iOS PWA (WKWebView interdit les popups).
-   • signInWithRedirect fonctionne partout : Android, desktop, iOS Safari, iOS PWA.
-   • getRedirectResult() est appelé à chaque init — si un redirect vient de se
-     terminer, il récupère le user immédiatement. Sinon, il renvoie null sans erreur.
-   • onAuthStateChanged est le filet de sécurité : il reste la source de vérité.
+   STRATÉGIE : Popup par défaut, Redirect sur iOS PWA standalone.
+   ───────────────────────────────────────────────────────────────
+   • signInWithPopup : utilisé sur desktop, Android, Safari normal.
+     Plus fiable depuis 2024 — signInWithRedirect est cassé sur Chrome avec la
+     dépréciation des cookies tiers (erreur "missing initial state").
+   • signInWithRedirect : UNIQUEMENT sur iOS PWA standalone (navigator.standalone)
+     car WKWebView bloque les popups.
+   • getRedirectResult() est appelé à chaque init pour récupérer l'user après
+     un redirect iOS. Sur desktop il renvoie null sans erreur → ignoré.
+   • onAuthStateChanged (via authStateReady) est la source de vérité finale.
 
-   PERSISTANCE : indexedDBLocalPersistence (déclarée dans firebase-config.js).
-   ────────────────────────────────────────
-   • sessionStorage est effacé lors du redirect cross-origin → token perdu sur iOS.
-   • IndexedDB persiste entre navigations → token récupéré après redirect.
+   PERSISTANCE : browserLocalPersistence (déclarée dans firebase-config.js).
+   ───────────────────────────────────────────────────────────────────────────
+   • localStorage persiste entre navigations et survit aux redirects cross-origin.
+   • authStateReady() garantit que le token est lu avant le premier emit de null.
 
    PRÉREQUIS FIREBASE CONSOLE (une seule fois, manuel) :
    ──────────────────────────────────────────────────────
@@ -25,6 +28,7 @@
 import { auth } from './firebase-config.js';
 import {
   GoogleAuthProvider,
+  signInWithPopup,
   signInWithRedirect,
   getRedirectResult,
   signOut,
@@ -97,7 +101,9 @@ export var Auth = {
     });
   },
 
-  // ── Connexion : redirect uniquement (compatible iOS PWA + tout le reste) ──
+  // ── Connexion ─────────────────────────────────────────────────────────────
+  // Popup sur desktop/Android/Safari (plus fiable, pas de cross-origin state).
+  // Redirect seulement sur iOS PWA standalone où les popups sont bloqués.
   login: function() {
     var self = this;
     var btn = document.getElementById('auth-login-btn');
@@ -105,12 +111,35 @@ export var Auth = {
       btn.disabled  = true;
       btn.innerHTML = '🔄 Connexion...';
     }
-    // ⚠️  PAS de setTimeout : iOS Safari bloque les navigations non-synchrones
-    // avec le geste utilisateur. On appelle signInWithRedirect directement.
-    signInWithRedirect(auth, googleProvider).catch(function(err) {
-      console.error('[Auth] signInWithRedirect error:', err.code, err.message);
-      self._showError('Connexion échouée (' + err.code + '). Réessaie.');
-    });
+
+    // iOS PWA standalone : navigator.standalone === true → popup bloqué par WKWebView
+    var isIOSStandalone = (typeof window.navigator.standalone !== 'undefined') && window.navigator.standalone;
+
+    if (isIOSStandalone) {
+      // ⚠️ PAS de setTimeout : iOS Safari bloque les redirects non-synchrones au geste
+      signInWithRedirect(auth, googleProvider).catch(function(err) {
+        console.error('[Auth] signInWithRedirect error:', err.code, err.message);
+        self._showError('Connexion échouée (' + err.code + '). Réessaie.');
+      });
+    } else {
+      signInWithPopup(auth, googleProvider).then(function(result) {
+        // onAuthStateChanged prend le relais — rien à faire ici
+        console.log('[Auth] Popup OK :', result.user.displayName);
+      }).catch(function(err) {
+        if (err.code === 'auth/popup-blocked') {
+          // Dernier recours si le popup est bloqué malgré tout
+          signInWithRedirect(auth, googleProvider).catch(function(err2) {
+            self._showError('Connexion échouée (' + err2.code + '). Réessaie.');
+          });
+        } else if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+          console.error('[Auth] signInWithPopup error:', err.code, err.message);
+          self._showError('Connexion échouée (' + err.code + '). Réessaie.');
+        } else {
+          // L'utilisateur a fermé le popup — remettre le bouton
+          self._updateUI(null);
+        }
+      });
+    }
   },
 
   logout: function() {
