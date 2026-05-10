@@ -46,7 +46,12 @@ function _getLocalData() {
 // ── Application des données cloud en local ────────────────────────────────
 function _applyCloudToLocal(cloudData) {
   try {
-    if (cloudData.sessions)  localStorage.setItem('mrpg_v2',        JSON.stringify(cloudData.sessions));
+    // SÉCURITÉ : ne jamais écraser les séances locales avec un tableau vide.
+    // L'appelant doit s'assurer que cloudData.sessions est non-vide s'il veut
+    // remplacer les séances locales (sauf si l'utilisateur a explicitement choisi).
+    if (Array.isArray(cloudData.sessions) && cloudData.sessions.length > 0) {
+      localStorage.setItem('mrpg_v2', JSON.stringify(cloudData.sessions));
+    }
     if (cloudData.user)      localStorage.setItem('mrpg_user',      JSON.stringify(cloudData.user));
     if (cloudData.blocks)    localStorage.setItem('mrpg_blocks',    JSON.stringify(cloudData.blocks));
     if (cloudData.cycles)    localStorage.setItem('mrpg_cycles',    JSON.stringify(cloudData.cycles));
@@ -58,6 +63,37 @@ function _applyCloudToLocal(cloudData) {
   }
 
   // Recharger l'état APP en mémoire
+  if (window.APP) {
+    try {
+      if (typeof loadData === 'function')  APP.data = loadData();
+      if (typeof loadUser === 'function')  APP.user = loadUser();
+      if (window.PLAN  && typeof PLAN.load  === 'function') PLAN.load();
+      if (window.SIM   && typeof SIM.load   === 'function') SIM.load();
+      if (window.CORPS && typeof CORPS.loadWlog === 'function') CORPS.loadWlog();
+      if (typeof APP.render === 'function') APP.render();
+    } catch(e) {
+      console.warn('[sync] APP reload error:', e);
+    }
+  }
+}
+
+// ── Application forcée (choix explicite de l'utilisateur dans la modale) ──
+// Contrairement à _applyCloudToLocal, écrase aussi les séances avec un tableau vide.
+function _forceApplyCloudToLocal(cloudData) {
+  try {
+    if (Array.isArray(cloudData.sessions)) {
+      localStorage.setItem('mrpg_v2', JSON.stringify(cloudData.sessions));
+    }
+    if (cloudData.user)      localStorage.setItem('mrpg_user',      JSON.stringify(cloudData.user));
+    if (cloudData.blocks)    localStorage.setItem('mrpg_blocks',    JSON.stringify(cloudData.blocks));
+    if (cloudData.cycles)    localStorage.setItem('mrpg_cycles',    JSON.stringify(cloudData.cycles));
+    if (cloudData.planning)  localStorage.setItem('mrpg_planning',  JSON.stringify(cloudData.planning));
+    if (cloudData.weightLog) localStorage.setItem('mrpg_weight_log',JSON.stringify(cloudData.weightLog));
+    localStorage.setItem('mrpg_last_sync', String(cloudData.updatedAt || Date.now()));
+  } catch(e) {
+    console.error('[sync] _forceApplyCloudToLocal error:', e);
+  }
+
   if (window.APP) {
     try {
       if (typeof loadData === 'function')  APP.data = loadData();
@@ -95,9 +131,7 @@ function _mergeData(local, cloud) {
 }
 
 // ── Affichage de la modale de conflit (non-bloquante) ────────────────────
-// Remplace les confirm()/prompt() qui sont bloqués en iOS PWA standalone.
 function _showConflictModal(localData, cloudData) {
-  // Évite un double affichage
   if (document.getElementById('sync-conflict-modal')) return;
 
   var localCount = (localData.sessions || []).length;
@@ -143,14 +177,16 @@ function _showConflictModal(localData, cloudData) {
 
   document.getElementById('sync-btn-merge').addEventListener('click', function() {
     var merged = _mergeData(localData, cloudData);
-    _applyCloudToLocal(merged);
+    _forceApplyCloudToLocal(merged);
     pushToCloud(window._syncUID, merged);
     _close();
     if (typeof toast === 'function') toast('✅ Fusion : ' + merged.sessions.length + ' séances');
   });
 
   document.getElementById('sync-btn-cloud').addEventListener('click', function() {
-    _applyCloudToLocal(cloudData);
+    // Choix explicite de l'utilisateur → on utilise _forceApplyCloudToLocal
+    // pour respecter son choix même si le cloud a moins de séances.
+    _forceApplyCloudToLocal(cloudData);
     _close();
     if (typeof toast === 'function') toast('⬇️ Cloud importé');
   });
@@ -164,19 +200,23 @@ function _showConflictModal(localData, cloudData) {
 
 // ── Point d'entrée principal ──────────────────────────────────────────────
 export async function syncData(uid) {
-  window._syncUID = uid; // conservé pour la modale de conflit
+  window._syncUID = uid;
   _setSyncStatus('syncing');
 
   var userDocRef = doc(db, 'users', uid);
   var localData  = _getLocalData();
+  var localCount = localData.sessions.length;
+
+  console.log('[sync] syncData — local:', localCount, 'séances, updatedAt:', localData.updatedAt);
 
   try {
     var cloudSnap = await getDoc(userDocRef);
 
+    // ── Cas A : cloud inexistant ──────────────────────────────────────────
+    // Ne pousser que si on a vraiment des séances — évite de polluer le cloud
+    // avec sessions:[] (qui provoquerait ensuite un écrasement erroné des données locales).
     if (!cloudSnap.exists()) {
-      // Cas A : premier login, Cloud vide
-      if (localData.sessions.length > 0 || localData.user) {
-        // Envoi automatique sans demande — on ne perd rien
+      if (localCount > 0) {
         await pushToCloud(uid, localData);
         if (typeof toast === 'function') toast('☁️ Données sauvegardées dans le Cloud');
       }
@@ -184,25 +224,61 @@ export async function syncData(uid) {
       return;
     }
 
-    var cloudData = cloudSnap.data();
+    var cloudData  = cloudSnap.data();
+    var cloudCount = Array.isArray(cloudData.sessions) ? cloudData.sessions.length : 0;
 
-    // Cas B : conflit réel — les deux côtés ont des séances
-    if (localData.sessions.length > 0 &&
-        cloudData.sessions && cloudData.sessions.length > 0 &&
-        localData.updatedAt !== (cloudData.updatedAt || 0)) {
-      _showConflictModal(localData, cloudData);
-      return; // La modale gère la suite
+    console.log('[sync] cloud:', cloudCount, 'séances, updatedAt:', cloudData.updatedAt);
+
+    // ── Cas B : local vide → cloud est la seule source de vérité ─────────
+    if (localCount === 0) {
+      if (cloudCount > 0) {
+        _applyCloudToLocal(cloudData);
+        if (typeof toast === 'function') toast('⬇️ Données restaurées depuis le Cloud');
+      }
+      _setSyncStatus('synced');
+      return;
     }
 
-    // Cas C : sync automatique sans conflit
-    if (cloudData.updatedAt > localData.updatedAt) {
-      _applyCloudToLocal(cloudData);
-      _setSyncStatus('synced');
-    } else if (localData.updatedAt > (cloudData.updatedAt || 0)) {
+    // ── À partir d'ici, local a des séances ──────────────────────────────
+
+    // Cas C : cloud vide → toujours pousser le local (ne jamais laisser un
+    // cloud vide écraser des données locales existantes).
+    if (cloudCount === 0) {
+      console.log('[sync] cloud vide, local non-vide → push local');
       await pushToCloud(uid, localData);
-    } else {
-      _setSyncStatus('synced');
+      return;
     }
+
+    // ── Cas D : les deux côtés ont des séances ────────────────────────────
+    var localTs = localData.updatedAt;
+    var cloudTs = cloudData.updatedAt || 0;
+
+    // Déjà synchronisé : même timestamp et même nombre de séances
+    if (localTs !== 0 && localTs === cloudTs && localCount === cloudCount) {
+      console.log('[sync] déjà synchronisé');
+      _setSyncStatus('synced');
+      return;
+    }
+
+    // Local plus riche (plus de séances) ET au moins aussi récent → push local.
+    // Ce cas couvre l'ajout de nouvelles séances depuis la dernière sync.
+    if (localCount > cloudCount && localTs >= cloudTs) {
+      console.log('[sync] local plus riche → push local');
+      await pushToCloud(uid, localData);
+      return;
+    }
+
+    // Local aussi riche ET plus récent → push local.
+    if (localCount === cloudCount && localTs > cloudTs) {
+      console.log('[sync] local plus récent → push local');
+      await pushToCloud(uid, localData);
+      return;
+    }
+
+    // Dans tous les autres cas, impossible de trancher automatiquement
+    // sans risque de perte → laisser l'utilisateur décider.
+    console.log('[sync] conflit détecté → modale');
+    _showConflictModal(localData, cloudData);
 
   } catch(e) {
     console.error('[sync] syncData error:', e);
@@ -217,7 +293,6 @@ export async function pushToCloud(uid, data) {
   var userDocRef = doc(db, 'users', uid);
   var timestamp  = Date.now();
 
-  // Inclure toutes les clés (y compris les nouvelles : cycles, planning, weightLog)
   var payload = {
     sessions:  data.sessions  || [],
     user:      data.user      || null,
