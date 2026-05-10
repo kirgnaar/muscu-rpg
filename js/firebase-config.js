@@ -1,6 +1,10 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth }        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore }   from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import {
+  initializeAuth,
+  browserLocalPersistence,
+  browserPopupRedirectResolver
+} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey:            "AIzaSyCjsXZ7jvxD5RsuAfI19DvDpaACFpmUnPg",
@@ -14,8 +18,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-// getAuth() : API standard Firebase.
-// Persistence par défaut = browserLocalPersistence (localStorage).
-// Pas d'initializeAuth() manuel — évite les bugs liés à browserPopupRedirectResolver.
-export const auth = getAuth(app);
-export const db   = getFirestore(app);
+// initializeAuth avec persistence et resolver explicites.
+// browserLocalPersistence = stockage dans localStorage (clé firebase:authUser:...).
+// browserPopupRedirectResolver requis pour signInWithPopup.
+export const auth = initializeAuth(app, {
+  persistence:          browserLocalPersistence,
+  popupRedirectResolver: browserPopupRedirectResolver
+});
+export const db = getFirestore(app);

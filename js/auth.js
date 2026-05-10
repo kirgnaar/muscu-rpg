@@ -12,7 +12,8 @@
    • onAuthStateChanged : source de vérité. Firebase SDK bufferise le premier
      emit jusqu'à avoir lu localStorage → pas de double-emit null/user.
 
-   PERSISTANCE : browserLocalPersistence (défaut de getAuth()).
+   PERSISTANCE : browserLocalPersistence (localStorage), déclaré
+   explicitement dans firebase-config.js via initializeAuth().
    ══════════════════════════════════════════════════════════════════════════ */
 
 import { auth } from './firebase-config.js';
@@ -34,34 +35,43 @@ export var Auth = {
 
   init: function() {
     var self = this;
+    console.log('[Auth] init() — démarrage');
 
     // ── 1. Cache UI immédiat — évite le flash "non connecté" ─────────────
     var cachedUser = null;
     try { cachedUser = JSON.parse(localStorage.getItem('mrpg_auth_cache') || 'null'); } catch(e) {}
     if (cachedUser && cachedUser.uid) {
+      console.log('[Auth] cache localStorage trouvé :', cachedUser.displayName);
       self.user = cachedUser;
       self._updateUI(cachedUser);
+    } else {
+      console.log('[Auth] aucun cache localStorage (mrpg_auth_cache)');
     }
 
-    // ── 2. getRedirectResult — UNIQUEMENT sur iOS PWA standalone ─────────
-    // Sur desktop/Android, signInWithPopup ne génère pas de redirect.
-    // Appeler getRedirectResult inutilement peut consommer un état redirect
-    // périmé (laissé par l'ancien code) et perturber onAuthStateChanged.
+    // ── 2. Vérification des clés Firebase dans localStorage ───────────────
+    var fbKeys = Object.keys(localStorage).filter(function(k) { return k.indexOf('firebase:authUser:') === 0; });
+    console.log('[Auth] clés Firebase dans localStorage :', fbKeys.length ? fbKeys : 'aucune');
+
+    // ── 3. getRedirectResult — UNIQUEMENT sur iOS PWA standalone ─────────
     var isIOSStandalone = (typeof navigator.standalone !== 'undefined') && !!navigator.standalone;
+    console.log('[Auth] isIOSStandalone :', isIOSStandalone);
     if (isIOSStandalone) {
       getRedirectResult(auth).then(function(result) {
-        if (result && result.user) console.log('[Auth] iOS redirect OK:', result.user.displayName);
+        if (result && result.user) {
+          console.log('[Auth] iOS redirect OK :', result.user.displayName);
+        } else {
+          console.log('[Auth] iOS getRedirectResult : aucun résultat');
+        }
       }).catch(function(err) {
         if (err.code !== 'auth/no-auth-event' && err.code !== 'auth/null-user') {
-          console.warn('[Auth] getRedirectResult:', err.code, err.message);
+          console.warn('[Auth] getRedirectResult :', err.code, err.message);
         }
       });
     }
 
-    // ── 3. Source de vérité ───────────────────────────────────────────────
-    // onAuthStateChanged bufferise le premier emit jusqu'à avoir lu localStorage.
-    // Pas besoin de authStateReady() avec getAuth() — le comportement est garanti.
+    // ── 4. Source de vérité ───────────────────────────────────────────────
     onAuthStateChanged(auth, function(user) {
+      console.log('[Auth] onAuthStateChanged :', user ? ('connecté → ' + user.email) : 'null (déconnecté)');
       if (user) {
         var userData = {
           uid:         user.uid,
@@ -85,26 +95,29 @@ export var Auth = {
   // ── Connexion ─────────────────────────────────────────────────────────
   login: function() {
     var self = this;
+    console.log('[Auth] login() appelé');
     var btn = document.getElementById('auth-login-btn');
     if (btn) { btn.disabled = true; btn.innerHTML = '🔄 Connexion...'; }
 
     var isIOSStandalone = (typeof navigator.standalone !== 'undefined') && !!navigator.standalone;
 
     if (isIOSStandalone) {
+      console.log('[Auth] → signInWithRedirect (iOS standalone)');
       signInWithRedirect(auth, googleProvider).catch(function(err) {
-        console.error('[Auth] signInWithRedirect error:', err.code, err.message);
+        console.error('[Auth] signInWithRedirect error :', err.code, err.message);
         self._showError('Connexion échouée (' + err.code + '). Réessaie.');
       });
     } else {
+      console.log('[Auth] → signInWithPopup');
       signInWithPopup(auth, googleProvider).then(function(result) {
-        console.log('[Auth] Popup OK:', result.user.displayName);
+        console.log('[Auth] signInWithPopup OK :', result.user.email);
       }).catch(function(err) {
+        console.error('[Auth] signInWithPopup error :', err.code, err.message);
         if (err.code === 'auth/popup-blocked') {
-          self._showError('Popup bloqué — autorise les popups pour ce site dans ton navigateur.');
+          self._showError('Popup bloqué — autorise les popups pour ce site dans ton navigateur, puis réessaie.');
         } else if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
           self._updateUI(null);
         } else {
-          console.error('[Auth] signInWithPopup error:', err.code, err.message);
           self._showError('Connexion échouée (' + err.code + '). Réessaie.');
         }
       });
@@ -113,13 +126,14 @@ export var Auth = {
 
   logout: function() {
     var self = this;
+    console.log('[Auth] logout() appelé');
     signOut(auth).then(function() {
       try { localStorage.removeItem('mrpg_auth_cache'); } catch(e) {}
       self._updateUI(null);
       self._setSyncStatus('offline');
       if (typeof toast === 'function') toast('Déconnecté ✓');
     }).catch(function(err) {
-      console.warn('[Auth] Logout error:', err);
+      console.warn('[Auth] Logout error :', err);
     });
   },
 
