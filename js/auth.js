@@ -70,12 +70,13 @@ export var Auth = {
       }
     });
 
-    // ── 3. Source de vérité — attend que Firebase ait lu localStorage ──────
-    // authStateReady() résout UNE SEULE FOIS, quand l'état initial est connu
-    // avec certitude (lecture localStorage terminée). Sans cela, onAuthStateChanged
-    // peut émettre null avant d'avoir fini de lire le token persisté → déconnexion
-    // apparente à chaque rechargement de page.
-    auth.authStateReady().then(function() {
+    // ── 3. Source de vérité ───────────────────────────────────────────────────
+    // authStateReady() attend que Firebase ait lu le token persisté en localStorage
+    // avant le premier emit de onAuthStateChanged — évite le flash "déconnecté".
+    // Le .catch() est OBLIGATOIRE : sans lui, si authStateReady() rejette (erreur
+    // réseau, SDK bug), onAuthStateChanged n'est jamais enregistré et la session
+    // est perdue pour toujours sur cet onglet.
+    function _listen() {
       onAuthStateChanged(auth, function(user) {
         if (user) {
           var userData = {
@@ -83,21 +84,25 @@ export var Auth = {
             displayName: user.displayName || 'Guerrier',
             photoURL:    user.photoURL    || ''
           };
-          try {
-            localStorage.setItem('mrpg_auth_cache', JSON.stringify(userData));
-          } catch(e) {}
+          try { localStorage.setItem('mrpg_auth_cache', JSON.stringify(userData)); } catch(e) {}
           self.user = user;
           self._updateUI(user);
           self._setSyncStatus('syncing');
           setTimeout(function() { syncData(user.uid); }, 300);
         } else {
-          // null ici = Firebase a terminé sa lecture ET il n'y a vraiment pas de session
           self.user = null;
           try { localStorage.removeItem('mrpg_auth_cache'); } catch(e) {}
           self._updateUI(null);
           self._setSyncStatus('offline');
         }
       });
+    }
+    auth.authStateReady().then(_listen).catch(function(err) {
+      // authStateReady() a rejeté (rare mais possible) — on s'abonne directement.
+      // Sans authStateReady, onAuthStateChanged peut émettre null puis user en 2 temps
+      // → flash du bouton connexion, mais la session est quand même restaurée.
+      console.warn('[Auth] authStateReady failed, fallback direct listener:', err.code || err);
+      _listen();
     });
   },
 
@@ -127,16 +132,16 @@ export var Auth = {
         console.log('[Auth] Popup OK :', result.user.displayName);
       }).catch(function(err) {
         if (err.code === 'auth/popup-blocked') {
-          // Dernier recours si le popup est bloqué malgré tout
-          signInWithRedirect(auth, googleProvider).catch(function(err2) {
-            self._showError('Connexion échouée (' + err2.code + '). Réessaie.');
-          });
-        } else if (err.code !== 'auth/popup-closed-by-user' && err.code !== 'auth/cancelled-popup-request') {
+          // Le popup a été bloqué par le navigateur. NE PAS tomber sur signInWithRedirect :
+          // la redirection échoue silencieusement sur Chrome (missing initial state).
+          // On demande à l'utilisateur d'autoriser les popups pour ce site.
+          self._showError('Popup bloqué — autorise les popups pour ce site dans ton navigateur, puis réessaie.');
+        } else if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
+          // L'utilisateur a fermé le popup — remettre le bouton silencieusement
+          self._updateUI(null);
+        } else {
           console.error('[Auth] signInWithPopup error:', err.code, err.message);
           self._showError('Connexion échouée (' + err.code + '). Réessaie.');
-        } else {
-          // L'utilisateur a fermé le popup — remettre le bouton
-          self._updateUI(null);
         }
       });
     }
